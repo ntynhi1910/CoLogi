@@ -1,0 +1,98 @@
+.plan-publication {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.plan-publication .delivery-section,
+.plan-publication .manager-fields > div {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.publication-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  margin-block: .75rem;
+}
+
+.publication-events summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.publication-events .delivery-records {
+  margin-top: .75rem;
+}
+
+.publication-schedule,
+.publication-recipients {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: .75rem;
+}
+
+.publication-schedule .dssr-panel,
+.publication-schedule .manager-table-scroll,
+.plan-publication .manager-table-scroll {
+  min-width: 0;
+}
+
+.publication-items {
+  min-width: 0;
+}
+
+.publication-items th,
+.publication-items td,
+.plan-publication .manager-fields dd {
+  overflow-wrap: anywhere;
+}
+
+.publication-code {
+  overflow-wrap: anywhere;
+}
+
+.publication-stop-times {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr));
+  gap: .5rem;
+  margin-block: .65rem;
+}
+
+.publication-stop-times dd {
+  margin-inline-start: 0;
+  font-weight: 600;
+}
+
+.publication-window {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+
+.execution-stop {
+  border-block-start: 1px solid #d6e3db;
+  margin-block: .75rem;
+  padding-block: .75rem;
+}
+
+.execution-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  align-items: end;
+  gap: .65rem;
+  margin-block: .75rem;
+}
+
+.execution-form label {
+  display: grid;
+  gap: .35rem;
+}
+
+.execution-form input, .execution-form select {
+  min-width: 0;
+  width: 100%;
+  border: 1px solid #c8d8ce;
+  border-radius: .45rem;
+  background: #fff;
+  padding: .55rem;
+}

@@ -1,0 +1,5 @@
+*.sh text eol=lf
+*.sql text eol=lf
+*.sha256 text eol=lf
+*.dump binary
+*.xlsx binary

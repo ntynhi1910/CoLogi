@@ -1,0 +1,53 @@
+.cp12 { display: grid; gap: 1rem; color: #153a28; }
+.cp12 h1, .cp12 h2, .cp12 h3 { margin: 0 0 .6rem; }
+.cp12 p { margin-block: .45rem; }
+.cp12 > header { display: flex; flex-wrap: wrap; align-items: end; gap: .65rem; justify-content: space-between; }
+.cp12-panel { padding: clamp(.8rem, 2vw, 1.25rem); min-width: 0; }
+.cp12-kpis, .cp12-fields, .cp12-key-values { display: grid; gap: .7rem; }
+.cp12-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); margin: .7rem 0 0; }
+.cp12-kpis > div { border: 1px solid #deebe1; border-radius: .65rem; padding: .75rem; background: #fcfefa; }
+.cp12-kpis dd { margin: .35rem 0; font-size: clamp(1.25rem, 2vw, 1.65rem); color: #165638; font-weight: 700; }
+.cp12 small { display: block; color: #52675a; overflow-wrap: anywhere; font-size: .78rem; }
+.cp12-switch, .cp12-plans li { display: flex; flex-wrap: wrap; gap: .55rem; align-items: center; }
+.cp12 button { font: inherit; cursor: pointer; }
+.cp12 button:disabled { cursor: default; }
+.cp12-switch button, .cp12 button:not([class]) {
+  color: #184b31; border: 1px solid #cdded1; background: #fff; border-radius: .5rem; padding: .5rem .75rem;
+}
+.cp12-switch button[aria-pressed="true"] { color: #fff; background: #1b663e; border-color: #1b663e; }
+.cp12-fields { grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr)); }
+.cp12 label { display: grid; min-width: 0; gap: .3rem; font-size: .9rem; }
+.cp12 :is(input, textarea, select) {
+  box-sizing: border-box; min-width: 0; width: 100%; min-height: 2.45rem; padding: .45rem .6rem;
+  border: 1px solid #c4d8c9; border-radius: .45rem; background: #fff; color: inherit; font: inherit;
+}
+.cp12 :is(button, input, a, textarea, select, summary):focus-visible { outline: 2px solid #23955a; outline-offset: 2px; }
+.cp12-plans, .cp12-audit { list-style: none; padding: 0; }
+.cp12-plans li, .cp12-audit li, .cp12-detail { border-block-start: 1px solid #e0ebe3; padding-block: .65rem; }
+.cp12-plans li { justify-content: space-between; }
+.cp12-badge { background: #e7f1e9; border-radius: 1rem; font-size: .8rem; padding: .3rem .55rem; }
+.cp12-audit li { display: grid; gap: .2rem; }
+.cp12-entry { display: grid; gap: .65rem; margin-top: .75rem; padding: .75rem; background: #f0f6f2; border-radius: .6rem; }
+.cp12-cost-bar { display: grid; grid-template-columns: 1fr auto; gap: .3rem .6rem; margin-block: .8rem; }
+.cp12-cost-bar progress { grid-column: 1 / -1; width: 100%; }
+.cp12 progress { height: .75rem; accent-color: #25794d; }
+.cp12 progress[data-series="0"] { accent-color: #8798a5; }
+.cp12 progress[data-series="2"] { accent-color: #127e78; }
+.cp12-key-values { grid-template-columns: repeat(2, minmax(0, 1fr)); border-block-start: 1px solid #e1ebe3; padding-top: .7rem; }
+.cp12-key-values dd { margin: .3rem 0 0; font-weight: 700; }
+.cp12-trend > div { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) auto; align-items: center; gap: .5rem; margin-block: .45rem; }
+.cp12-trend progress { width: 100%; }
+.cp12-trend strong { grid-column: 3; }
+.cp12-scroll { overflow-x: auto; }
+.cp12 table { border-collapse: collapse; min-width: 100%; text-align: left; font-size: .85rem; }
+.cp12 :is(th, td) { border-bottom: 1px solid #e1ebe3; padding: .45rem .55rem; white-space: nowrap; }
+.cp12 thead { background: #edf4ef; }
+.cp12-detail summary { cursor: pointer; font-weight: 650; }
+@media (max-width: 850px) { .cp12-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 430px) { .cp12-kpis { grid-template-columns: minmax(0, 1fr); } }
+@media print {
+  body:has(.cp12) :is(aside, .topbar, nav, button, .cp12 > header label, .cp12 [aria-label="Bộ lọc hiệu suất"]) { display: none !important; }
+  .cp12 { margin: 0 !important; color: #111; }
+  .cp12-panel { border-color: #ccc; }
+  .cp12 table { font-size: 8pt; }
+}

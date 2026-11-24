@@ -1,0 +1,89 @@
+{
+  "manifest_version": 1,
+  "decision_reference": "CP08-MANAGER-V7-SUPPLEMENT-R11-P18-20261124",
+  "decision_date_ict": "2026-11-24",
+  "decision_source": "Manager CoLogi final decision in the conversation, Manager Acceptance of V7 and Supplement",
+  "technical_verification_at_ict": "2026-11-24T01:32:17.872617+07:00",
+  "classification": "MANAGER_ACCEPTED_FOR_OPERATIONAL_TESTING",
+  "provider_independently_verified_for_legacy_availability": false,
+  "independent_provider_document_reference": null,
+  "activation_status": "NOT_ACTIVATED",
+  "scope": {
+    "purpose": "CP08 system acceptance with existing operational Demand; no commercial transport decision",
+    "database": "cologi",
+    "backend_port": 8014,
+    "frontend_port": 5173,
+    "manager_actor_id": 1,
+    "tenant_context": "DEFAULT_OPERATIONAL_DEMANDS",
+    "run_id": 11,
+    "run_uuid": "4543c428-e5b6-4da1-9839-db5c4bb7d1b8",
+    "candidate_id": 21,
+    "candidate_code": "158d494a487548139f35e233ee38ea8b",
+    "plan_id": 18,
+    "plan_code": "afafc13d6a9a5b729158b2d66f833039",
+    "plan_status_at_capture": "DRAFT",
+    "template": "DIRECT_CONSOLIDATED",
+    "f2_fingerprint": "63e307c748d5df6842c698ec96f1b5524eac45d7219ae929871db5c64a25ac47",
+    "rule_set_id": 2,
+    "demand_ids": [42, 43],
+    "weight_kg": "400.000",
+    "cargo": "FROZEN_SEAFOOD",
+    "provider_id": 1,
+    "provider_code": "TP001",
+    "requested_service_date": "2026-11-24",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "required_vehicle_envelope": {"start": "07:00:00", "end": "13:30:00"}
+  },
+  "sources": {
+    "v7_availability": {
+      "workbook": "docs/source/CoLogi_Dataset_v7.xlsx",
+      "sha256": "fa10e68aa1e39ab6ac4a6fc53d6b0711c76cb8481f035455b254e4193ca4b799",
+      "sheet": "48_Provider_Availability",
+      "audit_log_id": 36,
+      "audit_action": "PROVIDER_AVAILABILITY_MIGRATED",
+      "audit_row_sha256": "d9ff261028996ad7e537ef7b4824f0cd1a4d5ae413187c5c7bcb90263b3769e9",
+      "original_provenance": "SYNTHETIC_NOVEMBER_DEMO",
+      "stored_source_mode": "PROVIDER_CONFIRMED_IMPORT",
+      "legacy_rows_sha256": "76a8499f02069a18531ab3ac44821dc5ad4eca785a1691eaee4190a533e92c98",
+      "hash_recipe": "SHA-256 UTF-8 over PostgreSQL to_jsonb(row)::text; legacy rows joined with LF ordered by id; AuditLog hash over its single row",
+      "effective_date": "2026-11-24",
+      "window": {"start": "06:00:00", "end": "20:00:00"},
+      "availability_status": "AVAILABLE",
+      "rows": [
+        {"legacy_id": 99, "offer_id": 1, "vehicle_type": "VAN500_AMB", "vehicle_count": 2, "range": "A103:H103"},
+        {"legacy_id": 100, "offer_id": 2, "vehicle_type": "VAN500_CHL", "vehicle_count": 2, "range": "A104:H104"},
+        {"legacy_id": 101, "offer_id": 3, "vehicle_type": "TRUCK1000_MULTI", "vehicle_count": 3, "range": "A105:H105"},
+        {"legacy_id": 102, "offer_id": 4, "vehicle_type": "TRUCK1500_MULTI", "vehicle_count": 2, "range": "A106:H106"},
+        {"legacy_id": 103, "offer_id": 5, "vehicle_type": "TRUCK2000_FRZ", "vehicle_count": 2, "range": "A107:H107"},
+        {"legacy_id": 104, "offer_id": 6, "vehicle_type": "TRUCK3000_MULTI", "vehicle_count": 2, "range": "A108:H108"}
+      ]
+    },
+    "supplement": {
+      "workbook": "docs/source/CoLogi_Dataset_V7_Supplement_v1.xlsx",
+      "sha256": "5ce02e1a580ca0cb8d1df8340730d80b3f2666a3ff6bd73135eea938a3bbc196",
+      "version": "V7-SUPPLEMENT-v1",
+      "approval_audit_log_id": 232,
+      "provenance": "SYNTHETIC/CAPSTONE",
+      "existing_approval_from": "2026-11-23",
+      "existing_approval_to": "2027-02-28",
+      "first_fleet_date": "2026-12-01",
+      "eligible_for_target_fleet_date": false,
+      "resolution": "Existing effective-date, approval, scope, and revocation behavior per source revision"
+    }
+  },
+  "baseline": {
+    "f3_gate": "UNVERIFIED",
+    "f3_diagnostics": ["AVAILABILITY_MISSING"],
+    "waves": 0,
+    "eligible_native_cp7_slots_for_offers_on_service_date": 0,
+    "dated_availability_revisions_on_service_date": 0,
+    "saved_f3_f4_f5_counts": [0, 0, 0]
+  },
+  "authorization": {
+    "dataset_use_for_scoped_acceptance": "MANAGER_APPROVED",
+    "code_change": "NOT_GRANTED_IN_THIS_CHECKPOINT",
+    "deploy_or_activate_live": "NOT_GRANTED_IN_THIS_CHECKPOINT",
+    "production_database_writes": "NOT_GRANTED_IN_THIS_CHECKPOINT",
+    "modify_legacy_or_committed_lineage": "OUT_OF_SCOPE"
+  }
+}

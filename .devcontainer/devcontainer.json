@@ -1,0 +1,15 @@
+{
+  "name": "CoLogi v1.0.0",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  "forwardPorts": [15173, 18000],
+  "portsAttributes": {
+    "15173": { "label": "CoLogi frontend", "onAutoForward": "notify" },
+    "18000": { "label": "CoLogi backend", "onAutoForward": "silent" },
+    "5432": { "label": "PostgreSQL (Compose network only)", "onAutoForward": "ignore" }
+  },
+  "otherPortsAttributes": { "onAutoForward": "ignore" },
+  "postStartCommand": "sh .devcontainer/start.sh"
+}

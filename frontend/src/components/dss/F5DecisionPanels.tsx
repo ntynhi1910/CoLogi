@@ -1,0 +1,530 @@
+import { useCallback, useState } from 'react'
+import type { ReactNode } from 'react'
+import { deliveryDate } from './f1Display'
+import { kg, phases, planName } from './f3Display'
+import { statuses as f4Status } from './f4Display'
+import { dash, decimal, diagnostic, money, number, percent } from './f5Display'
+import { getF4Evaluation } from '../../services/dss/f4Service'
+import { useDssQuery } from '../../services/dss/useDssQuery'
+import type { F5Component, F5Configuration, F5Issue, F5Option, F5Preview } from '../../types/f5'
+
+export function Savings({ value }: { value: string | null | undefined }) {
+  const amount = number(value)
+  return <span className={amount === null || amount === 0 ? undefined : amount > 0 ? 'f5-positive' : 'f5-negative'}>
+    {money(value, true)}
+  </span>
+}
+
+const state = { BLOCKED: 'Bị chặn tại F4', NOT_EVALUATED: 'Chưa đủ bằng chứng', EVALUATED: 'Đã tính chi phí' }
+const categories = { TRANSPORT: 'Vận chuyển', HUB_HANDLING: 'Xử lý Hub', HANDLING: 'Xử lý tại điểm', OTHER: 'Phụ phí / chờ' }
+type Category = keyof typeof categories
+const categoryKeys = Object.keys(categories) as Category[]
+function outletLabels(data: Pick<F5Preview, 'demands' | 'options'>) {
+  const labels = new Map(data.demands.map(row => [row.outlet_id, row.outlet_code || 'Outlet chưa có mã']))
+  for (const option of data.options) {
+    for (const row of option.allocations) {
+      if (row.outlet_code || !labels.has(row.outlet_id)) labels.set(row.outlet_id, row.outlet_code || 'Outlet chưa có mã')
+    }
+  }
+  return labels
+}
+
+export function Issues({ issues, outlets }: { issues: F5Issue[]; outlets?: Map<number, string> }) {
+  if (!issues.length) return null
+  return <ul className="f5-issues">{issues.map((issue, i) => <li key={i}>
+    {diagnostic[issue.code] ?? issue.code}{issue.wave_no && ' · Wave ' + issue.wave_no}
+    {issue.demand_codes?.length ? ' · ' + issue.demand_codes.join(', ') : ''}
+    {issue.outlet_id != null && ' · ' + (outlets?.get(issue.outlet_id) ?? 'Outlet chưa có mã')}
+    {issue.scope && ' · ' + issue.scope}
+  </li>)}</ul>
+}
+
+export function Table({ label, columns, children }: { label: string; columns: string[]; children: ReactNode }) {
+  return <div className="f5-table-scroll" tabIndex={0} role="region" aria-label={label}>
+    <table className="f5-table" aria-label={label}>
+      <thead><tr>{columns.map(title => <th key={title} scope="col">{title}</th>)}</tr></thead>
+      <tbody>{children}</tbody>
+    </table>
+  </div>
+}
+
+export function Rank({ rank }: { rank: number | null | undefined }) {
+  return rank == null ? dash : <span className={'f5-badge f5-rank' + (rank === 1 ? ' f5-rank--first' : '')}>Hạng {rank}</span>
+}
+
+function evaluated(options: F5Option[]) {
+  return options.filter(option => option.status === 'EVALUATED' && number(option.collaborative_cost) !== null)
+}
+
+function sum(values: (string | number | null | undefined)[], places = 2) {
+  const amounts = values.map(number)
+  if (!amounts.length || amounts.some(amount => amount === null)) return null
+  const factor = 10 ** places
+  return amounts.reduce<number>((total, amount) => total + Math.round(Number(amount) * factor), 0) / factor
+}
+
+function axisStep(max: number) {
+  if (max <= 0) return 0
+  const raw = max / 5
+  const magnitude = 10 ** Math.floor(Math.log10(raw))
+  return ([1, 2, 2.5, 5, 10].find(value => value >= raw / magnitude) ?? 10) * magnitude
+}
+
+function Axis({ steps }: { steps: number[] }) {
+  const format = new Intl.NumberFormat('vi-VN', { maximumFractionDigits: 2 })
+  return <div className="f5-axis"><div className="f5-axis-ticks">
+    {steps.map((tick, index) => <span key={index}>{format.format(tick)}</span>)}
+  </div><span>VND</span></div>
+}
+
+function benefit(option: F5Option) {
+  const savings = option.allocations.map(row => number(row.participant_saving)).filter(value => value !== null)
+  return { total: savings.length, positive: savings.filter(value => value > 0).length, negative: savings.filter(value => value < 0).length }
+}
+
+function OnTimeStops({ data, code }: { data: F5Preview; code: string | undefined }) {
+  const load = useCallback(() => code ? getF4Evaluation(data.run_code, data.group_code, code) : Promise.resolve(null),
+    [data.run_code, data.group_code, code])
+  const { data: saved, loading } = useDssQuery(load)
+  const metrics = saved?.evaluation_code === code && saved?.status === 'PASS' ? saved.result.metrics : null
+  return metrics && metrics.delivery_stop_count > 0
+    ? metrics.on_time_stops + '/' + metrics.delivery_stop_count + ' điểm giao'
+    : loading && code ? 'Đang đọc F4…' : dash
+}
+
+function Recommendation({ data, options }: { data: F5Preview; options: F5Option[] }) {
+  const recommended = data.recommendation.plan_codes
+    .map(code => options.find(option => option.plan.plan_code === code))
+    .filter(option => option !== undefined)
+  const plan = recommended[0]
+  const other = options.find(option => option.rank === 2 && option.plan.plan_code !== plan?.plan.plan_code)
+  const distance = plan ? sum(plan.waves.map(wave => wave.distance_km), 6) : null
+  const counts = plan ? benefit(plan) : null
+  const comparable = data.recommendation.status === 'RECOMMENDED'
+  const difference = comparable && plan && other ? sum([other.collaborative_cost, -(number(plan.collaborative_cost) ?? 0)]) : null
+  return <section className="dssr-panel f5-panel f5-recommendation" aria-label="Phương án đề xuất">
+    <div className="f5-badges">
+      <span className="f5-badge f5-rank--first">{data.recommendation.status === 'TIE' ? 'Đồng hạng'
+        : data.recommendation.status === 'SINGLE_EVALUATED' ? 'Phương án duy nhất đã tính'
+          : comparable && plan ? 'Phương án đề xuất' : 'Đề xuất'}</span>
+      {plan?.rank != null && <Rank rank={plan.rank} />}
+    </div>
+    <h2>{recommended.length ? recommended.map(option => planName(option.plan)).join(' / ') : 'Chờ bằng chứng chi phí'}</h2>
+    {data.recommendation.status === 'TIE' ? <p>Các phương án đủ điều kiện này có cùng chi phí thấp nhất.</p>
+      : difference !== null && difference > 0 && other
+        ? <p>Chi phí thấp hơn <strong>{planName(other.plan)}</strong> {money(difference)}.</p>
+        : data.recommendation.status === 'SINGLE_EVALUATED' && plan
+          ? <p>Chờ thêm phương án đủ dữ liệu để đối chiếu chi phí.</p>
+          : comparable && plan && <p>Chi phí thấp nhất trong các phương án có cùng cơ sở so sánh.</p>}
+    {recommended.length === 1 && plan && <dl className="f5-recommendation-metrics">
+      <div><dt>Quãng đường F4</dt><dd>{distance === null ? dash : decimal.format(distance) + ' km'}</dd></div>
+      <div><dt>Giao đúng giờ</dt><dd><OnTimeStops data={data} code={plan.lineage?.f4_evaluation_code} /></dd></div>
+      <div><dt>Luồng hàng</dt><dd>{plan.waves.length ? plan.waves.length + ' wave' : dash}</dd></div>
+      <div><dt>Outlet tiết kiệm chi phí</dt><dd>{counts?.total ? counts.positive + '/' + counts.total + ' Outlet' : dash}</dd></div>
+    </dl>}
+  </section>
+}
+
+function TotalChart({ data }: { data: F5Preview }) {
+  const rows = [
+    { label: 'Giao độc lập', value: number(data.baseline_cost), tone: 'baseline', status: 'Chưa có chi phí', rank: null, key: 'baseline' },
+    ...data.options.map(option => ({
+      label: planName(option.plan), value: option.status === 'EVALUATED' ? number(option.collaborative_cost) : null,
+      status: option.status === 'EVALUATED' ? 'Chưa có chi phí' : state[option.status], key: option.plan.plan_code,
+      tone: option.rank === 1 ? 'best' : 'other', rank: option.rank,
+    })),
+  ]
+  const step = axisStep(Math.max(0, ...rows.map(row => row.value ?? 0)))
+  return <section className="dssr-panel f5-panel f5-total-chart" aria-label="So sánh tổng chi phí">
+    <h2>So sánh tổng chi phí</h2>
+    <div className="f5-chart-rows">{rows.map(row => <div className="f5-chart-row" key={row.key}>
+      <div className="f5-chart-label"><strong>{row.label}</strong>
+        {row.value === null ? <span className="f5-badge">{row.status}</span>
+          : <span className="f5-chart-total">{money(row.value)}{row.rank !== null && <Rank rank={row.rank} />}</span>}
+      </div>
+      {row.value !== null && <div className="f5-total-track" aria-hidden="true">
+        <span className={'f5-total-fill f5-total-fill--' + row.tone} style={{ width: (step ? row.value / (5 * step) * 100 : 0) + '%' }} />
+      </div>}
+    </div>)}</div>
+    {step > 0 && <Axis steps={Array.from({length: 6}, (_, i) => i * step)} />}
+  </section>
+}
+
+export function Overview({ data, actions, saved, eligible }: {
+  data: F5Preview; actions: (option: F5Option) => ReactNode; saved: number; eligible: number
+}) {
+  const priced = evaluated(data.options).slice().sort((a, b) => Number(a.collaborative_cost) - Number(b.collaborative_cost))
+  const pricedSavings = priced.filter(option => number(option.cost_saving) !== null)
+  const maxSaving = pricedSavings.reduce<F5Option | undefined>((max, option) =>
+    max && Number(max.cost_saving) >= Number(option.cost_saving) ? max : option, undefined)
+  const outlets = outletLabels(data)
+  return <>
+    <dl className="f5-kpis f5-kpis--overview">
+      <div><dt>Chi phí giao độc lập</dt><dd>{money(data.baseline_cost)}</dd></div>
+      <div><dt>Chi phí phối hợp thấp nhất</dt><dd>{money(priced[0]?.collaborative_cost)}</dd></div>
+      <div><dt>Tiết kiệm tối đa</dt><dd><Savings value={maxSaving?.cost_saving} /></dd>
+        <small>{maxSaving?.saving_rate_pct != null ? percent(maxSaving.saving_rate_pct, true) + ' so với giao riêng' : 'Chưa có tỷ lệ đối chiếu'}</small></div>
+      <div><dt>Phương án đã tính</dt><dd>{priced.length}/{data.options.length}</dd>
+        <small>{data.persistence_available ? 'Đã lưu ' + saved + '/' + eligible + ' kết quả đủ điều kiện' : 'Đang ở chế độ xem trước'}</small></div>
+    </dl>
+    <div className="f5-decision-grid"><Recommendation data={data} options={priced} /><TotalChart data={data} /></div>
+    <section className="dssr-panel f5-panel">
+      <h2>Chi tiết so sánh</h2>
+      <Table label="So sánh chi phí F5" columns={['Phương án', 'Trạng thái F4 / F5', 'Tổng chi phí', 'Tiết kiệm', 'Tỷ lệ', 'Thứ hạng']}>
+        {data.options.map(option => {
+          const ready = option.status === 'EVALUATED' && number(option.collaborative_cost) !== null
+          return <tr key={option.plan.plan_code}><th scope="row">{planName(option.plan)}{ready && actions(option)}</th>
+            <td>{option.f4_status ? f4Status[option.f4_status] : dash}
+              <span className={'f5-badge f5-badge--' + option.status.toLowerCase()}>{state[option.status]}</span>
+              {option.status !== 'EVALUATED' && <Issues issues={option.diagnostics} outlets={outlets} />}
+              {option.f4_diagnostics.includes('F4_SEQUENCE_NOT_EXHAUSTIVE') && <p>{diagnostic.F4_SEQUENCE_NOT_EXHAUSTIVE}</p>}</td>
+            <td>{ready ? money(option.collaborative_cost) : dash}</td>
+            <td><Savings value={ready ? option.cost_saving : null} /></td>
+            <td>{ready ? percent(option.saving_rate_pct, true) : dash}</td><td>{ready ? <Rank rank={option.rank} /> : dash}</td>
+          </tr>
+        })}
+      </Table>
+      <Issues issues={data.diagnostics} outlets={outlets} />
+    </section>
+  </>
+}
+
+const unitLabels: Record<string, string> = { KM: 'km', KG: 'kg', ORDER: 'đơn', MIN: 'phút' }
+const distanceLabels: Record<string, string> = {
+  FIRST_SERVICE_TO_LAST_SERVICE: 'Từ điểm phục vụ đầu tiên đến điểm phục vụ cuối cùng, không gồm depot hoặc chặng quay về.',
+  INCLUDING_DEPOT: 'Bao gồm chặng từ depot đến điểm lấy hàng đầu tiên và chặng quay về.',
+}
+const chargeLabels: Record<string, string> = {
+  DISTANCE: 'Quãng đường', TRANSPORT_BASE: 'Cước vận chuyển', WAIT: 'Thời gian chờ',
+  STOP_HANDLING: 'Xử lý tại điểm', HUB_HANDLING: 'Xử lý tại Hub', SURCHARGE: 'Phụ phí',
+}
+
+function formula(item: F5Component) {
+  const count = number(item.quantity)
+  const unit = unitLabels[item.unit_code]
+  const rate = number(item.unit_rate)
+  if (count === null || rate === null) return dash
+  return decimal.format(count) + (unit ? ' ' + unit : '') + ' × ' +
+    decimal.format(rate) + ' VND' + (unit ? '/' + unit : '')
+}
+
+export function Components({ items, waves = [] }: { items: F5Component[]; waves?: F5Option['waves'] }) {
+  return <Table label="Cấu phần tính giá" columns={['Khoản phí', 'Phạm vi', 'Công thức và nguồn giá', 'Thành tiền']}>
+    {items.map((item, i) => {
+      const wave = waves.find(row => row.wave_no === item.wave_no)
+      const scope = item.wave_no != null
+        ? 'Wave ' + item.wave_no + (wave ? ' · ' + phases[wave.phase] : '')
+        : item.scope.startsWith('DEMAND/') ? item.scope.slice(7) : 'Cấp phương án'
+      const basis = item.distance_evidence?.scope
+      return <tr key={i}><th scope="row">{categories[item.component_type]}</th><td>{scope}</td>
+        <td><strong>{formula(item)} = {money(item.amount)}</strong>
+          <details><summary>Nguồn giá và hiệu lực</summary>
+            <p>{item.source_reference}</p>
+            <p>Hiệu lực {deliveryDate(item.valid_from)} – {deliveryDate(item.valid_to)}</p>
+            <p>Phạm vi giá {item.covers.map(key => chargeLabels[key] ?? key).join(', ')}</p>
+            {typeof basis === 'string' && <p>{distanceLabels[basis] ?? 'Chưa có diễn giải phạm vi quãng đường.'}</p>}
+            <details><summary>Chi tiết kiểm toán</summary>
+              <pre>{JSON.stringify(item, null, 2)}</pre></details>
+          </details>
+        </td><td>{money(item.amount)}</td>
+      </tr>
+    })}
+  </Table>
+}
+
+export function WaveCosts({ option }: { option: F5Option }) {
+  return <>
+    {option.waves.length > 0 && <Table label="Chi phí theo wave F4" columns={['Wave', 'Chiều', 'Offer', 'Quãng đường F4', 'Chi phí wave']}>
+      {option.waves.map(wave => <tr key={wave.wave_no}><th scope="row">{wave.wave_no}</th><td>{phases[wave.phase]}</td>
+        <td>#{wave.offer_id}</td><td>{number(wave.distance_km) === null ? dash : decimal.format(Number(wave.distance_km)) + ' km'}</td>
+        <td>{money(wave.cost)}</td></tr>)}
+    </Table>}
+    {!!option.components.length && <Components items={option.components} waves={option.waves} />}
+    {!option.waves.length && !option.components.length && <p>Chưa có cấu phần đủ bằng chứng.</p>}
+  </>
+}
+
+function componentTotals(option: F5Option) {
+  return categoryKeys.flatMap(category => {
+    const items = option.components.filter(item => item.component_type === category)
+    const total = sum(items.map(item => item.amount))
+    return total === null ? [] : [{ category, total, items }]
+  })
+}
+
+function StackedCosts({ options }: { options: F5Option[] }) {
+  const [hover, setHover] = useState<string>()
+  const [focus, setFocus] = useState<string>()
+  const [selected, setSelected] = useState<string>()
+  const rows = options.map(option => ({ option, parts: componentTotals(option) }))
+  const step = axisStep(Math.max(0, ...rows.map(({ option }) => Number(option.collaborative_cost))))
+  const totalWidth = step * 5
+  const detail = rows.flatMap(({ option, parts }) => parts.map(part => ({ option, ...part })))
+    .find(({ option, category }) => option.plan.plan_code + '/' + category === (hover ?? focus ?? selected))
+  const shown = categoryKeys.filter(category => rows.some(row => row.parts.some(part => part.category === category)))
+  const first = rows.find(row => row.option.rank === 1)
+  const second = rows.find(row => row.option.rank === 2)
+  const comparable = first && second &&
+    [first, second].every(row => sum(row.parts.map(part => part.total)) === number(row.option.collaborative_cost))
+  const differences = comparable ? shown.flatMap(category => {
+    const previous = first.parts.find(part => part.category === category)?.total ?? 0
+    const next = second.parts.find(part => part.category === category)?.total ?? 0
+    const change = sum([next, -previous])
+    return change ? [categories[category] + ' ' + money(change, true)] : []
+  }) : []
+  return <section className="dssr-panel f5-panel">
+    <h2>So sánh cấu phần chi phí</h2>
+    {!rows.length ? <p>Chưa có phương án đủ bằng chứng để vẽ biểu đồ.</p> : <>
+      <ul className="f5-legend">{shown.map(key => <li key={key}><span className={'f5-segment--' + key} />{categories[key]}</li>)}</ul>
+      <div className="f5-chart-rows">{rows.map(({ option, parts }) =>
+        <div key={option.plan.plan_code} className="f5-chart-row">
+          <div className="f5-chart-label"><strong>{planName(option.plan)}</strong><strong>{money(option.collaborative_cost)}</strong></div>
+          {parts.some(part => part.total > 0) && <div className="f5-stacked-track">
+            {parts.filter(part => part.total > 0).map(part => {
+              const key = option.plan.plan_code + '/' + part.category
+              const width = totalWidth ? part.total / totalWidth * 100 : 0
+              return <button key={key} type="button" className={'f5-segment f5-segment--' + part.category}
+                aria-label={planName(option.plan) + ' · ' + categories[part.category] + ' · ' + money(part.total)}
+                aria-pressed={selected === key} style={{ width: width + '%' }}
+                onPointerEnter={event => { if (event.pointerType !== 'touch') setHover(key) }}
+                onPointerLeave={() => setHover(undefined)} onFocus={() => setFocus(key)} onBlur={() => setFocus(undefined)}
+                onKeyDown={event => { if (event.key === 'Escape') { setSelected(undefined); setFocus(undefined); setHover(undefined) } }}
+                onClick={() => setSelected(current => current === key ? undefined : key)}>
+                {width >= 15 ? money(part.total) : ''}
+              </button>
+            })}
+          </div>}
+          {parts.length ? <ul className="f5-chart-values">{parts.map(part => <li key={part.category}>
+            {categories[part.category]} <strong>{money(part.total)}</strong>
+          </li>)}</ul> : <p>Chưa có cấu phần chi tiết.</p>}
+          {!!parts.length && sum(parts.map(part => part.total)) !== number(option.collaborative_cost) &&
+            <p>Chưa đủ cấu phần để đối chiếu với tổng chi phí.</p>}
+        </div>)}</div>
+      {step > 0 && <Axis steps={Array.from({ length: 6 }, (_, i) => i * step)} />}
+      <div className="f5-chart-inspector" role="status">
+        {detail ? <><strong>{planName(detail.option.plan)} · {categories[detail.category]}</strong>
+          <span>{money(detail.total)}</span>
+          <span>{detail.items.map(item => formula(item)).join(' + ')}</span></>
+          : 'Chọn một đoạn thanh để xem khoản phí và cách tính.'}
+      </div>
+      {first && second && differences.length > 0 && <p>
+        {planName(second.option.plan)} so với {planName(first.option.plan)} · {differences.join(' · ')}
+      </p>}
+    </>}
+  </section>
+}
+
+export function CostBreakdown({ data }: { data: F5Preview }) {
+  const outlets = outletLabels(data)
+  return <>
+    <StackedCosts options={evaluated(data.options)} />
+    <section className="dssr-panel f5-panel">
+      <h2>Chi phí theo wave và khoản phí</h2>
+      {data.options.map(option => <details className="f5-disclosure" key={option.plan.plan_code} open={data.options[0] === option}>
+        <summary>{planName(option.plan)} <span>{option.status === 'EVALUATED' ? money(option.collaborative_cost) : state[option.status]}</span></summary>
+        <Issues issues={option.diagnostics} outlets={outlets} />
+        <WaveCosts option={option} />
+      </details>)}
+    </section>
+  </>
+}
+
+type AllocationData = Pick<F5Preview, 'configuration' | 'options' | 'total_weight_kg' | 'demands' | 'baseline_cost' | 'baseline_inputs'>
+
+function weight(value: string | number | null | undefined) {
+  const amount = number(value)
+  return amount === null ? dash : kg(String(amount))
+}
+
+function allocationRows(data: AllocationData, options: F5Option[]) {
+  return Array.from(outletLabels(data), ([id, label]) => {
+    const allocations = options.map(option => option.allocations.find(outlet => outlet.outlet_id === id))
+    const reference = allocations.find(value => value !== undefined)
+    return { id, label, allocations, share: reference?.share_pct,
+      baseline: reference?.baseline_cost, weight: reference?.weight_kg ??
+        sum(data.demands.filter(demand => demand.outlet_id === id).map(demand => demand.required_weight_kg), 3) }
+  })
+}
+type OutletRow = ReturnType<typeof allocationRows>[number]
+
+function OutletChart({ rows, options }: { rows: OutletRow[]; options: F5Option[] }) {
+  const amounts = rows.flatMap(row => row.allocations.map(outlet => number(outlet?.participant_saving))).filter(value => value !== null)
+  if (!amounts.length) return <p>Chưa có kết quả tiết kiệm theo Outlet.</p>
+  const max = Math.max(0, ...amounts)
+  const min = Math.min(0, ...amounts)
+  const step = axisStep(Math.max(max, -min)) || 1
+  const positiveLimit = Math.max(step, Math.ceil(max / step) * step)
+  const negativeLimit = Math.max(step, Math.ceil(-min / step) * step)
+  const size = positiveLimit + negativeLimit
+  const zero = 100 * negativeLimit / size
+  return <section className="f5-outlet-chart" aria-label="Biểu đồ tiết kiệm theo Outlet">
+    <div className="f5-chart-label"><h3>Mức tiết kiệm theo Outlet</h3><span>VND</span></div>
+    <ul className="f5-benefits">{options.map(option => {
+      const counts = benefit(option)
+      const allOutlets = rows.length
+      return <li key={option.plan.plan_code}>
+        <strong>{planName(option.plan)}</strong>
+        <span className="f5-positive">{counts.positive}/{allOutlets} Outlet hưởng lợi</span>
+        <span className={counts.negative > 0 ? 'f5-negative' : undefined}>{counts.negative}/{allOutlets} Outlet tăng chi phí</span>
+        {counts.total < allOutlets && <span>{allOutlets - counts.total} Outlet chưa có dữ liệu</span>}
+      </li>
+    })}</ul>
+    <div className="f5-diverging" style={{ '--f5-zero': zero + '%' } as React.CSSProperties}>
+      <div className="f5-diverging-axis" aria-hidden="true"><span>Tăng chi phí</span><span>0</span><span>Tiết kiệm</span></div>
+      {rows.map(row => <div key={row.id} className="f5-diverging-group">
+        <strong>{row.label}</strong>
+        {options.map((option, index) => {
+          const value = number(row.allocations[index]?.participant_saving)
+          return <div className="f5-diverging-row" key={option.plan.plan_code}>
+            <span className="f5-diverging-label">{option.plan.hub?.code ?? planName(option.plan)}</span>
+            <div className="f5-diverging-track" aria-hidden="true">
+              {value !== null && value !== 0 && <span className={value < 0 ? 'f5-impact--negative'
+                : option.plan.hub ? 'f5-impact--hub' : 'f5-impact--direct'}
+                style={{ left: (value < 0 ? zero + value / size * 100 : zero) + '%', width: Math.abs(value) / size * 100 + '%' }} />}
+            </div>
+            <div className="f5-diverging-value"><Savings value={row.allocations[index]?.participant_saving} /></div>
+          </div>
+        })}
+      </div>)}
+    </div>
+  </section>
+}
+
+function AllocationPolicy({ config }: { config: F5Configuration | null }) {
+  if (!config) return <p>Chờ phương pháp phân bổ và nguồn giá được duyệt.</p>
+  return <div className="f5-policy">
+    <p>{config.allocation_method === 'WEIGHT'
+      ? 'Chi phí phối hợp được chia theo tỷ trọng khối lượng của từng Outlet trong tổng khối lượng nhu cầu.'
+      : 'Chi phí phối hợp được chia theo tỷ trọng số đơn của từng Outlet trong tổng số đơn.'}</p>
+    <p>{config.rounding_mode === 'HALF_UP' && config.rounding_unit_vnd != null
+      ? 'Làm tròn nửa lên đến ' + decimal.format(config.rounding_unit_vnd) + ' VND.' : 'Chưa có thông tin làm tròn.'}
+      {config.allocation_residual === 'LARGEST_REMAINDER_OUTLET_ID' &&
+        ' Phần dư được chia theo phần lẻ lớn nhất. Khi bằng nhau, Outlet có ID nhỏ hơn được ưu tiên.'}</p>
+  </div>
+}
+
+export function Allocations({ data }: { data: AllocationData }) {
+  const [filter, setFilter] = useState('')
+  const options = evaluated(data.options).filter(option => option.allocations.length)
+  const selected = options.filter(option => !filter || option.plan.plan_code === filter)
+  const rows = allocationRows(data, selected)
+  const columns = ['Outlet', 'Khối lượng', 'Tỷ trọng', 'Chi phí giao độc lập', ...selected.flatMap(option =>
+    [planName(option.plan) + ' · Phân bổ', planName(option.plan) + ' · Tiết kiệm'])]
+  const shareTotal = sum(rows.map(row => row.share), 4)
+  return <section className="dssr-panel f5-panel">
+    <div className="f5-panel-heading"><h2>Phân bổ chi phí theo Outlet</h2>
+      {options.length > 1 && <label className="f5-filter">Phương án
+        <select value={filter} onChange={event => setFilter(event.target.value)}>
+          <option value="">Tất cả phương án</option>
+          {options.map(option => <option key={option.plan.plan_code} value={option.plan.plan_code}>{planName(option.plan)}</option>)}
+        </select>
+      </label>}
+    </div>
+    <AllocationPolicy config={data.configuration} />
+    {selected.length > 0 && <>
+      <OutletChart rows={rows} options={selected} />
+      <h3>Đối chiếu phân bổ</h3>
+      <p className="f5-mobile-table-hint">Vuốt ngang bảng để xem chi phí và tiết kiệm của từng phương án.</p>
+      <Table label="Đối chiếu phân bổ theo Outlet" columns={columns}>
+        {rows.map(row => <tr key={row.id}><th scope="row">{row.label}</th><td>{weight(row.weight)}</td>
+          <td>{percent(row.share)}</td><td>{money(row.baseline)}</td>
+          {row.allocations.flatMap((allocation, index) => [
+            <td key={index + '-cost'}>{money(allocation?.allocated_cost)}</td>,
+            <td key={index + '-saving'}><Savings value={allocation?.participant_saving} /></td>,
+          ])}
+        </tr>)}
+        <tr className="f5-total-row"><th scope="row">Tổng đối chiếu</th><td>{weight(data.total_weight_kg)}</td>
+          <td>{percent(shareTotal?.toString())}</td><td>{money(data.baseline_cost)}</td>
+          {selected.flatMap((option, index) => [
+            <td key={option.plan.plan_code + '-cost'}>{money(sum(rows.map(row => row.allocations[index]?.allocated_cost)))}</td>,
+            <td key={option.plan.plan_code + '-saving'}><Savings value={sum(rows.map(row => row.allocations[index]?.participant_saving))?.toString()} /></td>,
+          ])}
+        </tr>
+      </Table>
+    </>}
+    {selected.length === 0 && <p>Chưa có kết quả phân bổ.</p>}
+    <details className="f5-disclosure"><summary>Tập Demand và chi phí giao độc lập</summary>
+      <Table label="Đầu vào giao độc lập" columns={['Demand', 'Outlet', 'Khối lượng', 'Cự ly giao riêng', 'Chi phí giao độc lập']}>
+        {data.demands.map(demand => {
+          const input = data.baseline_inputs.find(row => row.demand_id === demand.id)
+          const rawDistance = input?.distance_evidence?.distance_km
+          const km = typeof rawDistance === 'string' || typeof rawDistance === 'number' ? number(rawDistance) : null
+          return <tr key={demand.id}><th scope="row">{demand.code}</th><td>{demand.outlet_code || dash}</td>
+            <td>{weight(demand.required_weight_kg)}</td>
+            <td>{km === null ? dash : decimal.format(km) + ' km'}</td>
+            <td>{money(input?.amount)}</td></tr>
+        })}
+      </Table>
+    </details>
+  </section>
+}
+
+export function Sources({ data }: { data: F5Preview }) {
+  const allComponents = [...data.baseline_inputs.flatMap(row => row.components), ...data.options.flatMap(row => row.components)]
+  const rates = [...new Set(allComponents.filter(item => item.pricing_basis === 'PER_KM').map(item => item.unit_rate))]
+  const hubFees = data.options.flatMap(option => option.components.filter(item =>
+    item.component_type === 'HUB_HANDLING' && item.wave_no == null).map(item => ({ option, item })))
+  const outlets = outletLabels(data)
+  const config = data.configuration
+  return <>
+    <section className="dssr-panel f5-panel">
+      <h2>Nguồn giá thực sự sử dụng</h2>
+      {!data.price_evidence ? <p>Chưa có báo giá được duyệt cho ngữ cảnh này.</p> : <>
+        <p><strong>{config?.version ?? 'Cấu hình đã duyệt'}</strong> · {data.price_evidence.source_mode}</p>
+        <p>{data.price_evidence.approval_reference}</p>
+        <dl className="f5-source-facts">
+          <div><dt>Đơn giá theo quãng đường đã dùng</dt><dd>{rates.length
+            ? rates.map(rate => decimal.format(Number(rate)) + ' VND/km').join(' · ') : dash}</dd></div>
+          {hubFees.map(({ option, item }, index) => <div key={option.plan.plan_code + '/' + index}>
+            <dt>Phí xử lý {option.plan.hub?.code ?? 'Hub'} cấp phương án</dt><dd>{money(item.amount)}</dd></div>)}
+          <div><dt>Phạm vi quãng đường</dt><dd>{config?.distance_basis ? distanceLabels[config.distance_basis] ?? dash : dash}</dd></div>
+        </dl>
+      </>}
+      <Issues issues={data.diagnostics} outlets={outlets} />
+      <details className="f5-disclosure"><summary>Cự ly và nguồn giá giao riêng theo Demand</summary>
+        {data.baseline_inputs.map(row => <section key={row.demand_id}>
+          <h3>{row.demand_code} · {money(row.amount)}</h3>
+          {typeof row.distance_evidence?.source_reference === 'string' && <p>{row.distance_evidence.source_reference}</p>}
+          <Components items={row.components} />
+        </section>)}
+        {!data.baseline_inputs.length && <p>Chưa có bằng chứng giao riêng.</p>}
+      </details>
+    </section>
+    <section className="dssr-panel f5-panel">
+      <h2>Nguồn giá tham khảo CP7</h2>
+      <p>Giá tham khảo trên offer CP7 nằm ngoài phép tính F5. Kết quả sử dụng báo giá có phạm vi và hiệu lực được duyệt.</p>
+      <p>{data.audit.run_cost_profile_id == null
+        ? (data.evaluation_context === 'UAT' && data.price_evidence
+          ? 'Run chưa gắn CostProfile. Kết quả UAT sử dụng fixture đã duyệt.'
+          : 'Run chưa gắn CostProfile.')
+        : 'CostProfile gắn với Run #' + data.audit.run_cost_profile_id}</p>
+      {data.audit.offers.length ? <Table label="Giá tham khảo CP7" columns={['Offer', 'Giá cố định tham khảo', 'Giá/km tham khảo']}>
+        {data.audit.offers.map(offer => <tr key={offer.id}><th scope="row">#{offer.id}</th>
+          <td>{money(offer.fixed_quote_vnd)}</td><td>{offer.estimated_cost_per_km_vnd == null ? dash : money(offer.estimated_cost_per_km_vnd) + '/km'}</td></tr>)}
+      </Table> : <p>Chưa có offer CP7 đối chiếu.</p>}
+    </section>
+    <section className="dssr-panel f5-panel">
+      <h2>Truy xuất dữ liệu và kiểm toán</h2>
+      <details className="f5-disclosure"><summary>Công thức và chính sách phân bổ</summary>
+        <ul className="f5-audit-formulas"><li>Chi phí giao độc lập = tổng chi phí giao riêng của các Demand cùng tập so sánh.</li>
+          <li>Chi phí phối hợp = tổng các khoản phí hợp lệ của phương án.</li>
+          <li>Tiết kiệm = chi phí giao độc lập − chi phí phối hợp.</li>
+          <li>Tỷ lệ tiết kiệm = tiết kiệm ÷ chi phí giao độc lập × 100 khi chi phí giao độc lập lớn hơn 0.</li></ul>
+        <AllocationPolicy config={config} />
+      </details>
+      <details className="f5-disclosure"><summary>Danh mục quy tắc V7 và cấu hình</summary>
+        <Table label="Danh mục quy tắc V7" columns={['Quy tắc', 'Biểu thức', 'Loại']}>
+          {Object.entries(data.rule_catalog_v7).map(([code, rule]) => <tr key={code}><th scope="row">{code}</th>
+            <td>{rule.expression}</td><td>{rule.rule_type}</td></tr>)}
+        </Table>
+        <details><summary>JSON cấu hình</summary><pre>{JSON.stringify({ config, audit: data.audit, evidence: data.price_evidence }, null, 2)}</pre></details>
+      </details>
+      <details className="f5-disclosure"><summary>Lineage F1–F5, fingerprint và snapshot</summary><pre>{JSON.stringify({
+        run: data.run_code, candidate: data.group_code, scenario: data.scenario, contract_version: data.contract_version,
+        comparison_fingerprint: data.fingerprint, configuration_fingerprint: data.configuration_fingerprint,
+        demand_basis_fingerprint: data.demand_basis_fingerprint,
+        options: data.options.map(row => ({ lineage: row.lineage, input_fingerprint: row.input_fingerprint })),
+      }, null, 2)}</pre></details>
+    </section>
+  </>
+}

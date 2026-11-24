@@ -1,0 +1,217 @@
+:root {
+  font-family: var(--font-family-base);
+  color: var(--color-text);
+  background: var(--color-background);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-optical-sizing: auto;
+  font-weight: var(--font-weight-regular);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgba(75, 177, 105, 0.3);
+  outline-offset: 2px;
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--color-background);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 40px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+}
+
+.brand-mark {
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.brand-mark.small {
+  width: 34px;
+  height: 34px;
+  font-size: 18px;
+}
+
+.eyebrow {
+  margin: 22px 0 8px;
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 1.5px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 30px;
+  letter-spacing: -0.8px;
+}
+
+.muted {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.auth-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.auth-form label {
+  margin-top: 8px;
+  color: var(--color-text);
+  font-size: 13px;
+  font-weight: var(--font-weight-semibold);
+}
+
+.auth-form input {
+  width: 100%;
+  min-height: 46px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.auth-form input::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 0.8;
+}
+
+.auth-form input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(30, 107, 58, 0.1);
+}
+
+.auth-form button,
+.secondary-button {
+  min-height: 44px;
+  padding: 12px 16px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: white;
+  font-weight: var(--font-weight-semibold);
+  transition: background 150ms ease, border-color 150ms ease;
+}
+
+.auth-form button {
+  margin-top: 16px;
+}
+
+.auth-form button:hover:not(:disabled) {
+  background: var(--color-primary-dark);
+}
+
+.secondary-button {
+  background: var(--color-surface-soft);
+  color: var(--color-primary-dark);
+  border-color: var(--color-border);
+}
+
+.secondary-button:hover:not(:disabled) {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary);
+}
+
+.error-message {
+  margin: 8px 0 0;
+  color: var(--color-danger);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.loading-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: var(--color-text-secondary);
+  background: var(--color-background);
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 16px;
+  }
+
+  .auth-card {
+    padding: 28px 22px;
+  }
+
+  h1 {
+    font-size: 26px;
+  }
+}
+
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper input {
+  padding-right: 64px;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  margin: 0 !important;
+  min-height: 32px !important;
+  padding: 4px 8px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--color-primary) !important;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.password-toggle:hover:not(:disabled) {
+  background: var(--color-primary-soft) !important;
+}

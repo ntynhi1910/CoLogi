@@ -1,0 +1,536 @@
+{
+  "postgresql": "17.12",
+  "migration_state": [
+    [
+      "accounts",
+      "0001_initial"
+    ],
+    [
+      "accounts",
+      "0002_externaluseraccess"
+    ],
+    [
+      "accounts",
+      "0003_useroutletaccess"
+    ],
+    [
+      "accounts",
+      "0004_auditlog_remove_userrole_acc_userrole_user_role_uniq_and_more"
+    ],
+    [
+      "accounts",
+      "0005_remove_userrole_acc_userrole_user_uniq_and_more"
+    ],
+    [
+      "accounts",
+      "0006_alter_auditlog_entity_id"
+    ],
+    [
+      "accounts",
+      "0007_capstone_context"
+    ],
+    [
+      "admin",
+      "0001_initial"
+    ],
+    [
+      "admin",
+      "0002_logentry_remove_auto_add"
+    ],
+    [
+      "admin",
+      "0003_logentry_add_action_flag_choices"
+    ],
+    [
+      "auth",
+      "0001_initial"
+    ],
+    [
+      "auth",
+      "0002_alter_permission_name_max_length"
+    ],
+    [
+      "auth",
+      "0003_alter_user_email_max_length"
+    ],
+    [
+      "auth",
+      "0004_alter_user_username_opts"
+    ],
+    [
+      "auth",
+      "0005_alter_user_last_login_null"
+    ],
+    [
+      "auth",
+      "0006_require_contenttypes_0002"
+    ],
+    [
+      "auth",
+      "0007_alter_validators_add_error_messages"
+    ],
+    [
+      "auth",
+      "0008_alter_user_username_max_length"
+    ],
+    [
+      "auth",
+      "0009_alter_user_last_name_max_length"
+    ],
+    [
+      "auth",
+      "0010_alter_group_name_max_length"
+    ],
+    [
+      "auth",
+      "0011_update_proxy_permissions"
+    ],
+    [
+      "auth",
+      "0012_alter_user_first_name_max_length"
+    ],
+    [
+      "authtoken",
+      "0001_initial"
+    ],
+    [
+      "authtoken",
+      "0002_auto_20160226_1747"
+    ],
+    [
+      "authtoken",
+      "0003_tokenproxy"
+    ],
+    [
+      "authtoken",
+      "0004_alter_tokenproxy_options"
+    ],
+    [
+      "contenttypes",
+      "0001_initial"
+    ],
+    [
+      "contenttypes",
+      "0002_remove_content_type_name"
+    ],
+    [
+      "demands",
+      "0001_initial"
+    ],
+    [
+      "demands",
+      "0002_supplierconfirmation_supplierrequest_and_more"
+    ],
+    [
+      "demands",
+      "0003_cp6_sourcing_selection"
+    ],
+    [
+      "demands",
+      "0004_supplieritempromise_decline_reason"
+    ],
+    [
+      "demands",
+      "0005_capstone_context"
+    ],
+    [
+      "demands",
+      "0006_cp12_cancelled_supply"
+    ],
+    [
+      "masterdata",
+      "0001_initial"
+    ],
+    [
+      "masterdata",
+      "0002_cargocategory_outlet"
+    ],
+    [
+      "masterdata",
+      "0003_item_supplieritem_item_md_item_cat_active_idx_and_more"
+    ],
+    [
+      "masterdata",
+      "0004_remove_supplieritem_md_sitem_price_positive_and_more"
+    ],
+    [
+      "masterdata",
+      "0005_hub_vehicletype_vehiclecargocompatibility"
+    ],
+    [
+      "planning",
+      "0001_initial"
+    ],
+    [
+      "planning",
+      "0002_group4_run_orchestration"
+    ],
+    [
+      "planning",
+      "0003_group6_plan_foundation"
+    ],
+    [
+      "planning",
+      "0004_group8_f2_structure"
+    ],
+    [
+      "planning",
+      "0005_f2_option_identity"
+    ],
+    [
+      "planning",
+      "0006_f3_evaluation"
+    ],
+    [
+      "planning",
+      "0007_f4_evaluation"
+    ],
+    [
+      "planning",
+      "0008_receiving_calendar"
+    ],
+    [
+      "planning",
+      "0009_f5_economic_evaluation"
+    ],
+    [
+      "planning",
+      "0010_operational_evidence"
+    ],
+    [
+      "planning",
+      "0011_capstone_context"
+    ],
+    [
+      "planning",
+      "0012_cp09_cp10_delivery"
+    ],
+    [
+      "planning",
+      "0013_cp11_inventory_execution"
+    ],
+    [
+      "planning",
+      "0014_cp12_reconciliation"
+    ],
+    [
+      "sessions",
+      "0001_initial"
+    ],
+    [
+      "transportation",
+      "0001_initial"
+    ],
+    [
+      "transportation",
+      "0002_alter_provideravailability_source_mode"
+    ],
+    [
+      "transportation",
+      "0003_confirm_tp001_availability"
+    ],
+    [
+      "transportation",
+      "0004_hub_coverage_evidence"
+    ]
+  ],
+  "tables": {
+    "audit_logs": {
+      "rows": 251,
+      "sha256": "cccd815f3d6a3ac0cc6cad1dae93636ee77eabb0c74f6d9820f74045704f4520"
+    },
+    "auth_group": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "auth_group_permissions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "auth_permission": {
+      "rows": 256,
+      "sha256": "62d4aad1063295ff017531cc5c95f84d6a278da2ae2b0d6d3bc17fa065983884"
+    },
+    "authtoken_token": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "business_rules": {
+      "rows": 31,
+      "sha256": "c90c79e317bb32e5c3d0e4dd6cffe92b1896eabd3cd2be970489eed6742719bb"
+    },
+    "cargo_categories": {
+      "rows": 7,
+      "sha256": "a4888c2ab160ab939fc0b64f5900e808f88164ee2e846c9d38d87f8e17306b95"
+    },
+    "collaboration_groups": {
+      "rows": 30,
+      "sha256": "dfe31ab104f73b6d3edf41e982328f86030229e1ee39d1307f9a20c368d84444"
+    },
+    "cost_allocations": {
+      "rows": 36,
+      "sha256": "50460f07d7b1cf7f521edc1a4eecefdbb834c722477053d3dac7b847df5362b2"
+    },
+    "cost_components": {
+      "rows": 42,
+      "sha256": "eb07f29786513bd3c894fc359f1a6eab8c138147450b0def9f7e8d6fca47d465"
+    },
+    "cost_profiles": {
+      "rows": 5,
+      "sha256": "29c5053d99aa12a50fedf4e548ff6862cf6358a6a0f58076fdd659ee5b44a820"
+    },
+    "delivery_demands": {
+      "rows": 48,
+      "sha256": "090b42fbf3ad24514d9a9aa839f10ea34729f0c4bba684921e857e02cdaf170b"
+    },
+    "delivery_waves": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "demand_cost_inputs": {
+      "rows": 36,
+      "sha256": "befcd0cbb5dd132367c937ff5888e5386a7201c18136bf37248b60c89df86a71"
+    },
+    "demand_items": {
+      "rows": 92,
+      "sha256": "e8485591ff154bf07e42f082f81eec196635ea6ee42442899a89f58ac50ab068"
+    },
+    "demand_sourcing_options": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "demand_supplier_selections": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "django_admin_log": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "django_content_type": {
+      "rows": 64,
+      "sha256": "f68f09b54ab9a964da159403a2a02b1bc904bcf697fbdb96c6da565d15654afc"
+    },
+    "django_migrations": {
+      "rows": 58,
+      "sha256": "a7cdd8d4e66aa9366f41ebc003864ea47ba8026132e522de24e2658dce7e53bb"
+    },
+    "django_session": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "economic_evaluations": {
+      "rows": 18,
+      "sha256": "d9f15751cc3974b5aea00d1bee92c5017880a1e7ed9ac023ff6448f8c2ef94ff"
+    },
+    "external_user_access": {
+      "rows": 11,
+      "sha256": "c2743cdfe234223dda0bfb6d5a059df821ca92112ac8277d6828550a5f06969d"
+    },
+    "f3_evaluations": {
+      "rows": 24,
+      "sha256": "2c37dcda93e32080517b9a6596a7fd5dc82572ec0fdbbcd8f22e368b85430b38"
+    },
+    "f4_evaluations": {
+      "rows": 18,
+      "sha256": "0ec95e1cdce0d77a124aabbd15809cb66a62d17ccb81265075b38f596078766a"
+    },
+    "final_plan_demands": {
+      "rows": 2,
+      "sha256": "cec4f1a254a3f0c53cfae1b1f4d79461f82591d01a4ab7a3f2702df3ca7e1996"
+    },
+    "final_plans": {
+      "rows": 1,
+      "sha256": "f58380a6c33f15e61bb9ed144503932ec3fed390865039342cf772af04d93339"
+    },
+    "fulfillment_plans": {
+      "rows": 35,
+      "sha256": "4689b7f0aa9c6aee5f699f26257838c0ed71d24383fed786760f2d8f5ae05f6d"
+    },
+    "group_demands": {
+      "rows": 90,
+      "sha256": "af6e2c42e96ec7c3f839ee00815c25125d75a0fa6bbc276aafca9311ec01d196"
+    },
+    "hub_coverage_evidence": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "hubs": {
+      "rows": 3,
+      "sha256": "8553b562ad2afbfcd9cf6c66c5d1d0cd445ca06ad6d5e1625893fbb59e99ede0"
+    },
+    "inventory_balances": {
+      "rows": 562,
+      "sha256": "dfac21dfb7f6c2e6b4b7ad325acad8fa0287ccd495dc3af7658a73459351ce50"
+    },
+    "inventory_reservations": {
+      "rows": 10,
+      "sha256": "1cfeed031b5c32d0e2bf07523624117a42ee4dbed5e280e7acc1340d01a3259e"
+    },
+    "inventory_transactions": {
+      "rows": 572,
+      "sha256": "65898cb88fa4633807a81bba85ae093584943ffd7b122f7e92363215c1bcc34f"
+    },
+    "items": {
+      "rows": 36,
+      "sha256": "f2e1ad3441b889eeda73cf0c7b2343d04d54c29ebebd4e5e1dc4e1c0642c45a3"
+    },
+    "logistics_execution_events": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logistics_fleet_holds": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "logistics_reconciliation_records": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "operational_evidence": {
+      "rows": 2124,
+      "sha256": "af6ebdef7a413e8b76ed45040992fb745517e937c7e7548e8928f5565a024fdd"
+    },
+    "outlets": {
+      "rows": 13,
+      "sha256": "bd995d64538dd0c7e533781db549af8059c150be51fdec02bc1cf0f91318eaab"
+    },
+    "plan_decisions": {
+      "rows": 1,
+      "sha256": "4ccf8e3a1ece45fb8bb7bc15b2f154eeb870fd51d92e2c5f905d70ae218d79e6"
+    },
+    "planning_parameters": {
+      "rows": 8,
+      "sha256": "37486cc83f861ab482117488ab042def36bf986282e3577ec80dd96e712a601e"
+    },
+    "planning_run_demands": {
+      "rows": 92,
+      "sha256": "5ec1bfac5df8d5a996b11501010223a3bb5e881364f59eacc8346c6e8cad87d0"
+    },
+    "planning_runs": {
+      "rows": 16,
+      "sha256": "6c7a59e0e9682c5ddc7ec155713b2a217a90790c482940d8c58c4ce01b82f292"
+    },
+    "provider_availability": {
+      "rows": 142,
+      "sha256": "faa343df2c85b05df5d8ee6034bea1be1bf3284617ebce5d84f5153940623208"
+    },
+    "provider_supplier_coverage": {
+      "rows": 10,
+      "sha256": "1d9934990006275c0bdc59b7337b32a98e45deb25a049d1930d5639e0a53c7b7"
+    },
+    "provider_vehicle_offers": {
+      "rows": 7,
+      "sha256": "31dc54f0eda95e414d8ec74c531251fad6a1618ac60a2d6baaa623569ecc018f"
+    },
+    "receiving_slots": {
+      "rows": 33,
+      "sha256": "c1ec82fdae0019d3d4fe400f502c5556e7fd49fa190ca78ff81c127b6c5978ce"
+    },
+    "receiving_windows": {
+      "rows": 142,
+      "sha256": "1c19909e16beb6c0666f910d19f899e6c214223b82be28f30399d397934300d3"
+    },
+    "roles": {
+      "rows": 4,
+      "sha256": "76b1dc6c4ac6057d63e1674f6f74d2f6ece451c0e6b260e8fa8cc6b8ede40181"
+    },
+    "rule_sets": {
+      "rows": 2,
+      "sha256": "e942ae5cd93b48bb3f609dbd920743718e70df085aceea8e8475977c600ec044"
+    },
+    "supplier_confirmations": {
+      "rows": 31,
+      "sha256": "630d69b0bd678398fd503393c3f73938996280ed62d0278b027236b8cfbd77df"
+    },
+    "supplier_item_promises": {
+      "rows": 51,
+      "sha256": "c8c0e2e99ff5f0dcfd28fe0f547f4c31e02fc8c2c6b99647ac3e34552088d9ae"
+    },
+    "supplier_items": {
+      "rows": 281,
+      "sha256": "19b3a8ff6f7d44f10f5863af2412fc54c72ed0ec381282737ea6c3523844759d"
+    },
+    "supplier_requests": {
+      "rows": 30,
+      "sha256": "7cc04948c89f967c125d62cf75bdf62ac856c981eb8b07ce10c4b5283240a7d0"
+    },
+    "suppliers": {
+      "rows": 10,
+      "sha256": "6c9fb7a90f2700a944a40f1db5fc30c948c9c84605573a1bd3598f9295139e1b"
+    },
+    "transport_handover_responses": {
+      "rows": 1,
+      "sha256": "efb3a5ae5bb29b2ff087952fa741599db58f2c72e95730a8516605434e2acc92"
+    },
+    "transport_handovers": {
+      "rows": 1,
+      "sha256": "8dcb6d48eeb9ef65a5c52363ced16bb46cf301a708b7e80e346f055b52b95493"
+    },
+    "transport_providers": {
+      "rows": 1,
+      "sha256": "d4912c60436bc8f424ca5f3ef221377a781277aec20277caded8ae7aba0ab3b5"
+    },
+    "user_outlet_access": {
+      "rows": 33,
+      "sha256": "6921066b256f312ac3df6fd85a0be1ca8c5a154bd0bed22d3b1eac8d289bee38"
+    },
+    "user_roles": {
+      "rows": 17,
+      "sha256": "8caa2280f86b55c825281eb1266eb477a9752755c0d462e4b9924f7ebf40aa8a"
+    },
+    "users": {
+      "rows": 17,
+      "sha256": "2a1260cb7cc941981afb83f4eabee686802ff5e3feb7164d6633f747b82e5e60"
+    },
+    "users_groups": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "users_user_permissions": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "vehicle_cargo_compatibility": {
+      "rows": 49,
+      "sha256": "488073c6094e522671f878b01fad64bdafd5540d68350c5dbedb0df81667f762"
+    },
+    "vehicle_types": {
+      "rows": 8,
+      "sha256": "65020d1a91c5a7338305d46b05e59061616eb868dcc1d80f39572a81b6b9a753"
+    },
+    "wave_demands": {
+      "rows": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  },
+  "table_count": 67,
+  "total_rows": 5462,
+  "demo_accounts": 17,
+  "sanitation": [
+    "unusable passwords",
+    "removed sessions and tokens",
+    "cleared audit IPs",
+    "pseudonymized personal display names",
+    "redacted one unverified Outlet address, duplicate display label and matching audit values on release clone"
+  ],
+  "dump_bytes": 744747,
+  "dump_sha256": "1b9a8f690e890bfacbc2e42fabe18e482b1c48843a75653133989d0489580fa6",
+  "privacy_findings": {},
+  "status": "LOCAL_RELEASE_CANDIDATE_PENDING_REVIEW",
+  "datasets": {
+    "CoLogi_Dataset_v7.xlsx": {
+      "sha256": "4b4dacf6389625c164e5a9490340994219645b5c310ad65e769ca2c9b68e01d0",
+      "bytes": 417758,
+      "historical_source_sha256": "fa10e68aa1e39ab6ac4a6fc53d6b0711c76cb8481f035455b254e4193ca4b799",
+      "metadata_redaction_parts": [
+        "docProps/core.xml",
+        "xl/comments/comment1.xml"
+      ]
+    },
+    "CoLogi_Dataset_V7_Supplement_v1.xlsx": {
+      "sha256": "5ce02e1a580ca0cb8d1df8340730d80b3f2666a3ff6bd73135eea938a3bbc196",
+      "bytes": 147785
+    }
+  }
+}

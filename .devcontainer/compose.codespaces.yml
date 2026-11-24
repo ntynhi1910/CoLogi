@@ -1,0 +1,7 @@
+services:
+  backend:
+    # Fixed host validation through the forwarded URL. The frontend still uses same-origin /api.
+    environment:
+      DJANGO_ALLOWED_HOSTS: "localhost,127.0.0.1,backend,${CODESPACE_NAME:?Codespace name required}-15173.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN:?Forwarding domain required},${CODESPACE_NAME}-18000.${GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN}"
+    ports:
+      - '127.0.0.1:18000:8000'

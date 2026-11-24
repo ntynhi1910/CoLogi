@@ -1,0 +1,208 @@
+.f3-page { padding-block-start: 14px; }
+
+.f3-header {
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.f3-header .dssr-back-link { margin-bottom: 14px; }
+
+.f3-header-actions,
+.f3-option-actions,
+.f3-plan-picker,
+.f3-tabs {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.f3-header-actions { justify-content: flex-end; }
+.f3-all-link { text-decoration: none; }
+
+.f3-tabs {
+  padding: 5px;
+  margin-bottom: 16px;
+  background: #eef5ef;
+  border: 1px solid #dae7dc;
+  border-radius: 12px;
+}
+
+.f3-tabs button,
+.f3-history button {
+  color: #173e2a;
+  font: inherit;
+  cursor: pointer;
+}
+
+.f3-tabs button {
+  padding: 10px 15px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  font-weight: 650;
+}
+
+.f3-tabs button[aria-selected="true"] {
+  border-color: #d7e6da;
+  background: #fff;
+  box-shadow: 0 1px 2px #163e2b12;
+}
+
+.f3-overview h2,
+.f3-work-panel h2,
+.f3-history h2,
+.f3-saved h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+}
+
+.f3-table-wrap { overflow-x: auto; }
+
+.f3-table {
+  width: 100%;
+  min-width: 650px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: .91rem;
+}
+
+.f3-table th,
+.f3-table td {
+  padding: 8px 11px;
+  border-bottom: 1px solid #e1ebe3;
+  vertical-align: middle;
+}
+
+.f3-table thead th { background: #edf5ee; }
+.f3-table tbody th { width: 27%; }
+.f3-table tbody tr:nth-child(even) { background: #f8fbf8; }
+.f3-table td { width: 24.33%; }
+.f3-option-actions button { min-height: 30px; padding: 4px 7px; font-size: .81rem; }
+
+.f3-chip {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-weight: 650;
+  font-size: .83rem;
+  background: #ecf1ec;
+  color: #234833;
+}
+
+.f3-chip--eligible { background: #dff2e4; color: #165b37; }
+.f3-chip--unverified { background: #fff1d6; color: #744b12; }
+.f3-chip--not_eligible { background: #fbe4df; color: #8c3224; }
+.f3-synthetic { display: block; margin-top: 3px; color: #6c511c; }
+
+.f3-plan-picker {
+  margin-bottom: 14px;
+  font-weight: 650;
+}
+
+.f3-plan-picker select {
+  min-width: min(245px, 100%);
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #c9dace;
+  border-radius: 8px;
+  font: inherit;
+  color: #173e2a;
+  background: #fff;
+}
+
+.f3-work-panel,
+.f3-saved {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.f3-diagnostics,
+.f3-list {
+  padding-inline-start: 24px;
+}
+
+.f3-list li { margin-block: 4px; }
+
+.f3-wave {
+  padding: 16px;
+  margin-top: 12px;
+  background: #f7faf7;
+  border: 1px solid #dbe8de;
+  border-radius: 12px;
+}
+
+.f3-wave-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 8px;
+}
+
+.f3-wave h3,
+.f3-wave-heading p { margin: 0 0 4px; }
+
+.f3-wave-facts {
+  grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+  margin: 12px 0 8px;
+}
+
+.f3-load-progress {
+  display: block;
+  width: 100%;
+  height: 12px;
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  background: #e4ebe5;
+  overflow: hidden;
+}
+
+.f3-load-progress::-webkit-progress-bar { background: #e4ebe5; }
+.f3-load-progress::-webkit-progress-value { background: #237841; border-radius: 999px; }
+.f3-load-progress::-moz-progress-bar { background: #237841; border-radius: 999px; }
+
+.f3-wave h4 { margin: 12px 0 0; }
+.f3-wave-evidence { margin: 8px 0 12px; }
+.f3-rule-list .f3-chip { margin-left: 6px; }
+.f3-parameters dd { margin-left: 0; margin-bottom: 8px; }
+
+.f3-history-grid {
+  display: grid;
+  grid-template-columns: minmax(225px, 1fr) minmax(0, 1.5fr);
+  align-items: start;
+  gap: 14px;
+}
+
+.f3-history ul {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.f3-history button {
+  display: grid;
+  justify-items: start;
+  gap: 3px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #dce8de;
+  border-radius: 9px;
+  background: #fff;
+  text-align: left;
+}
+
+.f3-history button[aria-pressed="true"] {
+  border-color: #3f7a52;
+  background: #edf7ef;
+}
+
+.f3-history button > span:not(.f3-chip) { font-size: .85rem; }
+.f3-page button:disabled { opacity: .65; cursor: not-allowed; }
+
+@media (max-width: 800px) {
+  .f3-history-grid { grid-template-columns: 1fr; }
+  .f3-header { align-items: flex-start; }
+}

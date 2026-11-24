@@ -1,0 +1,43 @@
+.account-columns { min-width: 0; }
+.account-columns.manager-columns { grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr); }
+.account-filters { margin-block: 0.3rem; }
+.account-filters label:first-child { flex: 1 1 16rem; }
+.account-table th, .account-table td { vertical-align: middle; }
+.account-table td { overflow-wrap: anywhere; }
+.account-table th[scope='row'] small { margin-top: 0.35rem; overflow-wrap: anywhere; }
+.account-table .manager-badge, .account-table th:nth-child(5) { white-space: nowrap; }
+.account-row-actions { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.account-row-actions button, .account-danger {
+  border: 1px solid #d9e6de; border-radius: 0.5rem; padding: 0.4rem 0.55rem;
+  background: #fff; color: #175336; font: inherit; font-weight: 600; cursor: pointer;
+}
+.account-danger, .account-row-actions .account-danger { color: #8f3224; border-color: #ecc3bb; background: #fff4f1; }
+.account-notice { padding: 0.7rem 0.9rem; border-radius: 0.55rem; background: #e7f4e9; color: #175336; }
+.account-dialog fieldset { margin: 0; min-width: 0; padding: 0.45rem 0.7rem 0.6rem; border: 1px solid #d8e5db; border-radius: 0.55rem; }
+.account-dialog legend { padding-inline: 0.25rem; font-weight: 700; }
+.account-dialog .manager-account-form input[type='checkbox'], .account-dialog .manager-account-form input[type='radio'] {
+  accent-color: #145a35; flex: 0 0 1rem; width: 1rem; height: 1rem;
+  align-self: start; margin: 0.2rem 0 0; padding: 0;
+}
+.account-dialog .manager-check { padding-block: 0.25rem; }
+.account-dialog input[readonly] { background: #f1f5f2; }
+.account-dialog textarea {
+  min-height: 5rem; width: 100%; resize: vertical; font: inherit; padding: 0.55rem;
+  border: 1px solid #c9d9ce; border-radius: 0.5rem; color: inherit; background: #fff;
+}
+.account-scope-options { max-height: 10rem; overflow-y: auto; padding-inline-end: 0.25rem; }
+.account-dialog .delivery-actions { margin-top: 0.5rem; }
+.account-details-panel dd { overflow-wrap: anywhere; }
+@media (max-width: 900px) {
+  .account-columns.manager-columns { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 600px) {
+  .account-table { min-width: 0; }
+  .account-table, .account-table tbody { display: block; }
+  .account-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .account-table tbody tr { display: grid; grid-template-columns: minmax(0, 1fr); border-bottom: 1px solid #e6ede7; padding: 0.4rem 0; }
+  .account-table th, .account-table td { display: block; padding: 0.25rem 0.3rem; border-bottom: none; }
+  .account-table td::before { content: attr(data-label) " · "; color: #536d5f; font-size: 0.84rem; }
+  .account-table td:last-child:has(.account-row-actions)::before { content: none; }
+  .account-filters label { width: 100%; }
+}

@@ -1,0 +1,13 @@
+/.env
+/.local/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+node_modules/
+dist/
+*.tsbuildinfo
+*.log
+/backups/
+*.dump
+!/database/cologi.dump
