@@ -147,62 +147,79 @@ export const AccountWorkspacePage: React.FC = () => {
     setTimeout(() => setToastMsg(null), 4000);
   };
 
+  /* API call only, no state: safe to start from an effect. */
+  const loadAccounts = useCallback(() => apiRequest<{
+    users?: Record<string, unknown>[];
+    units?: {
+      outlets?: Record<string, unknown>[];
+      suppliers?: Record<string, unknown>[];
+      providers?: Record<string, unknown>[];
+    };
+    writes_enabled?: boolean;
+  }>('/accounts/workspace/users/'), []);
+
+  const applyAccounts = useCallback((data: Awaited<ReturnType<typeof loadAccounts>>) => {
+    const rawList = Array.isArray(data)
+      ? data
+      : Array.isArray(data.users)
+      ? data.users
+      : [];
+
+    const normalized = rawList.map((item, idx) => normalizeUserRecord(item, idx));
+    setAccounts(normalized);
+
+    if (data && typeof data === 'object' && data.units) {
+      setUnits({
+        outlets: (data.units.outlets || []).map((o) => ({
+          id: Number(o.id),
+          code: String(o.outlet_code || ''),
+          name: String(o.outlet_name || ''),
+        })),
+        suppliers: (data.units.suppliers || []).map((s) => ({
+          id: Number(s.id),
+          code: String(s.supplier_code || ''),
+          name: String(s.supplier_name || ''),
+        })),
+        providers: (data.units.providers || []).map((p) => ({
+          id: Number(p.id),
+          code: String(p.provider_code || ''),
+          name: String(p.provider_name || ''),
+        })),
+      });
+    }
+
+    if (typeof data?.writes_enabled === 'boolean') {
+      setWritesEnabled(data.writes_enabled);
+    }
+  }, []);
+
+  const failAccounts = useCallback((err: unknown) => {
+    setApiError(err instanceof Error ? err.message : 'Lỗi tải danh sách tài khoản');
+  }, []);
+
+  /* User-triggered reload: show the loading state, then fetch. */
   const fetchAccountsFromBackend = useCallback(async () => {
     setLoading(true);
     setApiError(null);
     try {
-      const data = await apiRequest<{
-        users?: Record<string, unknown>[];
-        units?: {
-          outlets?: Record<string, unknown>[];
-          suppliers?: Record<string, unknown>[];
-          providers?: Record<string, unknown>[];
-        };
-        writes_enabled?: boolean;
-      }>('/accounts/workspace/users/');
-
-      const rawList = Array.isArray(data)
-        ? data
-        : Array.isArray(data.users)
-        ? data.users
-        : [];
-
-      const normalized = rawList.map((item, idx) => normalizeUserRecord(item, idx));
-      setAccounts(normalized);
-
-      if (data && typeof data === 'object' && data.units) {
-        setUnits({
-          outlets: (data.units.outlets || []).map((o) => ({
-            id: Number(o.id),
-            code: String(o.outlet_code || ''),
-            name: String(o.outlet_name || ''),
-          })),
-          suppliers: (data.units.suppliers || []).map((s) => ({
-            id: Number(s.id),
-            code: String(s.supplier_code || ''),
-            name: String(s.supplier_name || ''),
-          })),
-          providers: (data.units.providers || []).map((p) => ({
-            id: Number(p.id),
-            code: String(p.provider_code || ''),
-            name: String(p.provider_name || ''),
-          })),
-        });
-      }
-
-      if (typeof data?.writes_enabled === 'boolean') {
-        setWritesEnabled(data.writes_enabled);
-      }
-    } catch (err: unknown) {
-      setApiError(err instanceof Error ? err.message : 'Lỗi tải danh sách tài khoản');
+      applyAccounts(await loadAccounts());
+    } catch (err) {
+      failAccounts(err);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [loadAccounts, applyAccounts, failAccounts]);
 
   useEffect(() => {
-    fetchAccountsFromBackend();
-  }, [fetchAccountsFromBackend]);
+    let active = true;
+    loadAccounts()
+      .then(
+        (data) => { if (active) applyAccounts(data); },
+        (err: unknown) => { if (active) failAccounts(err); },
+      )
+      .finally(() => { if (active) setLoading(false); });
+    return () => { active = false; };
+  }, [loadAccounts, applyAccounts, failAccounts]);
 
   const selectedAccount = useMemo(
     () => (editingId !== null ? accounts.find((a) => a.id === editingId) || null : null),

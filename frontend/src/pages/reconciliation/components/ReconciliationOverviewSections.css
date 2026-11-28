@@ -109,8 +109,10 @@
   color: #fff;
 }
 
-.rco-tabs button:hover:not([aria-pressed="true"]) {
-  background: #f2f8f4;
+@media (hover: hover) and (pointer: fine) {
+  .rco-tabs button:hover:not([aria-pressed="true"]) {
+    background: #f2f8f4;
+  }
 }
 
 /* Buttons */
@@ -134,8 +136,10 @@
   color: #17623e;
 }
 
-.rco-button:hover {
-  filter: brightness(.96);
+@media (hover: hover) and (pointer: fine) {
+  .rco-button:hover {
+    filter: brightness(.96);
+  }
 }
 
 /* FinalPlan table */
@@ -185,8 +189,10 @@
   color: #294d37;
 }
 
-.rco-table tbody tr:hover {
-  background: #f9fcfa;
+@media (hover: hover) and (pointer: fine) {
+  .rco-table tbody tr:hover {
+    background: #f9fcfa;
+  }
 }
 
 .rco-table td strong {
@@ -209,8 +215,10 @@
   font-weight: 650;
 }
 
-.rco-table a:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .rco-table a:hover {
+    text-decoration: underline;
+  }
 }
 
 .rco-detail-link {

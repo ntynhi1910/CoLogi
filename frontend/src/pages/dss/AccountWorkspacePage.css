@@ -59,7 +59,7 @@
   font-weight: 600;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: all 0.15s ease;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
 }
 
 .aw-btn-primary {
@@ -67,8 +67,10 @@
   color: #ffffff;
 }
 
-.aw-btn-primary:hover {
-  background-color: #13442a;
+@media (hover: hover) and (pointer: fine) {
+  .aw-btn-primary:hover {
+    background-color: #13442a;
+  }
 }
 
 .aw-btn-outline {
@@ -77,8 +79,10 @@
   color: #172b20;
 }
 
-.aw-btn-outline:hover {
-  background-color: #eef3f0;
+@media (hover: hover) and (pointer: fine) {
+  .aw-btn-outline:hover {
+    background-color: #eef3f0;
+  }
 }
 
 .aw-btn-danger {
@@ -92,8 +96,10 @@
   color: #dc2626;
 }
 
-.aw-btn-danger-outline:hover {
-  background-color: #fef2f2;
+@media (hover: hover) and (pointer: fine) {
+  .aw-btn-danger-outline:hover {
+    background-color: #fef2f2;
+  }
 }
 
 /* KPI Grid */
@@ -256,8 +262,10 @@
   cursor: pointer;
 }
 
-.aw-table tbody tr:hover {
-  background: #f7faf8;
+@media (hover: hover) and (pointer: fine) {
+  .aw-table tbody tr:hover {
+    background: #f7faf8;
+  }
 }
 
 .aw-row-selected {

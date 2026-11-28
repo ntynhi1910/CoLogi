@@ -762,8 +762,10 @@
   cursor: pointer;
 }
 
-.f5-cost-detail-button:hover {
-  background: #eef6f0;
+@media (hover: hover) and (pointer: fine) {
+  .f5-cost-detail-button:hover {
+    background: #eef6f0;
+  }
 }
 
 .f5-cost-detail-button[aria-expanded="true"] {
@@ -1411,9 +1413,11 @@
   transition: background 0.2s ease;
 }
 
-.f5-page .f5-decision-button:hover {
-  background: #104d2d;
-  color: #ffffff;
+@media (hover: hover) and (pointer: fine) {
+  .f5-page .f5-decision-button:hover {
+    background: #104d2d;
+    color: #ffffff;
+  }
 }
 
 .f5-page .f5-decision-button:focus-visible {

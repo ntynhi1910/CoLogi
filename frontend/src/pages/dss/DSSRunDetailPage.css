@@ -1168,10 +1168,12 @@ details.dssr-panel > summary:focus-visible {
     box-shadow 0.2s ease;
 }
 
-.dssr-close-unplanned-button:hover {
-  transform: translateY(-2px);
-  background: #fcecec;
-  box-shadow: 0 6px 18px #a3454515;
+@media (hover: hover) and (pointer: fine) {
+  .dssr-close-unplanned-button:hover {
+    transform: translateY(-2px);
+    background: #fcecec;
+    box-shadow: 0 6px 18px #a3454515;
+  }
 }
 
 /* Nền phía sau modal */
@@ -1242,8 +1244,10 @@ details.dssr-panel > summary:focus-visible {
   transition: background 0.2s ease;
 }
 
-.dssr-modal-close:hover {
-  background: #e4ede6;
+@media (hover: hover) and (pointer: fine) {
+  .dssr-modal-close:hover {
+    background: #e4ede6;
+  }
 }
 
 /* Form bên trong modal */
@@ -1314,7 +1318,9 @@ details.dssr-panel > summary:focus-visible {
     transition: none;
   }
 
-  .dssr-close-unplanned-button:hover {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .dssr-close-unplanned-button:hover {
+      transform: none;
+    }
   }
 }

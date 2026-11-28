@@ -501,10 +501,16 @@
 
 /* Hover và trạng thái đang chọn */
 
-.f2-network-node:hover,
 .f2-network-node.is-selected {
   border-color: #23754a;
   box-shadow: 0 0 0 2px #23754a25;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .f2-network-node:hover {
+    border-color: #23754a;
+    box-shadow: 0 0 0 2px #23754a25;
+  }
 }
 
 .f2-network-node.is-selected:not(.is-hub) {
@@ -605,8 +611,10 @@
   line-height: 1;
 }
 
-.f2-network-detail header button:hover {
-  background: #e6eee7;
+@media (hover: hover) and (pointer: fine) {
+  .f2-network-detail header button:hover {
+    background: #e6eee7;
+  }
 }
 
 /* Thông tin địa chỉ, khối lượng, nhu cầu */
@@ -774,8 +782,10 @@
   transition: background 0.18s ease;
 }
 
-.f2-saved-table tbody tr:hover {
-  background: #f7faf7;
+@media (hover: hover) and (pointer: fine) {
+  .f2-saved-table tbody tr:hover {
+    background: #f7faf7;
+  }
 }
 
 /* Độ rộng các cột */
@@ -904,11 +914,13 @@
     border-color 0.18s ease;
 }
 
-.f2-saved-f3-link:hover {
-  background: #e6f2e9;
-  border-color: #23754a;
-  color: #183b29;
-  text-decoration: none;
+@media (hover: hover) and (pointer: fine) {
+  .f2-saved-f3-link:hover {
+    background: #e6f2e9;
+    border-color: #23754a;
+    color: #183b29;
+    text-decoration: none;
+  }
 }
 
 .f2-saved-f3-link:focus-visible {
@@ -1097,8 +1109,10 @@
   transition: background 0.18s ease;
 }
 
-.f2-evidence-main-row:hover {
-  background: #f7faf7;
+@media (hover: hover) and (pointer: fine) {
+  .f2-evidence-main-row:hover {
+    background: #f7faf7;
+  }
 }
 
 .f2-evidence-main-row.is-expanded {
@@ -1134,9 +1148,11 @@
   overflow-wrap: anywhere;
 }
 
-.f2-evidence-demand-code:hover {
-  color: #174e32;
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .f2-evidence-demand-code:hover {
+    color: #174e32;
+    text-decoration: underline;
+  }
 }
 
 /* Nút mở rộng */
@@ -1164,10 +1180,16 @@
   height: 18px;
 }
 
-.f2-evidence-toggle:hover,
 .is-expanded .f2-evidence-toggle {
   background: #e0eee3;
   border-color: #c6dacf;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .f2-evidence-toggle:hover {
+    background: #e0eee3;
+    border-color: #c6dacf;
+  }
 }
 
 .f2-evidence-demand-code:focus-visible,

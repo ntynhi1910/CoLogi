@@ -108,28 +108,44 @@ export default function VehicleOffersPage() {
   const [editingOffer, setEditingOffer] = useState<ProviderVehicleOffer | null>(null)
   const [form, setForm] = useState<OfferFormState>(emptyForm)
 
+  /* API call only, no state: safe to start from an effect. */
+  const fetchOffers = useCallback(() => Promise.all([
+    listProviderVehicleOffers(),
+    listProviderVehicleTypes(),
+  ]), [])
+
+  const applyOffers = useCallback(([offerData, vehicleTypeData]: Awaited<ReturnType<typeof fetchOffers>>) => {
+    setOffers(offerData)
+    setVehicleTypes(vehicleTypeData)
+  }, [])
+
+  const failOffers = useCallback((err: unknown) => {
+    setError(getErrorMessage(err))
+  }, [])
+
+  /* User-triggered reload: show the loading state, then fetch. */
   const loadOffers = useCallback(async () => {
     setIsLoading(true)
     setError('')
-
     try {
-      const [offerData, vehicleTypeData] = await Promise.all([
-        listProviderVehicleOffers(),
-        listProviderVehicleTypes(),
-      ])
-
-      setOffers(offerData)
-      setVehicleTypes(vehicleTypeData)
-    } catch (loadError) {
-      setError(getErrorMessage(loadError))
+      applyOffers(await fetchOffers())
+    } catch (err) {
+      failOffers(err)
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [fetchOffers, applyOffers, failOffers])
 
   useEffect(() => {
-    void loadOffers()
-  }, [loadOffers])
+    let active = true
+    fetchOffers()
+      .then(
+        (data) => { if (active) applyOffers(data) },
+        (err: unknown) => { if (active) failOffers(err) },
+      )
+      .finally(() => { if (active) setIsLoading(false) })
+    return () => { active = false }
+  }, [fetchOffers, applyOffers, failOffers])
 
   const vehicleTypeById = useMemo(
     () => new Map(vehicleTypes.map((item) => [item.id, item])),

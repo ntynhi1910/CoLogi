@@ -119,10 +119,12 @@
   flex-shrink: 0;
 }
 
-.supplier-reconciliation
-.sr-button:hover:not(:disabled) {
-  background: #edf5ef;
-  border-color: #a8c9b2;
+@media (hover: hover) and (pointer: fine) {
+  .supplier-reconciliation
+  .sr-button:hover:not(:disabled) {
+    background: #edf5ef;
+    border-color: #a8c9b2;
+  }
 }
 
 .supplier-reconciliation .sr-button-primary {
@@ -131,10 +133,12 @@
   border-color: var(--sr-primary);
 }
 
-.supplier-reconciliation
-.sr-button-primary:hover:not(:disabled) {
-  background: #195b38;
-  border-color: #195b38;
+@media (hover: hover) and (pointer: fine) {
+  .supplier-reconciliation
+  .sr-button-primary:hover:not(:disabled) {
+    background: #195b38;
+    border-color: #195b38;
+  }
 }
 
 .supplier-reconciliation .sr-icon-button {
@@ -187,8 +191,10 @@
     border-color .18s;
 }
 
-.supplier-reconciliation .sr-tab:hover {
-  color: var(--sr-primary);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-reconciliation .sr-tab:hover {
+    color: var(--sr-primary);
+  }
 }
 
 .supplier-reconciliation
@@ -434,10 +440,12 @@
     transform .18s;
 }
 
-.supplier-reconciliation .sr-kpi-card:hover {
-  border-color: #a8c9b2;
-  box-shadow: 0 5px 18px rgba(24, 59, 41, .06);
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-reconciliation .sr-kpi-card:hover {
+    border-color: #a8c9b2;
+    box-shadow: 0 5px 18px rgba(24, 59, 41, .06);
+    transform: translateY(-2px);
+  }
 }
 
 .supplier-reconciliation .sr-kpi-icon {
@@ -943,9 +951,11 @@
   background: #fafcfb;
 }
 
-.supplier-reconciliation
-.sr-table tbody tr:hover {
-  background: #f0f6f2;
+@media (hover: hover) and (pointer: fine) {
+  .supplier-reconciliation
+  .sr-table tbody tr:hover {
+    background: #f0f6f2;
+  }
 }
 
 .supplier-reconciliation .sr-plan-name {
@@ -975,8 +985,10 @@
   white-space: nowrap;
 }
 
-.supplier-reconciliation .sr-plan-detail:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .supplier-reconciliation .sr-plan-detail:hover {
+    text-decoration: underline;
+  }
 }
 
 .supplier-reconciliation .sr-table-footer {
@@ -1117,9 +1129,11 @@
   transition: transform .18s ease;
 }
 
-.supplier-reconciliation
-.sr-notice-row:hover .sr-notice-arrow {
-  transform: translateX(3px);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-reconciliation
+  .sr-notice-row:hover .sr-notice-arrow {
+    transform: translateX(3px);
+  }
 }
 
 /* EMPTY STATE */
@@ -1197,9 +1211,11 @@
     transition: none;
   }
 
-  .supplier-reconciliation
-  .sr-notice-row:hover .sr-notice-arrow {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .supplier-reconciliation
+    .sr-notice-row:hover .sr-notice-arrow {
+      transform: none;
+    }
   }
 }
 /* ==========================================
@@ -1519,8 +1535,10 @@
     transition: none;
   }
 
-  .supplier-reconciliation .sr-kpi-card:hover {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .supplier-reconciliation .sr-kpi-card:hover {
+      transform: none;
+    }
   }
 }
 
@@ -1636,14 +1654,18 @@
   transition: transform .18s ease;
 }
 
-.supplier-reconciliation .sr-execution-link:hover {
-  text-decoration: none;
-  color: #183b29;
+@media (hover: hover) and (pointer: fine) {
+  .supplier-reconciliation .sr-execution-link:hover {
+    text-decoration: none;
+    color: #183b29;
+  }
 }
 
-.supplier-reconciliation
-.sr-execution-link:hover svg {
-  transform: translateX(4px);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-reconciliation
+  .sr-execution-link:hover svg {
+    transform: translateX(4px);
+  }
 }
 
 /* STATUS GRID */
@@ -1675,12 +1697,14 @@
     box-shadow .18s ease;
 }
 
-.supplier-reconciliation
-.sr-execution-card:hover {
-  border-color: var(--execution-color);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-reconciliation
+  .sr-execution-card:hover {
+    border-color: var(--execution-color);
 
-  box-shadow:
-    0 4px 12px rgba(24, 59, 41, .05);
+    box-shadow:
+      0 4px 12px rgba(24, 59, 41, .05);
+  }
 }
 
 /* PENDING */

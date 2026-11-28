@@ -265,7 +265,9 @@
 .provider-trips-index .execution-plan-facts { background:#f5f8f5; border-radius:8px; padding:.75rem; }
 .provider-trips-index .pt-card-footer { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:1rem; align-items:center; margin-top:.75rem; }
 .provider-trips-index .pt-detail-link { background:#176740; color:#fff; border-radius:8px; padding:.65rem .9rem; font-weight:650; font-size:.85rem; text-decoration:none; text-align:center; }
-.provider-trips-index .pt-detail-link:hover { background:#114c30; }
+@media (hover: hover) and (pointer: fine) {
+  .provider-trips-index .pt-detail-link:hover { background:#114c30; }
+}
 .provider-trips-index :is(button,a,input,select):focus-visible { outline:2px solid #176740; outline-offset:3px; }
 @media(max-width:1100px) { .provider-trips-index .pt-status-grid { grid-template-columns:repeat(4,minmax(0,1fr)); } }
 @media(max-width:760px) { .provider-trips-index .pt-kpis, .provider-trips-index .pt-status-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } .provider-trips-index .pt-card-footer { grid-template-columns:1fr; gap:.5rem; } }
@@ -294,9 +296,11 @@
   transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
 }
 
-.provider-trips-index .execution-filters select:hover:not(:disabled) {
-  border-color: #78a98b;
-  background-color: #f8fbf8;
+@media (hover: hover) and (pointer: fine) {
+  .provider-trips-index .execution-filters select:hover:not(:disabled) {
+    border-color: #78a98b;
+    background-color: #f8fbf8;
+  }
 }
 
 .provider-trips-index .execution-filters select:focus {
@@ -372,8 +376,10 @@
     font-weight: 500;
   }
 
-  .provider-trips-index .execution-filters select option:hover {
-    background-color: #f1f7f2;
+  @media (hover: hover) and (pointer: fine) {
+    .provider-trips-index .execution-filters select option:hover {
+      background-color: #f1f7f2;
+    }
   }
 
   .provider-trips-index .execution-filters select option:checked {
@@ -413,7 +419,9 @@
   justify-self: start; color: #176740; font-size: .9rem; font-weight: 650; text-decoration: none;
   padding: .35rem 0; margin-bottom: .25rem;
 }
-.provider-trip-detail .manager-heading > a:hover { text-decoration: underline; }
+@media (hover: hover) and (pointer: fine) {
+  .provider-trip-detail .manager-heading > a:hover { text-decoration: underline; }
+}
 .provider-trip-detail .pt-trip-subtitle { color: #53685b; font-size: .9rem; }
 .provider-trip-detail .pt-trip-content { background: transparent; border: 0; box-shadow: none; padding: 0; gap: 1rem; }
 .provider-trip-detail .pt-trip-overview { padding: 1.25rem; border: 1px solid #dce8df; background: #fff; border-radius: 14px; }
@@ -526,9 +534,11 @@
   transition: border-color .2s ease, box-shadow .2s ease, background-color .2s ease;
 }
 
-.provider-trip-detail .execution-form select:hover:not(:disabled) {
-  border-color: #78a98b;
-  background-color: #f8fbf8;
+@media (hover: hover) and (pointer: fine) {
+  .provider-trip-detail .execution-form select:hover:not(:disabled) {
+    border-color: #78a98b;
+    background-color: #f8fbf8;
+  }
 }
 
 .provider-trip-detail .execution-form select:focus {
@@ -604,8 +614,10 @@
     font-weight: 500;
   }
 
-  .provider-trip-detail .execution-form select option:hover {
-    background-color: #f1f7f2;
+  @media (hover: hover) and (pointer: fine) {
+    .provider-trip-detail .execution-form select option:hover {
+      background-color: #f1f7f2;
+    }
   }
 
   .provider-trip-detail .execution-form select option:checked {
@@ -792,10 +804,12 @@
   transition: background-color .18s, border-color .18s;
 }
 
-.pr-drawer-execution
-.pr-execution-action:hover:not(:disabled) {
-  border-color: #9cbea6;
-  background: #f5f9f6;
+@media (hover: hover) and (pointer: fine) {
+  .pr-drawer-execution
+  .pr-execution-action:hover:not(:disabled) {
+    border-color: #9cbea6;
+    background: #f5f9f6;
+  }
 }
 
 .pr-drawer-execution
@@ -1066,9 +1080,11 @@
   color: #ffffff;
 }
 
-.pr-drawer-execution
-.pr-execution-form > .dssr-primary-button:hover:not(:disabled) {
-  background: #195b38;
+@media (hover: hover) and (pointer: fine) {
+  .pr-drawer-execution
+  .pr-execution-form > .dssr-primary-button:hover:not(:disabled) {
+    background: #195b38;
+  }
 }
 
 .pr-drawer-execution
@@ -1514,7 +1530,9 @@
   font: inherit;
   cursor: pointer;
 }
-.execution-mode-switch-options button:hover { background: #f4f8f5; border-color: #78a98b; }
+@media (hover: hover) and (pointer: fine) {
+  .execution-mode-switch-options button:hover { background: #f4f8f5; border-color: #78a98b; }
+}
 .execution-mode-switch-options button[aria-pressed="true"] {
   background: #e7f2ea;
   border-color: #176740;
@@ -1555,7 +1573,9 @@
 .provider-trip-detail .pt-route-overview li:not(:last-child)::after {content:'';position:absolute;top:1.5rem;right:-.65rem;width:.65rem;border-top:2px dashed #a7c6b2;pointer-events:none}
 .provider-trip-detail .pt-route-overview li[data-progress="done"]::after {border-color:#32865b;border-top-style:solid}
 .provider-trip-detail .pt-route-jump {display:flex;flex-direction:column;align-items:flex-start;gap:.6rem;min-width:0;width:100%;text-align:left;font:inherit;padding:.75rem;background:white;border:1px solid #dce8df;border-radius:10px;cursor:pointer;color:#155335;transition:box-shadow .15s,border-color .15s}
-.provider-trip-detail .pt-route-jump:hover {border-color:#43835d;box-shadow:0 2px 8px #163f2b15}
+@media (hover: hover) and (pointer: fine) {
+  .provider-trip-detail .pt-route-jump:hover {border-color:#43835d;box-shadow:0 2px 8px #163f2b15}
+}
 .provider-trip-detail .pt-route-dot {width:1.9rem;height:1.9rem;font-size:.85rem}
 .provider-trip-detail .pt-route-overview .pt-route-node {display:grid;gap:.25rem;width:100%;min-width:0}
 .provider-trip-detail .pt-route-node strong {font-size:1rem;overflow-wrap:anywhere}
@@ -1582,7 +1602,9 @@
 .provider-trip-detail .pt-action-grid small {font-size:.73rem;color:#53685b}
 .provider-trip-detail .pt-action-icon {display:grid;place-items:center;width:1.9rem;height:1.9rem;background:#e7f2ea;color:#176740;border-radius:7px;flex:none}
 .provider-trip-detail .pt-action-radio {width:.8rem;height:.8rem;flex:none;border:1px solid #9aada0;border-radius:50%;margin-top:.25rem}
-.provider-trip-detail .pt-action-grid button:hover:not(:disabled) {border-color:#78a98b;background:#f8fbf8}
+@media (hover: hover) and (pointer: fine) {
+  .provider-trip-detail .pt-action-grid button:hover:not(:disabled) {border-color:#78a98b;background:#f8fbf8}
+}
 .provider-trip-detail .pt-action-grid button[aria-pressed="true"] {border-color:#176740;background:#e7f2ea;box-shadow:inset 0 0 0 1px #176740}
 .provider-trip-detail .pt-action-grid button[aria-pressed="true"] .pt-action-radio {background:#176740;box-shadow:inset 0 0 0 2px #fff;border-color:#176740}
 .provider-trip-detail .pt-action-grid button[data-action="INCIDENT"] .pt-action-icon {background:#fff1df;color:#86510e}
@@ -1729,8 +1751,10 @@
 .provider-trip-detail .pt-route-overview li[data-progress="incident"] .pt-route-jump {
   border-color: #e4c38a;
 }
-.provider-trip-detail .pt-route-jump:hover {
-  border-color: var(--pt-journey-ink);
+@media (hover: hover) and (pointer: fine) {
+  .provider-trip-detail .pt-route-jump:hover {
+    border-color: var(--pt-journey-ink);
+  }
 }
 .provider-trip-detail .pt-route-jump:focus-visible {
   outline: 2px solid var(--pt-journey-ink);

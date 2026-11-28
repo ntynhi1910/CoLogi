@@ -254,8 +254,10 @@
   cursor: pointer;
 }
 
-.outlet-refresh-button:hover {
-  background: #edf5ef;
+@media (hover: hover) and (pointer: fine) {
+  .outlet-refresh-button:hover {
+    background: #edf5ef;
+  }
 }
 
 .outlet-refresh-button:disabled {
@@ -332,9 +334,14 @@
   background: #fafcfb;
 }
 
-.outlet-table-row:hover,
 .outlet-table-row[data-selected="true"] {
   background: #edf6ef;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .outlet-table-row:hover {
+    background: #edf6ef;
+  }
 }
 
 .outlet-table-code {
@@ -353,8 +360,10 @@
   cursor: pointer;
 }
 
-.outlet-name-button:hover {
-  color: #23754a;
+@media (hover: hover) and (pointer: fine) {
+  .outlet-name-button:hover {
+    color: #23754a;
+  }
 }
 
 .outlet-table-address {
@@ -562,9 +571,11 @@ dialog.outlet-drawer {
   cursor: pointer;
 }
 
-.outlet-drawer-close:hover {
-  background: #edf5ef;
-  color: #183b29;
+@media (hover: hover) and (pointer: fine) {
+  .outlet-drawer-close:hover {
+    background: #edf5ef;
+    color: #183b29;
+  }
 }
 
 .outlet-drawer-close svg {
@@ -1171,19 +1182,23 @@ dialog.outlet-dialog::backdrop {
     border-color 0.22s ease;
 }
 
-.outlet-page .outlet-metrics > div:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(24, 59, 41, 0.10);
-  border-color: #a8cbb3;
+@media (hover: hover) and (pointer: fine) {
+  .outlet-page .outlet-metrics > div:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(24, 59, 41, 0.10);
+    border-color: #a8cbb3;
+  }
 }
 
 /* KPI Ngừng hoạt động */
 
-.outlet-page .outlet-metrics > div[data-tone="amber"]:hover {
-  transform: translateY(-4px);
-  background: #f6e8c8;
-  border-color: #d8bd80;
-  box-shadow: 0 8px 20px rgba(145, 108, 34, 0.12);
+@media (hover: hover) and (pointer: fine) {
+  .outlet-page .outlet-metrics > div[data-tone="amber"]:hover {
+    transform: translateY(-4px);
+    background: #f6e8c8;
+    border-color: #d8bd80;
+    box-shadow: 0 8px 20px rgba(145, 108, 34, 0.12);
+  }
 }
 
 
@@ -1205,17 +1220,19 @@ dialog.outlet-dialog::backdrop {
     box-shadow 0.2s ease;
 }
 
-.outlet-page .dssr-primary-button:not(:disabled):hover,
-.outlet-page .dssr-secondary-button:not(:disabled):hover,
-.outlet-drawer .dssr-primary-button:not(:disabled):hover,
-.outlet-drawer .dssr-secondary-button:not(:disabled):hover,
-.outlet-dialog .dssr-primary-button:not(:disabled):hover,
-.outlet-dialog .dssr-secondary-button:not(:disabled):hover,
-.outlet-refresh-button:not(:disabled):hover,
-.outlet-pagination-controls button:not(:disabled):hover,
-.outlet-drawer-close:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 10px rgba(24, 59, 41, 0.10);
+@media (hover: hover) and (pointer: fine) {
+  .outlet-page .dssr-primary-button:not(:disabled):hover,
+  .outlet-page .dssr-secondary-button:not(:disabled):hover,
+  .outlet-drawer .dssr-primary-button:not(:disabled):hover,
+  .outlet-drawer .dssr-secondary-button:not(:disabled):hover,
+  .outlet-dialog .dssr-primary-button:not(:disabled):hover,
+  .outlet-dialog .dssr-secondary-button:not(:disabled):hover,
+  .outlet-refresh-button:not(:disabled):hover,
+  .outlet-pagination-controls button:not(:disabled):hover,
+  .outlet-drawer-close:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(24, 59, 41, 0.10);
+  }
 }
 
 
@@ -1229,9 +1246,11 @@ dialog.outlet-dialog::backdrop {
     color 0.2s ease;
 }
 
-.outlet-status-tabs button:hover,
-.outlet-detail-tabs button:hover {
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .outlet-status-tabs button:hover,
+  .outlet-detail-tabs button:hover {
+    transform: translateY(-2px);
+  }
 }
 
 

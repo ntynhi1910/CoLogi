@@ -3,6 +3,7 @@ import type { CSSProperties } from 'react'
 import type { F3Evaluation, ValidF3Evaluation } from '../../types/f3'
 import { kg, utilization } from './f3Display'
 import VehicleLoadMeter from './VehicleLoadMeter'
+import { getF3CapacityMetrics, num } from './f3Metrics'
 
 const f3StatusVi = (status: string): string => {
   const labels: Record<string, string> = {
@@ -19,10 +20,6 @@ const f3StatusVi = (status: string): string => {
 type ResultProps = { result: F3Evaluation }
 type EvidenceProps = ResultProps & { presentation?: unknown }
 
-const num = (value: unknown): number => {
-  const parsed = Number(value)
-  return Number.isFinite(parsed) ? parsed : 0
-}
 const percent = (weight: number, capacity: number) =>
   capacity > 0 ? Math.round((weight / capacity) * 100) : null
 const percentage = (value: number | null) => (value === null ? '—' : `${value}%`)
@@ -46,7 +43,7 @@ function buildStopDirectory(result: ValidF3Evaluation): Map<string, string> {
       const code = String(stop.code ?? '').trim()
       const address = String(stop.address ?? '').trim()
 
-      let displayLabel = ''
+      let displayLabel: string
       if (stop.kind === 'HUB' && result.plan.hub) {
         const hub = result.plan.hub
         displayLabel = hub.code && hub.name ? `${hub.code} · ${hub.name}` : code || hub.name
@@ -69,40 +66,6 @@ function resolveStopName(rawStop: unknown, directory: Map<string, string>): stri
   const raw = String(rawStop ?? '').trim()
   if (!raw) return '—'
   return directory.get(raw.toLowerCase()) ?? raw
-}
-
-export function getF3CapacityMetrics(result: F3Evaluation) {
-  if (result.status === 'INVALID_PLAN') {
-    return {
-      requiredKg: 0,
-      capacityKg: 0,
-      usedPercent: null as number | null,
-      backendPercent: null as number | null,
-      waveCount: 0,
-      vehicleCount: 0,
-    }
-  }
-
-  const requiredKg = num(result.total_required_weight_kg)
-
-  const capacityKg = result.waves.reduce(
-    (total, wave) => total + num(wave.vehicle.capacity_kg),
-    0
-  )
-
-  const usedPercent =
-    capacityKg > 0 ? Math.round((requiredKg / capacityKg) * 100) : null
-
-  const rawBackendPercent = Number(result.utilization_pct)
-
-  return {
-    requiredKg,
-    capacityKg,
-    usedPercent,
-    backendPercent: Number.isFinite(rawBackendPercent) ? rawBackendPercent : null,
-    waveCount: result.waves.length,
-    vehicleCount: result.vehicles_required,
-  }
 }
 
 function useF3Metrics(result: F3Evaluation) {

@@ -10,8 +10,8 @@ import {
   F3Diagnostics,
   F3Evidence,
   F3Waves,
-  getF3CapacityMetrics,
 } from '../../components/dss/F3AssessmentDetails'
+import { getF3CapacityMetrics } from '../../components/dss/f3Metrics'
 import { ApiError } from '../../services/api/client'
 import { dssErrorMessage } from '../../services/dss/dssService'
 import {

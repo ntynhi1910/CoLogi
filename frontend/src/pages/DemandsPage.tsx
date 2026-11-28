@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ApiError } from '../services/api/client'
 import { listDemands } from '../services/api/demands'
@@ -112,10 +112,6 @@ export default function DemandsPage() {
     outletFilter,
   ])
 
-  useEffect(() => {
-    setCurrentPage(1)
-  }, [search, statusFilter, supplierFilter, outletFilter, pageSize])
-
   const totalPages = Math.max(1, Math.ceil(filteredDemands.length / pageSize))
   const safePage = Math.min(currentPage, totalPages)
 
@@ -207,7 +203,7 @@ export default function DemandsPage() {
             <input
               type="search"
               value={search}
-              onChange={(event) => setSearch(event.target.value)}
+              onChange={(event) => { setSearch(event.target.value); setCurrentPage(1) }}
               placeholder="Tìm mã nhu cầu, nhà cung cấp, cửa hàng..."
               aria-label="Tìm kiếm nhu cầu"
             />
@@ -215,7 +211,7 @@ export default function DemandsPage() {
           <select
             value={statusFilter}
             onChange={(event) =>
-              setStatusFilter(event.target.value as 'ALL' | DemandStatus)
+              { setStatusFilter(event.target.value as 'ALL' | DemandStatus); setCurrentPage(1) }
             }
             aria-label="Lọc theo trạng thái"
           >
@@ -226,7 +222,7 @@ export default function DemandsPage() {
           </select>
           <select
             value={supplierFilter}
-            onChange={(event) => setSupplierFilter(event.target.value)}
+            onChange={(event) => { setSupplierFilter(event.target.value); setCurrentPage(1) }}
             aria-label="Lọc theo nhà cung cấp"
           >
             <option value="ALL">Tất cả nhà cung cấp</option>
@@ -248,7 +244,7 @@ export default function DemandsPage() {
           </select>
           <select
             value={outletFilter}
-            onChange={(event) => setOutletFilter(event.target.value)}
+            onChange={(event) => { setOutletFilter(event.target.value); setCurrentPage(1) }}
             aria-label="Lọc theo cửa hàng"
           >
             <option value="ALL">Tất cả cửa hàng</option>
@@ -368,7 +364,7 @@ export default function DemandsPage() {
                 <select
                   className="demand-page-size"
                   value={pageSize}
-                  onChange={(e) => setPageSize(Number(e.target.value))}
+                  onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1) }}
                   aria-label="Số dòng mỗi trang"
                 >
                   <option value={10}>10 / trang</option>

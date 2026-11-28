@@ -47,8 +47,10 @@
   text-decoration: none;
 }
 
-.purchasing-reconciliation-back:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .purchasing-reconciliation-back:hover {
+    text-decoration: underline;
+  }
 }
 
 .purchasing-reconciliation-panel {

@@ -214,8 +214,10 @@
   transition: background .15s, color .15s;
 }
 
-.cp12--manager .cp12-main-tabs button:hover {
-  background: #fff;
+@media (hover: hover) and (pointer: fine) {
+  .cp12--manager .cp12-main-tabs button:hover {
+    background: #fff;
+  }
 }
 
 .cp12--manager .cp12-main-tabs button[aria-pressed="true"] {
@@ -364,8 +366,10 @@
   vertical-align: middle;
 }
 
-.cp12--manager tbody tr:hover {
-  background: #f8fbf9;
+@media (hover: hover) and (pointer: fine) {
+  .cp12--manager tbody tr:hover {
+    background: #f8fbf9;
+  }
 }
 
 /* FinalPlan list */
@@ -391,8 +395,10 @@
   background: #fff;
 }
 
-.cp12--manager .cp12-plans li:hover {
-  background: #f7faf8;
+@media (hover: hover) and (pointer: fine) {
+  .cp12--manager .cp12-plans li:hover {
+    background: #f7faf8;
+  }
 }
 
 .cp12--manager .cp12-plans li a {
@@ -685,8 +691,10 @@
   text-decoration: none;
 }
 
-.cp12--manager .cp12-performance-plan:hover {
-  background: #f5faf6;
+@media (hover: hover) and (pointer: fine) {
+  .cp12--manager .cp12-performance-plan:hover {
+    background: #f5faf6;
+  }
 }
 
 .cp12--manager .cp12-performance-plan > div {
@@ -986,8 +994,10 @@
   color: #284d36;
 }
 
-.cp12--manager .manager-table tbody tr:hover {
-  background: #f8fbf9;
+@media (hover: hover) and (pointer: fine) {
+  .cp12--manager .manager-table tbody tr:hover {
+    background: #f8fbf9;
+  }
 }
 
 /* Responsive */
@@ -1126,22 +1136,26 @@
 
 /* Hover nâng nhẹ */
 
-.cp12--supplier .cp12-supplier-kpis > div:hover {
-  transform: translateY(-4px);
-  background: #eaf4ed;
-  border-color: #a8cbb3;
+@media (hover: hover) and (pointer: fine) {
+  .cp12--supplier .cp12-supplier-kpis > div:hover {
+    transform: translateY(-4px);
+    background: #eaf4ed;
+    border-color: #a8cbb3;
 
-  box-shadow: 0 8px 20px
-    rgba(24, 59, 41, 0.10);
+    box-shadow: 0 8px 20px
+      rgba(24, 59, 41, 0.10);
+  }
 }
 
-.cp12--supplier .cp12-supplier-kpis
-> div[data-tone="amber"]:hover {
-  background: #f6e8c8;
-  border-color: #d8bd80;
+@media (hover: hover) and (pointer: fine) {
+  .cp12--supplier .cp12-supplier-kpis
+  > div[data-tone="amber"]:hover {
+    background: #f6e8c8;
+    border-color: #d8bd80;
 
-  box-shadow: 0 8px 20px
-    rgba(145, 108, 34, 0.12);
+    box-shadow: 0 8px 20px
+      rgba(145, 108, 34, 0.12);
+  }
 }
 
 /* Responsive */
@@ -1173,8 +1187,10 @@
     transition: none;
   }
 
-  .cp12--supplier .cp12-supplier-kpis > div:hover {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .cp12--supplier .cp12-supplier-kpis > div:hover {
+      transform: none;
+    }
   }
 }
 /* =========================================
@@ -1256,10 +1272,12 @@
     border-color 0.2s ease;
 }
 
-.cp12--supplier .cp12-supplier-template:hover {
-  transform: translateY(-3px);
-  border-color: #a8cbb3;
-  box-shadow: 0 8px 20px rgba(24, 59, 41, 0.09);
+@media (hover: hover) and (pointer: fine) {
+  .cp12--supplier .cp12-supplier-template:hover {
+    transform: translateY(-3px);
+    border-color: #a8cbb3;
+    box-shadow: 0 8px 20px rgba(24, 59, 41, 0.09);
+  }
 }
 
 .cp12--supplier .cp12-supplier-template h3 {
@@ -1313,8 +1331,10 @@
   transition: background-color 0.2s ease;
 }
 
-.cp12--supplier .cp12-supplier-trend-row:hover {
-  background: #edf5ef;
+@media (hover: hover) and (pointer: fine) {
+  .cp12--supplier .cp12-supplier-trend-row:hover {
+    background: #edf5ef;
+  }
 }
 
 .cp12--supplier .cp12-supplier-trend-row span {
@@ -1381,8 +1401,10 @@
   transition: background-color 0.2s ease;
 }
 
-.cp12--supplier .cp12-supplier-plan-table tbody tr:hover > * {
-  background: #edf6ef;
+@media (hover: hover) and (pointer: fine) {
+  .cp12--supplier .cp12-supplier-plan-table tbody tr:hover > * {
+    background: #edf6ef;
+  }
 }
 
 .cp12--supplier .cp12-supplier-plan-table a {
@@ -1426,8 +1448,10 @@
     transition: none;
   }
 
-  .cp12--supplier .cp12-supplier-template:hover {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .cp12--supplier .cp12-supplier-template:hover {
+      transform: none;
+    }
   }
 
 }

@@ -99,8 +99,9 @@ function TimePickerField({
     String(index).padStart(2, '0')
   )
 
-  useEffect(() => {
-    if (isOpen) {
+  function togglePicker() {
+    if (!isOpen) {
+      // Start the wheel at the current value each time the picker opens
       const [hour = '08', minute = '00'] = value
         ? value.split(':')
         : []
@@ -108,7 +109,8 @@ function TimePickerField({
       setSelectedHour(hour)
       setSelectedMinute(minute)
     }
-  }, [isOpen, value])
+    setIsOpen(!isOpen)
+  }
 
   useEffect(() => {
     if (!timeError) return
@@ -149,7 +151,7 @@ function TimePickerField({
       <button
         type="button"
         className="demand-time-trigger"
-        onClick={() => setIsOpen((current) => !current)}
+        onClick={togglePicker}
         aria-expanded={isOpen}
         aria-label={`${label}: ${value || 'Chưa chọn giờ'}`}
       >

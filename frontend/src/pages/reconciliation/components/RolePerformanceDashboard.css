@@ -234,8 +234,10 @@
   white-space: nowrap;
 }
 
-.rpd-table tbody tr:hover {
-  background: #f8fbf9;
+@media (hover: hover) and (pointer: fine) {
+  .rpd-table tbody tr:hover {
+    background: #f8fbf9;
+  }
 }
 
 .rpd-plan-code {
@@ -251,8 +253,10 @@
   white-space: nowrap;
 }
 
-.rpd-table a:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .rpd-table a:hover {
+    text-decoration: underline;
+  }
 }
 
 .rpd-status {

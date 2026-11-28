@@ -189,9 +189,11 @@
   border-left: none;
 }
 
-.dssd-stat:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 31px rgba(18, 60, 27, 0.12);
+@media (hover: hover) and (pointer: fine) {
+  .dssd-stat:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 31px rgba(18, 60, 27, 0.12);
+  }
 }
 
 .dssd-stat-green {

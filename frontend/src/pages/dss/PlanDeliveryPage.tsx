@@ -2170,7 +2170,7 @@ export function FinalPlanIndexPage() {
   const result = useDssQuery(query)
   const [selectedCode, setSelectedCode] = useState<string>('')
 
-  const plans = result.data?.plans ?? []
+  const plans = useMemo(() => result.data?.plans ?? [], [result.data])
   const activePlan = useMemo(() => {
     if (!plans.length) return null
     if (selectedCode) {

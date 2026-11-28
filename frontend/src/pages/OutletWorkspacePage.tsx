@@ -350,6 +350,7 @@ function OutletDetail({
   )
 
   const result = useDssQuery(query)
+  const { reload } = result
 
   const data = result.data
 
@@ -358,9 +359,9 @@ function OutletDetail({
   useEffect(() => {
     if (lastRevision.current !== revision) {
       lastRevision.current = revision
-      result.reload()
+      reload()
     }
-  }, [revision, result.reload])
+  }, [revision, reload])
 
   const tabs = [
     { value: 'overview', label: 'Tổng quan' },

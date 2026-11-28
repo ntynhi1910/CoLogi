@@ -93,23 +93,40 @@ export default function SupplierInboxPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState('')
 
+  /* API call only, no state: safe to start from an effect. */
+  const fetchRequests = useCallback(() => listSupplierRequests(), [])
+
+  const applyRequests = useCallback((data: Awaited<ReturnType<typeof fetchRequests>>) => {
+    setRequests(data)
+  }, [])
+
+  const failRequests = useCallback((err: unknown) => {
+    setError(getErrorMessage(err))
+  }, [])
+
+  /* User-triggered reload: show the loading state, then fetch. */
   const loadRequests = useCallback(async () => {
     setIsLoading(true)
     setError('')
-
     try {
-      const data = await listSupplierRequests()
-      setRequests(data)
-    } catch (loadError) {
-      setError(getErrorMessage(loadError))
+      applyRequests(await fetchRequests())
+    } catch (err) {
+      failRequests(err)
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [fetchRequests, applyRequests, failRequests])
 
   useEffect(() => {
-    void loadRequests()
-  }, [loadRequests])
+    let active = true
+    fetchRequests()
+      .then(
+        (data) => { if (active) applyRequests(data) },
+        (err: unknown) => { if (active) failRequests(err) },
+      )
+      .finally(() => { if (active) setIsLoading(false) })
+    return () => { active = false }
+  }, [fetchRequests, applyRequests, failRequests])
 
   const waitingCount = requests.filter(
     (request) => request.request_status === 'WAITING'

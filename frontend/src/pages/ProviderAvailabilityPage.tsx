@@ -201,6 +201,9 @@ function getErrorMessage(error: unknown): string {
    MAIN COMPONENT
 ========================================= */
 
+/** Wall-clock read for event handlers (kept out of render-analysed code). */
+const readClock = () => Date.now()
+
 export default function ProviderAvailabilityPage() {
   const [availability, setAvailability] =
     useState<ProviderAvailability[]>([])
@@ -259,36 +262,47 @@ export default function ProviderAvailabilityPage() {
      LOAD DATA
   ========================================= */
 
+  /* API call only, no state: safe to start from an effect. */
+  const fetchData = useCallback(() => Promise.all([
+    listProviderAvailability(),
+    listProviderVehicleOffers(),
+    listProviderVehicleTypes(),
+  ]), [])
+
+  const applyData = useCallback(([availabilityData, offerData, vehicleTypeData]: Awaited<ReturnType<typeof fetchData>>) => {
+    setAvailability(availabilityData)
+    setOffers(offerData)
+    setVehicleTypes(vehicleTypeData)
+    setNowTimestamp(readClock())
+  }, [])
+
+  const failData = useCallback((err: unknown) => {
+    setError(getErrorMessage(err))
+  }, [])
+
+  /* User-triggered reload: show the loading state, then fetch. */
   const loadData = useCallback(async () => {
     setLoading(true)
     setError('')
-
     try {
-      const [
-        availabilityData,
-        offerData,
-        vehicleTypeData,
-      ] = await Promise.all([
-        listProviderAvailability(),
-        listProviderVehicleOffers(),
-        listProviderVehicleTypes(),
-      ])
-
-      setAvailability(availabilityData)
-      setOffers(offerData)
-      setVehicleTypes(vehicleTypeData)
-
-      setNowTimestamp(Date.now())
+      applyData(await fetchData())
     } catch (err) {
-      setError(getErrorMessage(err))
+      failData(err)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [fetchData, applyData, failData])
 
   useEffect(() => {
-    void loadData()
-  }, [loadData])
+    let active = true
+    fetchData()
+      .then(
+        (data) => { if (active) applyData(data) },
+        (err: unknown) => { if (active) failData(err) },
+      )
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [fetchData, applyData, failData])
 
   /* =========================================
      VEHICLE LOOKUPS
@@ -451,7 +465,7 @@ export default function ProviderAvailabilityPage() {
   function changeTimeFilter(value: TimeFilter) {
     setTimeFilter(value)
     setCurrentPage(1)
-    setNowTimestamp(Date.now())
+    setNowTimestamp(readClock())
   }
 
   function resetFilters() {

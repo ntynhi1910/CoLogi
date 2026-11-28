@@ -77,9 +77,11 @@
   line-height: 1.2;
 }
 
-.dssf-total-runs:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 31px #123c1b17;
+@media (hover: hover) and (pointer: fine) {
+  .dssf-total-runs:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 31px #123c1b17;
+  }
 }
 
 /* Khung lần chạy mới nhất */
@@ -421,9 +423,11 @@
     transition: none;
   }
 
-  .dssf-total-runs:hover,
-  .dssf-dashboard .dssd-stat:hover {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .dssf-total-runs:hover,
+    .dssf-dashboard .dssd-stat:hover {
+      transform: none;
+    }
   }
 }
 
@@ -468,11 +472,13 @@
 
 /* Hiệu ứng khi rê chuột */
 
-.dssf-history-pagination button:hover:not(:disabled) {
-  background: #edf6ef;
-  border-color: #9fc7aa;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 12px #123c1b12;
+@media (hover: hover) and (pointer: fine) {
+  .dssf-history-pagination button:hover:not(:disabled) {
+    background: #edf6ef;
+    border-color: #9fc7aa;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px #123c1b12;
+  }
 }
 
 /* Trang đang được chọn */
@@ -484,10 +490,12 @@
   box-shadow: 0 4px 10px #236c3d26;
 }
 
-.dssf-history-pagination .dssf-page-number.is-active:hover:not(:disabled) {
-  background: #1b5831;
-  border-color: #1b5831;
-  color: #ffffff;
+@media (hover: hover) and (pointer: fine) {
+  .dssf-history-pagination .dssf-page-number.is-active:hover:not(:disabled) {
+    background: #1b5831;
+    border-color: #1b5831;
+    color: #ffffff;
+  }
 }
 
 /* Mũi tên không khả dụng */
@@ -527,8 +535,10 @@
     transition: none;
   }
 
-  .dssf-history-pagination button:hover:not(:disabled) {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .dssf-history-pagination button:hover:not(:disabled) {
+      transform: none;
+    }
   }
 }
 
@@ -578,9 +588,11 @@
   font-variant-numeric: tabular-nums;
 }
 
-.dssr-page .dssf-run-stats > div:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 31px #123c1b17;
+@media (hover: hover) and (pointer: fine) {
+  .dssr-page .dssf-run-stats > div:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 31px #123c1b17;
+  }
 }
 
 
@@ -610,18 +622,22 @@
               box-shadow 0.2s ease;
 }
 
-.dssf-open-drawer:hover {
-  background: #e3f0e6;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px #123c1b12;
+@media (hover: hover) and (pointer: fine) {
+  .dssf-open-drawer:hover {
+    background: #e3f0e6;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px #123c1b12;
+  }
 }
 
 .dssf-open-drawer svg {
   transition: transform 0.2s ease;
 }
 
-.dssf-open-drawer:hover svg {
-  transform: translateX(3px);
+@media (hover: hover) and (pointer: fine) {
+  .dssf-open-drawer:hover svg {
+    transform: translateX(3px);
+  }
 }
 
 /* Drawer chính */
@@ -724,9 +740,11 @@
               transform 0.2s ease;
 }
 
-.dssf-drawer-close:hover {
-  background: #e4eee6;
-  transform: scale(1.05);
+@media (hover: hover) and (pointer: fine) {
+  .dssf-drawer-close:hover {
+    background: #e4eee6;
+    transform: scale(1.05);
+  }
 }
 
 /* Nội dung cuộn độc lập */
@@ -870,8 +888,10 @@
   transition: background 0.2s ease;
 }
 
-.dssf-drawer-footer-button:hover {
-  background: #eef5ef;
+@media (hover: hover) and (pointer: fine) {
+  .dssf-drawer-footer-button:hover {
+    background: #eef5ef;
+  }
 }
 
 /* Hiệu ứng trượt từ phải sang */
@@ -918,10 +938,12 @@
     transition: none;
   }
 
-  .dssf-open-drawer:hover,
-  .dssf-open-drawer:hover svg,
-  .dssf-drawer-close:hover {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .dssf-open-drawer:hover,
+    .dssf-open-drawer:hover svg,
+    .dssf-drawer-close:hover {
+      transform: none;
+    }
   }
 }
 
@@ -1111,8 +1133,10 @@
   transition: background 0.18s ease;
 }
 
-.dssf-supply-table tbody tr:hover {
-  background: #f7faf7;
+@media (hover: hover) and (pointer: fine) {
+  .dssf-supply-table tbody tr:hover {
+    background: #f7faf7;
+  }
 }
 
 /* Tên mặt hàng */
@@ -1426,8 +1450,10 @@
   transition: background 0.18s ease;
 }
 
-.dssf-group-table tbody tr:hover {
-  background: #f4f8f4;
+@media (hover: hover) and (pointer: fine) {
+  .dssf-group-table tbody tr:hover {
+    background: #f4f8f4;
+  }
 }
 
 .dssf-group-table td strong {
@@ -1489,9 +1515,11 @@
               transform 0.2s ease;
 }
 
-.dssf-group-open:hover {
-  background: #e2efe5;
-  transform: translateX(2px);
+@media (hover: hover) and (pointer: fine) {
+  .dssf-group-open:hover {
+    background: #e2efe5;
+    transform: translateX(2px);
+  }
 }
 
 .dssf-group-table .dssf-group-empty {
@@ -1532,8 +1560,10 @@
   cursor: pointer;
 }
 
-.dssf-group-page-buttons button:hover:not(:disabled) {
-  background: #edf4ee;
+@media (hover: hover) and (pointer: fine) {
+  .dssf-group-page-buttons button:hover:not(:disabled) {
+    background: #edf4ee;
+  }
 }
 
 .dssf-group-page-buttons button.is-active {
@@ -1567,8 +1597,10 @@
     transition: none;
   }
 
-  .dssf-group-open:hover {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .dssf-group-open:hover {
+      transform: none;
+    }
   }
 }
 
@@ -1622,9 +1654,11 @@
               box-shadow 0.2s ease;
 }
 
-.dssf-group-kpis article:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px #123c1b12;
+@media (hover: hover) and (pointer: fine) {
+  .dssf-group-kpis article:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px #123c1b12;
+  }
 }
 
 .dssf-group-kpi-label {
@@ -1989,8 +2023,10 @@
     transition: none;
   }
 
-  .dssf-group-kpis article:hover {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .dssf-group-kpis article:hover {
+      transform: none;
+    }
   }
 }
 
@@ -2119,8 +2155,10 @@
   background: #23754a;
 }
 
-.dssf-window-row > .dssf-window-bar:hover {
-  filter: brightness(0.92);
+@media (hover: hover) and (pointer: fine) {
+  .dssf-window-row > .dssf-window-bar:hover {
+    filter: brightness(0.92);
+  }
 }
 
 /* Khung giờ chung dưới biểu đồ */
@@ -2324,10 +2362,12 @@
               transform 0.2s ease;
 }
 
-.dssf-candidate-detail .dssf-back-to-results:hover {
-  color: #174e32;
-  text-decoration: none;
-  transform: translateX(-3px);
+@media (hover: hover) and (pointer: fine) {
+  .dssf-candidate-detail .dssf-back-to-results:hover {
+    color: #174e32;
+    text-decoration: none;
+    transform: translateX(-3px);
+  }
 }
 
 .dssf-candidate-detail .dssf-back-to-results:focus-visible {
@@ -2341,7 +2381,9 @@
     transition: none;
   }
 
-  .dssf-candidate-detail .dssf-back-to-results:hover {
-    transform: none;
+  @media (hover: hover) and (pointer: fine) {
+    .dssf-candidate-detail .dssf-back-to-results:hover {
+      transform: none;
+    }
   }
 }

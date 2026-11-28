@@ -723,8 +723,10 @@
   transition: background 150ms ease;
 }
 
-.clh-panel-cta:hover {
-  background: #14532d;
+@media (hover: hover) and (pointer: fine) {
+  .clh-panel-cta:hover {
+    background: #14532d;
+  }
 }
 
 .clh-count-pill {

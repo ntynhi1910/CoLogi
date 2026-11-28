@@ -261,8 +261,10 @@
   cursor: pointer;
 }
 
-.f4-drawer-close:hover {
-  background: #eaf4ed;
+@media (hover: hover) and (pointer: fine) {
+  .f4-drawer-close:hover {
+    background: #eaf4ed;
+  }
 }
 
 .f4-drawer-content {

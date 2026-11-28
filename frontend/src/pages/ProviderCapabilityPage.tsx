@@ -56,39 +56,54 @@ export default function ProviderCapabilityPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  /* API call only, no state: safe to start from an effect. */
+  const fetchData = useCallback(() => Promise.all([
+    getProviderProfile(),
+    listProviderVehicleOffers(),
+    listProviderAvailability(),
+    listProviderSupplierCoverages(),
+    listProviderVehicleTypes(),
+  ]), [])
+
+  const applyData = useCallback(([provider, vehicleOffers, availability, supplierCoverages, types]: Awaited<ReturnType<typeof fetchData>>) => {
+    setProfile(provider)
+    setOffers(vehicleOffers)
+    setSlots(availability)
+    setCoverages(supplierCoverages)
+    setVehicleTypes(types)
+  }, [])
+
+  const failData = useCallback((err: unknown) => {
+    setError(
+      err instanceof Error
+        ? err.message
+        : 'Không thể tải dữ liệu năng lực vận chuyển.'
+    )
+  }, [])
+
+  /* User-triggered reload: show the loading state, then fetch. */
   const loadData = useCallback(async () => {
     setLoading(true)
     setError('')
-
     try {
-      const [provider, vehicleOffers, availability, supplierCoverages, types] =
-        await Promise.all([
-          getProviderProfile(),
-          listProviderVehicleOffers(),
-          listProviderAvailability(),
-          listProviderSupplierCoverages(),
-          listProviderVehicleTypes(),
-        ])
-
-      setProfile(provider)
-      setOffers(vehicleOffers)
-      setSlots(availability)
-      setCoverages(supplierCoverages)
-      setVehicleTypes(types)
+      applyData(await fetchData())
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : 'Không thể tải dữ liệu năng lực vận chuyển.'
-      )
+      failData(err)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [fetchData, applyData, failData])
 
   useEffect(() => {
-    void loadData()
-  }, [loadData])
+    let active = true
+    fetchData()
+      .then(
+        (data) => { if (active) applyData(data) },
+        (err: unknown) => { if (active) failData(err) },
+      )
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false }
+  }, [fetchData, applyData, failData])
 
   const today = todayVietnam()
 
