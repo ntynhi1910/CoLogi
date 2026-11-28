@@ -68,8 +68,7 @@ time {
 
   td a,
   .si2-card-cta,
-  .dssf-link,
-  .sidebar-section-toggle {
+  .dssf-link {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
