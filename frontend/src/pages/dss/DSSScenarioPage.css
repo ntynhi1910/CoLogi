@@ -31,8 +31,10 @@
   cursor: pointer;
 }
 
-.dssc-back-link:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .dssc-back-link:hover {
+    text-decoration: underline;
+  }
 }
 
 .dssc-eyebrow {
@@ -257,11 +259,13 @@
   border-radius: 12px;
   background: #fbfdfb;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
 }
 
-.dssc-type-card:hover {
-  border-color: #a8ccb3;
+@media (hover: hover) and (pointer: fine) {
+  .dssc-type-card:hover {
+    border-color: #a8ccb3;
+  }
 }
 
 .dssc-type-card.is-selected {
@@ -334,7 +338,7 @@
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
 
 .dssc-button-primary {
@@ -343,8 +347,10 @@
   color: #fff;
 }
 
-.dssc-button-primary:hover:not(:disabled) {
-  background: #195a32;
+@media (hover: hover) and (pointer: fine) {
+  .dssc-button-primary:hover:not(:disabled) {
+    background: #195a32;
+  }
 }
 
 .dssc-button-secondary {
@@ -353,8 +359,10 @@
   color: #366e4b;
 }
 
-.dssc-button-secondary:hover:not(:disabled) {
-  background: #f1f8f3;
+@media (hover: hover) and (pointer: fine) {
+  .dssc-button-secondary:hover:not(:disabled) {
+    background: #f1f8f3;
+  }
 }
 
 .dssc-button:disabled {
@@ -569,9 +577,11 @@
   cursor: pointer;
 }
 
-.dssc-run-item button:hover,
-.dssc-latest-run button:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .dssc-run-item button:hover,
+  .dssc-latest-run button:hover {
+    text-decoration: underline;
+  }
 }
 
 .dssc-latest-run {

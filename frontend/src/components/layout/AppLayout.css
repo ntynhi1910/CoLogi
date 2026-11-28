@@ -147,6 +147,16 @@
 
   scrollbar-width: thin;
   scrollbar-color: #54795b transparent;
+
+  /* Fade the bottom edge so a clipped item reads as "more below" */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - var(--scroll-fade-y)), transparent);
+}
+
+@supports (animation-timeline: scroll()) {
+  .sidebar-scroll {
+    animation: scroll-fade-y-out linear both;
+    animation-timeline: scroll(self block);
+  }
 }
 
 .sidebar-section {
@@ -193,9 +203,11 @@
     border-color .18s;
 }
 
-.sidebar-link:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, .075);
+@media (hover: hover) and (pointer: fine) {
+  .sidebar-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, .075);
+  }
 }
 
 .sidebar-link.active {
@@ -270,8 +282,10 @@
   text-align: left;
 }
 
-.sidebar-section-toggle:hover {
-  color: #f3e0a9;
+@media (hover: hover) and (pointer: fine) {
+  .sidebar-section-toggle:hover {
+    color: #f3e0a9;
+  }
 }
 
 .sidebar-section-toggle svg {
@@ -510,9 +524,11 @@
   cursor: pointer;
 }
 
-.header-logout-button:hover {
-  background: #f0f8f1;
-  border-color: #acd2b5;
+@media (hover: hover) and (pointer: fine) {
+  .header-logout-button:hover {
+    background: #f0f8f1;
+    border-color: #acd2b5;
+  }
 }
 
 .app-content {
@@ -644,9 +660,11 @@
   transition: background 0.2s, border-color 0.2s;
 }
 
-.sidebar-profile-link:hover {
-  background: #eaf5ec;
-  border-color: #cfe5d3;
+@media (hover: hover) and (pointer: fine) {
+  .sidebar-profile-link:hover {
+    background: #eaf5ec;
+    border-color: #cfe5d3;
+  }
 }
 
 .sidebar-profile-link.active {

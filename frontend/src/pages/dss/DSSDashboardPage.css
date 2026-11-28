@@ -88,7 +88,7 @@
   font-size: 12px;
   font-weight: 750;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
 
 .dssd-button-primary {
@@ -97,8 +97,10 @@
   color: #fff;
 }
 
-.dssd-button-primary:hover:not(:disabled) {
-  background: #1b5831;
+@media (hover: hover) and (pointer: fine) {
+  .dssd-button-primary:hover:not(:disabled) {
+    background: #1b5831;
+  }
 }
 
 .dssd-button-secondary {
@@ -107,8 +109,10 @@
   color: #326845;
 }
 
-.dssd-button-secondary:hover:not(:disabled) {
-  background: #f1f8f3;
+@media (hover: hover) and (pointer: fine) {
+  .dssd-button-secondary:hover:not(:disabled) {
+    background: #f1f8f3;
+  }
 }
 
 .dssd-button:disabled {
@@ -349,12 +353,14 @@
   text-align: left;
   font: inherit;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
 }
 
-.dssd-scenario-card:hover {
-  border-color: #a7ceb1;
-  background: #f5faf6;
+@media (hover: hover) and (pointer: fine) {
+  .dssd-scenario-card:hover {
+    border-color: #a7ceb1;
+    background: #f5faf6;
+  }
 }
 
 .dssd-scenario-card.is-selected {
@@ -630,8 +636,10 @@
   border-bottom: none;
 }
 
-.dssd-table tbody tr:hover {
-  background: #fafcfb;
+@media (hover: hover) and (pointer: fine) {
+  .dssd-table tbody tr:hover {
+    background: #fafcfb;
+  }
 }
 
 .dssd-table td > strong {
@@ -695,8 +703,10 @@
   white-space: nowrap;
 }
 
-.dssd-view-button:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .dssd-view-button:hover {
+    text-decoration: underline;
+  }
 }
 
 /* PAGINATION */

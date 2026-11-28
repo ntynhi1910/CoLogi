@@ -38,8 +38,10 @@
   cursor: pointer;
 }
 
-.dssr-back-link:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .dssr-back-link:hover {
+    text-decoration: underline;
+  }
 }
 
 .dssr-eyebrow {
@@ -128,7 +130,7 @@
   font-size: 12px;
   font-weight: 750;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
 
 .dssr-primary-button {
@@ -137,8 +139,10 @@
   color: #fff;
 }
 
-.dssr-primary-button:hover {
-  background: #194e2e;
+@media (hover: hover) and (pointer: fine) {
+  .dssr-primary-button:hover {
+    background: #194e2e;
+  }
 }
 
 .dssr-secondary-button {
@@ -147,8 +151,10 @@
   color: #347348;
 }
 
-.dssr-secondary-button:hover {
-  background: #f1f8f3;
+@media (hover: hover) and (pointer: fine) {
+  .dssr-secondary-button:hover {
+    background: #f1f8f3;
+  }
 }
 
 .dssr-text-button {
@@ -162,8 +168,10 @@
   cursor: pointer;
 }
 
-.dssr-text-button:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .dssr-text-button:hover {
+    text-decoration: underline;
+  }
 }
 
 /* SHARED PANELS */
@@ -175,6 +183,49 @@
   border: 1px solid #e1ebe3;
   border-radius: 16px;
   background: #fff;
+}
+
+/* Collapsible panels: match the system instead of the native ▶ marker */
+details.dssr-panel > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 24px;
+  list-style: none;
+  cursor: pointer;
+  color: #173d27;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+details.dssr-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.dssr-panel > summary::before {
+  content: "";
+  flex: none;
+  width: 7px;
+  height: 7px;
+  margin-inline: 2px 4px;
+  border-right: 2px solid #23754a;
+  border-bottom: 2px solid #23754a;
+  transform: rotate(-45deg);
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+details.dssr-panel[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+details.dssr-panel[open] > summary {
+  margin-bottom: 14px;
+}
+
+details.dssr-panel > summary:focus-visible {
+  outline: 2px solid #23955a;
+  outline-offset: 4px;
+  border-radius: 6px;
 }
 
 .dssr-panel-heading {
@@ -378,11 +429,13 @@
   text-align: left;
   font: inherit;
   cursor: pointer;
-  transition: 0.2s;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
 }
 
-.dssr-progress-step:hover {
-  border-color: #9cc8a9;
+@media (hover: hover) and (pointer: fine) {
+  .dssr-progress-step:hover {
+    border-color: #9cc8a9;
+  }
 }
 
 .dssr-progress-step.is-active {
@@ -525,8 +578,10 @@
   cursor: pointer;
 }
 
-.dssr-tabs button:hover {
-  background: #f3f8f4;
+@media (hover: hover) and (pointer: fine) {
+  .dssr-tabs button:hover {
+    background: #f3f8f4;
+  }
 }
 
 .dssr-tabs button.is-active {
@@ -919,7 +974,7 @@
   border-radius: 11px;
   background: #20362a;
   color: #e0f2e4;
-  font-family: monospace;
+  font-family: var(--font-family-mono);
   font-size: 11px;
   line-height: 1.7;
   white-space: pre;

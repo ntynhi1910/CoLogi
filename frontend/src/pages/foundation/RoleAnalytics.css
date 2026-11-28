@@ -62,11 +62,13 @@
   font-size: 11px;
   font-weight: 750;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
 }
 
-.cla-range button:hover {
-  background: #E9F3EB;
+@media (hover: hover) and (pointer: fine) {
+  .cla-range button:hover {
+    background: #E9F3EB;
+  }
 }
 
 .cla-range button.active {
@@ -107,10 +109,12 @@
     box-shadow 0.2s ease;
 }
 
-.cla-card:hover {
-  transform: translateY(-2px);
-  box-shadow:
-    0 16px 33px rgba(18, 60, 27, 0.08);
+@media (hover: hover) and (pointer: fine) {
+  .cla-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 16px 33px rgba(18, 60, 27, 0.08);
+  }
 }
 
 .cla-card header {
@@ -139,9 +143,11 @@
   transition: opacity 0.2s ease;
 }
 
-.cla-svg rect:hover,
-.cla-svg circle:hover {
-  opacity: 0.8;
+@media (hover: hover) and (pointer: fine) {
+  .cla-svg rect:hover,
+  .cla-svg circle:hover {
+    opacity: 0.8;
+  }
 }
 
 /* LEGENDS */

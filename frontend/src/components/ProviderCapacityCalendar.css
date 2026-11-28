@@ -156,8 +156,10 @@
   transition: background .18s;
 }
 
-.pcal-day:hover {
-  background: #f3f8f4;
+@media (hover: hover) and (pointer: fine) {
+  .pcal-day:hover {
+    background: #f3f8f4;
+  }
 }
 
 .pcal-day.is-outside {

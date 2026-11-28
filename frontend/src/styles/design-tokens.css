@@ -1,12 +1,4 @@
-@font-face {
-  font-family: 'Bricolage Grotesque';
-  src: url('/fonts/BricolageGrotesque-VariableFont_opsz,wdth,wght.ttf')
-    format('truetype');
-  font-style: normal;
-  font-weight: 200 800;
-  font-display: swap;
-}
-
+/* Geist + Geist Mono (Vercel, OFL-1.1) are self-hosted via Fontsource, imported in main.tsx. */
 :root {
   /* CoLogi brand */
   --color-black-forest: #123C1B;
@@ -37,7 +29,8 @@
   --color-info: #356B9A;
 
   /* Typography */
-  --font-family-base: 'Bricolage Grotesque', sans-serif;
+  --font-family-base: 'Geist Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-family-mono: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-weight-regular: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -57,6 +50,13 @@
   --radius-md: 10px;
   --radius-lg: 16px;
   --radius-xl: 20px;
+
+  /* Motion: strong custom curves; UI transitions stay under 300ms */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --duration-press: 120ms;
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
 
   /* Elevation */
   --shadow-card: 0 3px 16px rgba(18, 60, 27, 0.045);

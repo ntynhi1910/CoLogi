@@ -122,7 +122,8 @@
 }
 .f4-wave-toggle, .f4-compare-toggle { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; width: 100%; padding: 5px 0; }
 .f4-stop-toggle { font-weight: 700; padding: 0; overflow-wrap: anywhere; }
-.f4-stop-toggle:hover, .f4-wave-toggle:hover strong, .f4-compare-toggle:hover strong { text-decoration: underline; }
+@media (hover: hover) and (pointer: fine) {
+.f4-stop-toggle:hover, .f4-wave-toggle:hover strong, .f4-compare-toggle:hover strong { text-decoration: underline; } }
 .f4-wave-meta { color: #51665a; font-size: .84rem; margin: 5px 0; }
 .f4-stop-table-scroll { container-type: inline-size; }
 .f4-stops { min-width: 850px; table-layout: fixed; }

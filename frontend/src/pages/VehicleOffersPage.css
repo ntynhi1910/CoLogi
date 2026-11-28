@@ -28,8 +28,10 @@
   color: #fff;
 }
 
-.provider-offers-heading-actions button:first-child:hover {
-  background: #116b49;
+@media (hover: hover) and (pointer: fine) {
+  .provider-offers-heading-actions button:first-child:hover {
+    background: #116b49;
+  }
 }
 
 .provider-offers-heading h1 {
@@ -72,11 +74,13 @@
   transition: background 0.18s ease, border-color 0.18s ease;
 }
 
-.provider-offers-refresh:hover,
-.provider-offers-actions button:hover,
-.provider-offers-form-actions button:hover {
-  border-color: var(--color-primary, #16845b);
-  background: #f0f8f4;
+@media (hover: hover) and (pointer: fine) {
+  .provider-offers-refresh:hover,
+  .provider-offers-actions button:hover,
+  .provider-offers-form-actions button:hover {
+    border-color: var(--color-primary, #16845b);
+    background: #f0f8f4;
+  }
 }
 
 .provider-offers-refresh:disabled,
@@ -266,8 +270,10 @@
   color: #b5473e;
 }
 
-.provider-offers-actions button.is-danger:hover {
-  background: #fff3f1;
+@media (hover: hover) and (pointer: fine) {
+  .provider-offers-actions button.is-danger:hover {
+    background: #fff3f1;
+  }
 }
 
 .provider-offers-actions button.is-activate {
@@ -275,8 +281,10 @@
   color: #197348;
 }
 
-.provider-offers-actions button.is-activate:hover {
-  background: #eaf7ef;
+@media (hover: hover) and (pointer: fine) {
+  .provider-offers-actions button.is-activate:hover {
+    background: #eaf7ef;
+  }
 }
 
 .provider-offers-empty {
@@ -458,8 +466,10 @@
   color: #fff;
 }
 
-.provider-offers-form-actions button[type="submit"]:hover {
-  background: #116b49;
+@media (hover: hover) and (pointer: fine) {
+  .provider-offers-form-actions button[type="submit"]:hover {
+    background: #116b49;
+  }
 }
 
 .provider-offers-note {

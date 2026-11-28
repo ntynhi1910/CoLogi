@@ -13,8 +13,10 @@
   text-decoration: none;
 }
 
-.supplier-detail-back:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .supplier-detail-back:hover {
+    text-decoration: underline;
+  }
 }
 
 .supplier-detail-heading,
@@ -349,8 +351,10 @@
   color: white;
 }
 
-.supplier-detail-submit:hover {
-  background: var(--color-primary-dark);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-detail-submit:hover {
+    background: var(--color-primary-dark);
+  }
 }
 
 .supplier-detail-submit:disabled {

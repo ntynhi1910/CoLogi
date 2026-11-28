@@ -118,9 +118,11 @@
   transition: transform .2s, box-shadow .2s;
 }
 
-.pcw-navigation-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(18, 60, 27, 0.09);
+@media (hover: hover) and (pointer: fine) {
+  .pcw-navigation-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(18, 60, 27, 0.09);
+  }
 }
 
 .pcw-card-icon {
@@ -319,9 +321,11 @@
     box-shadow 0.2s ease;
 }
 
-.pcw-readiness-item:hover {
-  border-color: #c7ddce;
-  box-shadow: 0 5px 18px rgba(18, 60, 27, 0.04);
+@media (hover: hover) and (pointer: fine) {
+  .pcw-readiness-item:hover {
+    border-color: #c7ddce;
+    box-shadow: 0 5px 18px rgba(18, 60, 27, 0.04);
+  }
 }
 
 /* Trạng thái có dữ liệu */
@@ -497,8 +501,10 @@
   border-bottom: none;
 }
 
-.pcw-table tbody tr:hover {
-  background: #fafcfb;
+@media (hover: hover) and (pointer: fine) {
+  .pcw-table tbody tr:hover {
+    background: #fafcfb;
+  }
 }
 
 /* ==============================

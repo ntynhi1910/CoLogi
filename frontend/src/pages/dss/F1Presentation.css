@@ -108,8 +108,10 @@
   text-decoration: none;
 }
 
-.dssf-link:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .dssf-link:hover {
+    text-decoration: underline;
+  }
 }
 
 .dssf-dashboard .dssf-history-table {

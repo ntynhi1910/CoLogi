@@ -62,8 +62,10 @@
   color: #fff;
 }
 
-.provider-availability-primary:hover {
-  background: #116b49;
+@media (hover: hover) and (pointer: fine) {
+  .provider-availability-primary:hover {
+    background: #116b49;
+  }
 }
 
 .provider-availability-primary:disabled,
@@ -73,11 +75,13 @@
   opacity: 0.55;
 }
 
-.provider-availability-refresh:hover,
-.provider-availability-edit:hover,
-.provider-availability-form-actions button:hover {
-  border-color: var(--color-primary, #16845b);
-  background: #f0f8f4;
+@media (hover: hover) and (pointer: fine) {
+  .provider-availability-refresh:hover,
+  .provider-availability-edit:hover,
+  .provider-availability-form-actions button:hover {
+    border-color: var(--color-primary, #16845b);
+    background: #f0f8f4;
+  }
 }
 
 .provider-availability-summary {
@@ -407,8 +411,10 @@
   color: #fff;
 }
 
-.provider-availability-form-actions button[type="submit"]:hover {
-  background: #116b49;
+@media (hover: hover) and (pointer: fine) {
+  .provider-availability-form-actions button[type="submit"]:hover {
+    background: #116b49;
+  }
 }
 
 @media (max-width: 900px) {
@@ -500,8 +506,10 @@
   transition: background .2s, border-color .2s;
 }
 
-.availability-time-filters button:hover {
-  background: #f2f8f4;
+@media (hover: hover) and (pointer: fine) {
+  .availability-time-filters button:hover {
+    background: #f2f8f4;
+  }
 }
 
 .availability-time-filters button.active {
@@ -537,9 +545,11 @@
   cursor: pointer;
 }
 
-.availability-reset-button:hover {
-  color: #1e6b3a;
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .availability-reset-button:hover {
+    color: #1e6b3a;
+    text-decoration: underline;
+  }
 }
 
 /* Time indicators */
@@ -614,9 +624,11 @@
   cursor: pointer;
 }
 
-.availability-pagination-actions button:hover:not(:disabled) {
-  background: #eef7f0;
-  border-color: #b9d9c2;
+@media (hover: hover) and (pointer: fine) {
+  .availability-pagination-actions button:hover:not(:disabled) {
+    background: #eef7f0;
+    border-color: #b9d9c2;
+  }
 }
 
 .availability-pagination-actions button:disabled {
