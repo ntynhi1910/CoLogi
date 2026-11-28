@@ -40,6 +40,84 @@ input:focus-visible {
   outline-offset: 2px;
 }
 
+/* Press feedback. The standalone `scale` property composes with any existing
+   `transform`, so buttons positioned with translate() do not jump. */
+:is(button, [role='button']):not(:disabled):active {
+  scale: 0.97;
+  transition: scale var(--duration-press) var(--ease-out);
+}
+
+/* Numbers that line up and do not jitter when they change */
+table,
+strong,
+time {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Touch devices: at least 44px tap targets */
+@media (pointer: coarse) {
+  :is(button, select, [role='button']),
+  input:not([type='checkbox'], [type='radio'], [type='hidden']) {
+    min-height: 44px;
+  }
+
+  input:is([type='checkbox'], [type='radio']) {
+    width: 20px;
+    height: 20px;
+  }
+
+  td a,
+  .si2-card-cta,
+  .dssf-link,
+  .sidebar-section-toggle {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+}
+
+/* Edge fades that only show while there is more content to scroll to */
+@property --scroll-fade-x {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 32px;
+}
+
+@property --scroll-fade-y {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 28px;
+}
+
+@keyframes scroll-fade-x-out {
+  0%, 92% { --scroll-fade-x: 32px; }
+  100% { --scroll-fade-x: 0px; }
+}
+
+@keyframes scroll-fade-y-out {
+  0%, 92% { --scroll-fade-y: 28px; }
+  100% { --scroll-fade-y: 0px; }
+}
+
+@media (max-width: 900px) {
+  .demand-table-wrapper,
+  .dssd-table-wrap,
+  .manager-table-scroll,
+  .supplier-catalog-table-wrap {
+    mask-image: linear-gradient(to right, #000 calc(100% - var(--scroll-fade-x)), transparent);
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .demand-table-wrapper,
+    .dssd-table-wrap,
+    .manager-table-scroll,
+    .supplier-catalog-table-wrap {
+      animation: scroll-fade-x-out linear both;
+      animation-timeline: scroll(self inline);
+    }
+  }
+}
+
 .auth-page {
   min-height: 100vh;
   display: grid;
@@ -141,8 +219,10 @@ h1 {
   margin-top: 16px;
 }
 
-.auth-form button:hover:not(:disabled) {
-  background: var(--color-primary-dark);
+@media (hover: hover) and (pointer: fine) {
+  .auth-form button:hover:not(:disabled) {
+    background: var(--color-primary-dark);
+  }
 }
 
 .secondary-button {
@@ -151,9 +231,11 @@ h1 {
   border-color: var(--color-border);
 }
 
-.secondary-button:hover:not(:disabled) {
-  background: var(--color-primary-soft);
-  border-color: var(--color-primary);
+@media (hover: hover) and (pointer: fine) {
+  .secondary-button:hover:not(:disabled) {
+    background: var(--color-primary-soft);
+    border-color: var(--color-primary);
+  }
 }
 
 .error-message {
@@ -212,6 +294,8 @@ h1 {
   cursor: pointer;
 }
 
-.password-toggle:hover:not(:disabled) {
-  background: var(--color-primary-soft) !important;
+@media (hover: hover) and (pointer: fine) {
+  .password-toggle:hover:not(:disabled) {
+    background: var(--color-primary-soft) !important;
+  }
 }

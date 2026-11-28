@@ -159,9 +159,11 @@
   transition: border-color .18s ease, box-shadow .18s ease;
 }
 
-.supplier-request-card:hover {
-  border-color: #b8d4bf;
-  box-shadow: 0 4px 14px rgba(18, 60, 27, .05);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-request-card:hover {
+    border-color: #b8d4bf;
+    box-shadow: 0 4px 14px rgba(18, 60, 27, .05);
+  }
 }
 
 .supplier-request-card-top > div {
@@ -260,8 +262,10 @@
   text-decoration: none;
 }
 
-.supplier-request-card-footer a:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .supplier-request-card-footer a:hover {
+    text-decoration: underline;
+  }
 }
 
 .supplier-inbox-empty {
@@ -566,7 +570,7 @@
   font-weight: 700;
   cursor: pointer;
 
-  transition: all .2s;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease;
 }
 
 .si2-quick-filters button span {
@@ -583,8 +587,10 @@
   font-size: 10px;
 }
 
-.si2-quick-filters button:hover {
-  background: #f2f8f3;
+@media (hover: hover) and (pointer: fine) {
+  .si2-quick-filters button:hover {
+    background: #f2f8f3;
+  }
 }
 
 .si2-quick-filters button.active {
@@ -626,10 +632,12 @@
     border-color .2s ease;
 }
 
-.si2-card:hover {
-  transform: translateY(-2px);
-  border-color: #b6d6bc;
-  box-shadow: 0 12px 26px rgba(18, 60, 27, .07);
+@media (hover: hover) and (pointer: fine) {
+  .si2-card:hover {
+    transform: translateY(-2px);
+    border-color: #b6d6bc;
+    box-shadow: 0 12px 26px rgba(18, 60, 27, .07);
+  }
 }
 
 /* Chờ phản hồi luôn nổi bật hơn */
@@ -997,11 +1005,16 @@
   font-size: 12px;
   font-weight: 800;
 
-  transition: gap .2s;
 }
 
-.si2-card-cta:hover {
-  gap: 14px;
+.si2-card-cta > span {
+  transition: transform var(--duration-base) var(--ease-out);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .si2-card-cta:hover > span {
+    transform: translateX(4px);
+  }
 }
 
 .si2-card-cta.is-urgent {
@@ -1132,7 +1145,9 @@
 }
 
 /* Hover nhẹ */
+@media (hover: hover) and (pointer: fine) {
 .supplier-summary-grid > .supplier-summary-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 9px 24px rgba(18, 60, 27, 0.075);
+}
 }

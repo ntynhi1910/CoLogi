@@ -691,10 +691,12 @@
     background 0.25s ease;
 }
 
-.supplier-catalog-modal-close:hover {
-  background: #EFF7F0;
-  color: #123C1B;
-  transform: rotate(90deg);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-catalog-modal-close:hover {
+    background: #EFF7F0;
+    color: #123C1B;
+    transform: rotate(90deg);
+  }
 }
 
 /* Glass card radio */
@@ -718,13 +720,15 @@
   background: rgba(255, 255, 255, 0.68);
 
   cursor: pointer;
-  transition: all 0.24s ease;
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease, transform var(--duration-base) var(--ease-out);
 }
 
-.supplier-catalog-choice-card:hover {
-  transform: translateY(-2px);
-  border-color: #99C8A5;
-  box-shadow: 0 10px 25px rgba(18, 60, 27, 0.07);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-catalog-choice-card:hover {
+    transform: translateY(-2px);
+    border-color: #99C8A5;
+    box-shadow: 0 10px 25px rgba(18, 60, 27, 0.07);
+  }
 }
 
 .supplier-catalog-choice .supplier-catalog-choice-card.is-active {
@@ -944,10 +948,12 @@
     transform 0.2s ease;
 }
 
-.supplier-catalog-form-actions
-.supplier-catalog-cancel:hover:not(:disabled) {
-  background: #e8f2ea;
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-catalog-form-actions
+  .supplier-catalog-cancel:hover:not(:disabled) {
+    background: #e8f2ea;
+    transform: translateY(-2px);
+  }
 }
 
 /* Nút Thêm mặt hàng */
@@ -978,12 +984,14 @@
     box-shadow 0.2s ease;
 }
 
-.supplier-catalog-form-actions
-.supplier-catalog-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-catalog-form-actions
+  .supplier-catalog-primary:hover:not(:disabled) {
+    transform: translateY(-2px);
 
-  box-shadow:
-    0 12px 24px rgba(18, 60, 27, 0.2);
+    box-shadow:
+      0 12px 24px rgba(18, 60, 27, 0.2);
+  }
 }
 
 .supplier-catalog-form-actions button:disabled {
@@ -1056,8 +1064,17 @@
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
 
-  animation: supplier-toast-in
-    0.28s cubic-bezier(.2, .8, .2, 1);
+  /* Transition + @starting-style: interruptible, unlike keyframes */
+  transition:
+    opacity 400ms ease,
+    transform 400ms ease;
+}
+
+@starting-style {
+  .supplier-mini-toast {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
 }
 
 .supplier-mini-toast--error {
@@ -1132,9 +1149,11 @@
     transform 0.2s ease;
 }
 
-.supplier-mini-toast-undo:hover:not(:disabled) {
-  background: #d8efde;
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-mini-toast-undo:hover:not(:disabled) {
+    background: #d8efde;
+    transform: translateY(-1px);
+  }
 }
 
 .supplier-mini-toast-undo:disabled {
@@ -1164,20 +1183,10 @@
   cursor: pointer;
 }
 
-.supplier-mini-toast-close:hover {
-  background: #edf3ee;
-  color: #123c1b;
-}
-
-@keyframes supplier-toast-in {
-  from {
-    opacity: 0;
-    transform: translateY(16px) scale(0.97);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-mini-toast-close:hover {
+    background: #edf3ee;
+    color: #123c1b;
   }
 }
 
@@ -1197,7 +1206,8 @@
 
 @media (prefers-reduced-motion: reduce) {
   .supplier-mini-toast,
-  .supplier-mini-toast-undo {
+  .supplier-mini-toast-undo,
+  .supplier-catalog-toast {
     animation: none;
     transition: none;
   }
@@ -1233,7 +1243,16 @@
   font-size: 14px;
   color: #253b2c;
 
-  animation: catalogToastIn 0.25s ease-out;
+  transition:
+    opacity 400ms ease,
+    transform 400ms ease;
+}
+
+@starting-style {
+  .supplier-catalog-toast {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
 }
 
 .supplier-catalog-toast.is-error {
@@ -1286,8 +1305,10 @@
   transition: background 0.2s;
 }
 
-.supplier-catalog-toast-undo:hover {
-  background: #edf7f0;
+@media (hover: hover) and (pointer: fine) {
+  .supplier-catalog-toast-undo:hover {
+    background: #edf7f0;
+  }
 }
 
 .supplier-catalog-toast-close {
@@ -1309,20 +1330,10 @@
   cursor: pointer;
 }
 
-.supplier-catalog-toast-close:hover {
-  background: #f1f4f2;
-  color: #42564a;
-}
-
-@keyframes catalogToastIn {
-  from {
-    opacity: 0;
-    transform: translateY(-12px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
+@media (hover: hover) and (pointer: fine) {
+  .supplier-catalog-toast-close:hover {
+    background: #f1f4f2;
+    color: #42564a;
   }
 }
 

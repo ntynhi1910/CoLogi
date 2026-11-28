@@ -23,9 +23,11 @@
   background: #b53838;
 }
 
-.cof-button--danger:hover:not(:disabled) {
-  color: #fff;
-  background: #972b2b;
+@media (hover: hover) and (pointer: fine) {
+  .cof-button--danger:hover:not(:disabled) {
+    color: #fff;
+    background: #972b2b;
+  }
 }
 
 /* SPINNER */
@@ -563,10 +565,12 @@
     0 7px 17px rgba(18, 60, 27, 0.14);
 }
 
-.cof-base-button--primary:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow:
-    0 10px 22px rgba(18, 60, 27, 0.2);
+@media (hover: hover) and (pointer: fine) {
+  .cof-base-button--primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow:
+      0 10px 22px rgba(18, 60, 27, 0.2);
+  }
 }
 
 .cof-base-button--secondary {
@@ -575,8 +579,10 @@
   color: #1e6b3a;
 }
 
-.cof-base-button--secondary:hover:not(:disabled) {
-  background: #e6f1e8;
+@media (hover: hover) and (pointer: fine) {
+  .cof-base-button--secondary:hover:not(:disabled) {
+    background: #e6f1e8;
+  }
 }
 
 .cof-base-button--ghost {
@@ -584,8 +590,10 @@
   color: #1e6b3a;
 }
 
-.cof-base-button--ghost:hover:not(:disabled) {
-  background: rgba(75, 177, 105, 0.08);
+@media (hover: hover) and (pointer: fine) {
+  .cof-base-button--ghost:hover:not(:disabled) {
+    background: rgba(75, 177, 105, 0.08);
+  }
 }
 
 .cof-base-button--danger.cof-button--danger {

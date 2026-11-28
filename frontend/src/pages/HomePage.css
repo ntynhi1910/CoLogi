@@ -48,8 +48,7 @@ no global component overrides. */
   flex:none;
   border-radius:50%;
   background:#58C375;
-  box-shadow:0 0 0 4px #4BB16924;
-  animation:clh-pulse 2.8s ease-in-out infinite
+  box-shadow:0 0 0 4px #4BB16924
 }
 
 .clh-separator {
@@ -93,9 +92,11 @@ no global component overrides. */
   transition:background .2s,border-color .2s
 }
 
-.clh-refresh:hover:not(:disabled) {
-  background:#F0F7F1;
-  border-color:#9FC5A9
+@media (hover: hover) and (pointer: fine) {
+  .clh-refresh:hover:not(:disabled) {
+    background:#F0F7F1;
+    border-color:#9FC5A9
+  }
 }
 
 .clh-role-switch {
@@ -124,11 +125,13 @@ no global component overrides. */
   color:#64816C;
   font-size:11px;
   font-weight:750;
-  transition:all .2s
+  transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease, color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
 }
 
-.clh-role:hover {
-  background:#ECF6EE
+@media (hover: hover) and (pointer: fine) {
+  .clh-role:hover {
+    background:#ECF6EE
+  }
 }
 
 .clh-role.active {
@@ -238,9 +241,11 @@ no global component overrides. */
   transition:transform .2s,box-shadow .2s
 }
 
-.clh-gold-button:hover {
-  transform:translateY(-3px);
-  box-shadow:0 15px 26px #031C1040
+@media (hover: hover) and (pointer: fine) {
+  .clh-gold-button:hover {
+    transform:translateY(-3px);
+    box-shadow:0 15px 26px #031C1040
+  }
 }
 
 .clh-hero-role,.clh-hero-feature {
@@ -265,8 +270,7 @@ no global component overrides. */
   height:248px;
   border:1px dashed #FFFFFF2B;
   border-radius:50%;
-  box-shadow:0 0 0 28px #FFFFFF07;
-  animation:clh-halo 8s ease-in-out infinite
+  box-shadow:0 0 0 28px #FFFFFF07
 }
 
 .clh-visual-card {
@@ -278,8 +282,7 @@ no global component overrides. */
   background:linear-gradient(135deg,#FFFFFF29,#FFFFFF0A);
   backdrop-filter:blur(14px);
   -webkit-backdrop-filter:blur(14px);
-  box-shadow:0 18px 30px #092C1A47;
-  animation:clh-bob 7s ease-in-out infinite
+  box-shadow:0 18px 30px #092C1A47
 }
 
 .clh-visual-header {
@@ -400,9 +403,11 @@ no global component overrides. */
   transition:transform .2s,box-shadow .2s
 }
 
-.clh-metric:hover {
-  transform:translateY(-3px);
-  box-shadow:0 16px 31px #123C1B17
+@media (hover: hover) and (pointer: fine) {
+  .clh-metric:hover {
+    transform:translateY(-3px);
+    box-shadow:0 16px 31px #123C1B17
+  }
 }
 
 .clh-metric-top {
@@ -557,8 +562,10 @@ no global component overrides. */
   border-bottom:0
 }
 
-.clh a.clh-task-row:hover {
-  background:#F8FCF9
+@media (hover: hover) and (pointer: fine) {
+  .clh a.clh-task-row:hover {
+    background:#F8FCF9
+  }
 }
 
 .clh-task-icon {
@@ -646,8 +653,10 @@ no global component overrides. */
   font-weight:800
 }
 
-.clh-panel-link:hover {
-  color:#0C4825!important
+@media (hover: hover) and (pointer: fine) {
+  .clh-panel-link:hover {
+    color:#0C4825!important
+  }
 }
 
 .clh-empty {
@@ -715,8 +724,7 @@ no global component overrides. */
 }
 
 .clh-bar-segment {
-  min-width:0;
-  transition:width .4s
+  min-width:0
 }
 
 .clh-bar-segment.green,.clh-legend-dot.green {
@@ -808,9 +816,11 @@ no global component overrides. */
   transition:transform .2s,border-color .2s
 }
 
-.clh-shortcut:hover {
-  transform:translateY(-2px);
-  border-color:#89BC99
+@media (hover: hover) and (pointer: fine) {
+  .clh-shortcut:hover {
+    transform:translateY(-2px);
+    border-color:#89BC99
+  }
 }
 
 .clh-shortcut>span {
@@ -950,33 +960,6 @@ no global component overrides. */
   to {
     opacity:1;
     transform:translateY(0)
-  }
-}
-
-@keyframes clh-pulse {
-  0%,100% {
-    box-shadow:0 0 0 4px #4BB16924
-  }
-  50% {
-    box-shadow:0 0 0 7px #4BB16908
-  }
-}
-
-@keyframes clh-bob {
-  0%,100% {
-    transform:translateY(0)
-  }
-  50% {
-    transform:translateY(-7px)
-  }
-}
-
-@keyframes clh-halo {
-  0%,100% {
-    opacity:.55
-  }
-  50% {
-    opacity:1
   }
 }
 
@@ -1157,10 +1140,16 @@ no global component overrides. */
   display: none;
 }
 
-.clh-account-trigger:hover,
 .clh-account-menu[open] .clh-account-trigger {
   border-color: #83BC96;
   background: #F6FAF7;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .clh-account-trigger:hover {
+    border-color: #83BC96;
+    background: #F6FAF7;
+  }
 }
 
 .clh-account-trigger > svg {
@@ -1310,8 +1299,10 @@ no global component overrides. */
   font-size: 18px;
 }
 
-.clh-account-profile-btn:hover {
-  background: #E4F2E8;
+@media (hover: hover) and (pointer: fine) {
+  .clh-account-profile-btn:hover {
+    background: #E4F2E8;
+  }
 }
 
 /* ROLE SWITCHER */
@@ -1348,9 +1339,11 @@ no global component overrides. */
   color: white;
 }
 
-.clh-account-roles button:hover:not(.selected) {
-  background: #EAF4ED;
-  border-color: #AACDB4;
+@media (hover: hover) and (pointer: fine) {
+  .clh-account-roles button:hover:not(.selected) {
+    background: #EAF4ED;
+    border-color: #AACDB4;
+  }
 }
 
 /* ROLE-AWARE LINKS */
@@ -1369,8 +1362,10 @@ no global component overrides. */
   transition: background .2s;
 }
 
-.clh-account-navlink:hover {
-  background: #F1F8F2;
+@media (hover: hover) and (pointer: fine) {
+  .clh-account-navlink:hover {
+    background: #F1F8F2;
+  }
 }
 
 .clh-account-navlink span {
@@ -1407,8 +1402,10 @@ no global component overrides. */
   transition: background .2s;
 }
 
-.clh-account-logout:hover {
-  background: #FFECE9;
+@media (hover: hover) and (pointer: fine) {
+  .clh-account-logout:hover {
+    background: #FFECE9;
+  }
 }
 
 /* PROFILE DETAILS */
@@ -1566,9 +1563,11 @@ no global component overrides. */
   box-shadow: 0 3px 12px rgba(18, 60, 27, 0.04);
 }
 
-.clh-account-trigger:hover {
-  background: #EDF7EF;
-  border-color: #4BB169;
+@media (hover: hover) and (pointer: fine) {
+  .clh-account-trigger:hover {
+    background: #EDF7EF;
+    border-color: #4BB169;
+  }
 }
 
 .clh-account-trigger-label {

@@ -19,6 +19,18 @@
   min-height: 86px;
 }
 
+@media (min-width: 1181px) {
+  .dssf-dashboard .dssf-scope-stats {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1180px) {
+  .dssd-stats > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
 .dssf-dashboard .dssf-dashboard-workspace {
   align-items: stretch;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
@@ -43,8 +55,10 @@
   text-decoration: none;
 }
 
-.dssf-link:hover {
-  text-decoration: underline;
+@media (hover: hover) and (pointer: fine) {
+  .dssf-link:hover {
+    text-decoration: underline;
+  }
 }
 
 .dssf-dashboard .dssf-history-table {

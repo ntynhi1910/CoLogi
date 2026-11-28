@@ -133,9 +133,11 @@
   color: #fff;
 }
 
-.demand-detail-primary:hover:not(:disabled) {
-  filter: brightness(0.95);
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .demand-detail-primary:hover:not(:disabled) {
+    filter: brightness(0.95);
+    transform: translateY(-1px);
+  }
 }
 
 .demand-detail-secondary {
@@ -144,9 +146,11 @@
   color: var(--color-text, #334155);
 }
 
-.demand-detail-secondary:hover {
-  border-color: var(--color-primary, #315fce);
-  color: var(--color-primary, #315fce);
+@media (hover: hover) and (pointer: fine) {
+  .demand-detail-secondary:hover {
+    border-color: var(--color-primary, #315fce);
+    color: var(--color-primary, #315fce);
+  }
 }
 
 .demand-detail-danger {
@@ -155,8 +159,10 @@
   color: #b43a3a;
 }
 
-.demand-detail-danger:hover:not(:disabled) {
-  background: #feecec;
+@media (hover: hover) and (pointer: fine) {
+  .demand-detail-danger:hover:not(:disabled) {
+    background: #feecec;
+  }
 }
 
 .demand-detail-primary:disabled,
@@ -504,12 +510,22 @@
 /* Nút hủy khi nhu cầu đã bị hủy */
 
 .demand-detail-danger.is-cancelled,
-.demand-detail-danger.is-cancelled:disabled,
-.demand-detail-danger.is-cancelled:hover {
+.demand-detail-danger.is-cancelled:disabled {
   background: #333333;
   border-color: #333333;
   color: #ffffff;
   opacity: 1;
   cursor: not-allowed;
   box-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .demand-detail-danger.is-cancelled:hover {
+    background: #333333;
+    border-color: #333333;
+    color: #ffffff;
+    opacity: 1;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
 }
