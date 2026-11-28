@@ -1,5 +1,5 @@
 
-import { useCallback, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type ReactNode } from 'react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/useAuth'
 import { apiRequest } from '../../services/api/client'
@@ -10,6 +10,7 @@ type MenuIcon =
   | 'home' | 'clipboard' | 'plus' | 'box' | 'truck'
   | 'calendar' | 'layers' | 'shield' | 'user' | 'menu'
   | 'chevron' | 'check' | 'route' | 'chart' | 'clock'
+  | 'users' | 'pin' | 'play'
 
 const iconArt: Record<MenuIcon, ReactNode> = {
   home: <>
@@ -62,6 +63,19 @@ const iconArt: Record<MenuIcon, ReactNode> = {
     <circle cx="12" cy="12" r="9" />
     <path d="M12 7v5l3 2" />
   </>,
+  users: <>
+    <circle cx="9" cy="8" r="3.5" />
+    <path d="M2.5 20c0-3.6 2.9-5.5 6.5-5.5s6.5 1.9 6.5 5.5" />
+    <path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 14.8c2.2.6 3.5 2.3 3.5 5.2" />
+  </>,
+  pin: <>
+    <path d="M12 21s-7-6.1-7-11.5a7 7 0 0 1 14 0C19 14.9 12 21 12 21Z" />
+    <circle cx="12" cy="9.5" r="2.5" />
+  </>,
+  play: <>
+    <circle cx="12" cy="12" r="9" />
+    <path d="m10 8.5 5 3.5-5 3.5z" />
+  </>,
 }
 
 function SideIcon({
@@ -98,8 +112,15 @@ const roleLabels: Record<BusinessRole, string> = {
 type MenuLink = {
   path: string
   label: string
-  detail: string
+  /** Shown as a tooltip; the sidebar keeps one line per item */
+  hint: string
   icon: MenuIcon
+  /** Exact match only (NavLink `end`) */
+  exact?: boolean
+  /** Custom active check for links that own a whole route family */
+  isActive?: (pathname: string, search: string) => boolean
+  /** Renders the DSS run progress under this link */
+  withRunProgress?: boolean
 }
 
 type MenuSection = {
@@ -109,91 +130,74 @@ type MenuSection = {
 
 /* Năm chức năng DSS theo báo cáo */
 const dssSteps = [
-  {
-    code: 'F1',
-    label: 'Phối hợp nhu cầu',
-    detail: 'Kiểm tra điều kiện gom hàng',
-  },
-  {
-    code: 'F2',
-    label: 'Xây dựng phương án',
-    detail: 'Giao trực tiếp / qua Hub',
-  },
-  {
-    code: 'F3',
-    label: 'Phân bổ phương tiện',
-    detail: 'Đánh giá từ phương án đã lưu',
-  },
-  {
-    code: 'F4',
-    label: 'Kiểm tra thời gian',
-    detail: 'Khung giờ lấy và nhận hàng',
-  },
-  {
-    code: 'F5',
-    label: 'Đánh giá kinh tế',
-    detail: 'So sánh chi phí phương án',
-  },
-]
+  { code: 'F1', label: 'Phối hợp nhu cầu' },
+  { code: 'F2', label: 'Xây dựng phương án' },
+  { code: 'F3', label: 'Phân bổ phương tiện' },
+  { code: 'F4', label: 'Kiểm tra thời gian' },
+  { code: 'F5', label: 'Đánh giá kinh tế' },
+] as const
 
-/* Điều hướng theo quyền và route đang có */
+type DssStepCode = (typeof dssSteps)[number]['code']
+
+/* Where each step lives for the run/option currently open. F5 needs an
+   evaluation code that only F4 knows, so it is never a direct link. */
+function stepHref(code: DssStepCode, runId?: string, optionId?: string) {
+  if (!runId) return undefined
+  if (code === 'F1') return `/dss/runs/${runId}`
+  if (!optionId || code === 'F5') return undefined
+  return `/dss/runs/${runId}/options/${optionId}/${code.toLowerCase()}`
+}
+
+function performanceLink(roles: BusinessRole[]): MenuLink {
+  const root = roles.includes('MANAGER') ? '/dss/reconciliation'
+    : roles.includes('TRANSPORT_PROVIDER') ? '/provider/reconciliation'
+      : roles.includes('PURCHASING_STAFF') ? '/purchasing/reconciliation' : '/supplier/reconciliation'
+  const label = roles.includes('MANAGER') ? 'Hiệu suất logistics'
+    : roles.includes('TRANSPORT_PROVIDER') ? 'Hiệu suất vận chuyển'
+      : roles.includes('SUPPLIER') ? 'Hiệu suất cung ứng' : 'Hiệu suất giao nhận'
+  return {
+    path: `${root}?tab=performance`,
+    label,
+    hint: 'KPI, đối soát và chi phí thực tế',
+    icon: 'chart',
+    isActive: (pathname, search) => pathname === root
+      && (new URLSearchParams(search).get('tab') ?? 'performance') === 'performance',
+  }
+}
+
+/* Điều hướng theo quyền và route đang có, xếp theo luồng công việc */
 function buildSections(
   roles: BusinessRole[],
   isCapstone: boolean,
   executionEnabled: boolean,
+  reconciliationEnabled: boolean,
 ): MenuSection[] {
   const isManager = roles.includes('MANAGER')
   const isStaff = roles.includes('PURCHASING_STAFF')
   const isSupplier = roles.includes('SUPPLIER')
   const isTransport = roles.includes('TRANSPORT_PROVIDER')
 
-  const sections: MenuSection[] = [
-    {
-      heading: 'TỔNG QUAN',
-      links: [
-        {
-          path: '/',
-          label: 'Bảng điều khiển',
-          detail: 'Tổng quan vận hành',
-          icon: 'home',
-        },
-      ],
-    },
-  ]
+  const sections: MenuSection[] = [{
+    heading: 'Tổng quan',
+    links: [{ path: '/', label: 'Bảng điều khiển', hint: 'Tổng quan vận hành', icon: 'home', exact: true }],
+  }]
 
   if (isManager || isStaff) {
     sections.push({
-      heading: '01 · NHU CẦU MUA HÀNG',
+      heading: 'Nhu cầu',
       links: [
         {
           path: '/demands',
           label: 'Danh sách nhu cầu',
-          detail: isManager
-            ? 'Giám sát · chỉ xem'
-            : 'Theo dõi và quản lý',
+          hint: isManager ? 'Giám sát, chỉ xem' : 'Theo dõi và quản lý nhu cầu',
           icon: 'clipboard',
+          exact: true,
         },
-        ...(!isManager && isStaff
-          ? [
-              {
-                path: '/demands/new',
-                label: 'Tạo nhu cầu mới',
-                detail: 'Nhập yêu cầu giao hàng',
-                icon: 'plus' as const,
-              },
-            ]
-          : []),
         ...(isStaff && !isCapstone ? [{
-          path: '/purchasing/outlets',
-          label: 'Quản lý điểm giao nhận',
-          detail: 'Địa chỉ và lịch nhận hàng',
-          icon: 'route' as const,
+          path: '/purchasing/outlets', label: 'Điểm giao nhận', hint: 'Địa chỉ và lịch nhận hàng', icon: 'pin' as const,
         }] : []),
         ...(isStaff ? [{
-          path: '/purchasing/receipts',
-          label: 'Lịch nhận hàng',
-          detail: 'Kế hoạch giao theo Outlet',
-          icon: 'calendar' as const,
+          path: '/purchasing/receipts', label: 'Lịch nhận hàng', hint: 'Kế hoạch giao theo Outlet', icon: 'calendar' as const,
         }] : []),
       ],
     })
@@ -201,72 +205,96 @@ function buildSections(
 
   if (isSupplier) {
     sections.push({
-      heading: '02 · NGUỒN CUNG',
+      heading: 'Cung ứng',
       links: [
-        {
-          path: '/supplier/requests',
-          label: 'Yêu cầu cung ứng',
-          detail: 'Xác nhận hàng & giờ lấy',
-          icon: 'layers',
-        },
-        {
-          path: '/supplier/items',
-          label: 'Danh mục mặt hàng',
-          detail: 'Thông tin hàng cung ứng',
-          icon: 'box',
-        },
-        {
-          path: '/supplier/shipments',
-          label: 'Lịch xuất hàng',
-          detail: 'Kế hoạch lấy hàng đã công bố',
-          icon: 'calendar',
-        },
+        { path: '/supplier/requests', label: 'Yêu cầu cung ứng', hint: 'Xác nhận hàng và giờ lấy', icon: 'layers' },
+        { path: '/supplier/items', label: 'Danh mục mặt hàng', hint: 'Thông tin hàng cung ứng', icon: 'box' },
+        { path: '/supplier/shipments', label: 'Lịch xuất hàng', hint: 'Kế hoạch lấy hàng đã công bố', icon: 'calendar' },
         ...(executionEnabled ? [{
-          path: '/supplier/inventory', label: 'Quản lý tồn kho', detail: 'Tồn thực tế và giữ chỗ', icon: 'box' as const,
+          path: '/supplier/inventory', label: 'Tồn kho', hint: 'Tồn thực tế và giữ chỗ', icon: 'box' as const,
         }] : []),
       ],
     })
   }
 
+  if (isTransport) {
+    sections.push({
+      heading: 'Năng lực vận chuyển',
+      links: [
+        { path: '/provider/capability', label: 'Tổng quan năng lực', hint: 'Phương tiện và phạm vi phục vụ', icon: 'truck' },
+        { path: '/provider/vehicle-offers', label: 'Xe và báo giá', hint: 'Số lượng, loại xe và chi phí', icon: 'box' },
+        { path: '/provider/availability', label: 'Lịch khả dụng', hint: 'Ngày, giờ và năng lực xe', icon: 'calendar' },
+      ],
+    }, {
+      heading: 'Chuyến hàng',
+      links: [
+        { path: '/provider/handovers', label: 'Xác nhận chuyến', hint: 'Bàn giao và phản hồi kế hoạch', icon: 'check' },
+        ...(executionEnabled ? [{
+          path: '/provider/trips', label: 'Điều phối chuyến', hint: 'Điểm dừng và giao nhận', icon: 'truck' as const,
+        }] : []),
+      ],
+    })
+  }
 
-if (isTransport) {
-  sections.push({
-    heading: '03 · VẬN CHUYỂN',
-    links: [
-      {
-        path: '/provider/capability',
-        label: 'Năng lực vận chuyển',
-        detail: 'Tổng quan phương tiện & phục vụ',
-        icon: 'truck',
-      },
-      {
-        path: '/provider/vehicle-offers',
-        label: 'Cấu hình xe & báo giá',
-        detail: 'Số lượng, loại xe và chi phí',
-        icon: 'box',
-      },
-      {
-        path: '/provider/availability',
-        label: 'Lịch khả dụng',
-        detail: 'Ngày, giờ và năng lực xe',
-        icon: 'calendar',
-      },
-    ],
-  })
-}
+  if (isManager) {
+    sections.push({
+      heading: 'Lập kế hoạch',
+      links: [{
+        path: '/dss',
+        label: 'Lập kế hoạch F1–F5',
+        hint: 'Chạy F1, xem phương án và lịch sử kết quả',
+        icon: 'play',
+        withRunProgress: true,
+        isActive: (pathname) => pathname === '/dss' || /^\/dss\/(runs|scenarios)\//.test(pathname),
+      }],
+    }, {
+      heading: 'Quyết định',
+      links: [
+        { path: '/dss/decisions', label: 'Phê duyệt phương án', hint: 'Xem và ghi quyết định', icon: 'shield' },
+        { path: '/dss/final-plans', label: 'Kế hoạch cuối cùng', hint: 'Phiên bản và bàn giao', icon: 'route' },
+        { path: '/dss/decision-history', label: 'Lịch sử quyết định', hint: 'Nhật ký và so sánh phiên bản', icon: 'clock' },
+      ],
+    })
+  }
+
+  const followUp: MenuLink[] = [
+    ...(isManager && executionEnabled ? [{
+      path: '/dss/execution', label: 'Theo dõi thực hiện', hint: 'Kế hoạch và giao nhận thực tế', icon: 'truck' as const,
+    }] : []),
+    ...(reconciliationEnabled ? [performanceLink(roles)] : []),
+  ]
+  if (followUp.length) sections.push({ heading: 'Thực hiện & đối soát', links: followUp })
+
+  if (isManager && !isCapstone) {
+    sections.push({
+      heading: 'Quản trị',
+      links: [{ path: '/dss/accounts', label: 'Tài khoản & phân quyền', hint: 'Vai trò và phạm vi truy cập', icon: 'users' }],
+    })
+  }
 
   return sections
 }
 
+function initials(name: string) {
+  // Only words that start with a letter: "Demo STAFF #2" -> "DS", not "D#"
+  const words = name.trim().split(/\s+/).filter((word) => /^\p{L}/u.test(word))
+  if (!words.length) return '?'
+  const first = [...words[0]][0] ?? ''
+  const last = words.length > 1 ? [...words[words.length - 1]][0] ?? '' : ''
+  return (first + last).toUpperCase()
+}
+
 export default function AppLayout() {
   const { pathname, search } = useLocation()
+  const runMatch = pathname.match(/^\/dss\/runs\/([^/]+)(?:\/options\/([^/]+))?/)
+  const runId = runMatch?.[1]
+  const optionId = runMatch?.[2]
   const optionStage = pathname.match(/^\/dss\/runs\/[^/]+\/options\/[^/]+\/(f[2-5])(?:\/|$)/)?.[1]
   const isF1 = /^\/dss\/(?:runs\/[^/]+(?:\/options\/[^/]+)?|scenarios\/[^/]+)\/?$/.test(pathname)
   const currentStep = optionStage?.toUpperCase() ?? (isF1 ? 'F1' : undefined)
   const { user, signOut, error } = useAuth()
 
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [dssOpen, setDssOpen] = useState(true)
   const { data: execution } = useDssQuery(useCallback(() => user
     ? apiRequest<{ enabled: boolean }>('/planning/execution/availability/')
     : Promise.resolve({ enabled: false }), [user]))
@@ -274,16 +302,21 @@ export default function AppLayout() {
     ? apiRequest<{ enabled: boolean }>('/planning/reconciliation/availability/')
     : Promise.resolve({ enabled: false }), [user, execution?.enabled]))
 
+  useEffect(() => {
+    if (!mobileOpen) return
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setMobileOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [mobileOpen])
+
   if (!user) return null
 
-  const isManager = user.roles.includes('MANAGER')
   const isPurchasing = user.roles.includes('PURCHASING_STAFF')
-  const isTransport = user.roles.includes('TRANSPORT_PROVIDER')
-  const isSupplier = user.roles.includes('SUPPLIER')
-
-
+  const isManager = user.roles.includes('MANAGER')
   const executionEnabled = execution?.enabled === true
-  const sections = buildSections(user.roles, Boolean(user.capstone_scenario), executionEnabled)
+  const sections = buildSections(
+    user.roles, Boolean(user.capstone_scenario), executionEnabled, reconciliation?.enabled === true,
+  )
 
   const roleName = user.roles.length
     ? user.roles
@@ -291,13 +324,7 @@ export default function AppLayout() {
         .join(' · ')
     : 'Chưa được gán vai trò'
 
-  const accessNote = isManager
-    ? 'Theo dõi nhu cầu; xem xét và phê duyệt phương án khi chức năng được tích hợp.'
-    : isPurchasing
-      ? 'Tạo và theo dõi nhu cầu theo phân quyền.'
-      : isTransport
-        ? 'Cập nhật năng lực, tiếp nhận kế hoạch được duyệt.'
-        : 'Xác nhận cung ứng và điều kiện lấy hàng.'
+  const close = () => setMobileOpen(false)
 
   async function handleSignOut() {
     try {
@@ -305,6 +332,39 @@ export default function AppLayout() {
     } catch {
       // AuthContext chịu trách nhiệm xử lý lỗi đăng xuất.
     }
+  }
+
+  function renderRunProgress() {
+    if (!currentStep) return null
+    const current = dssSteps.find((step) => step.code === currentStep)
+    return (
+      <div className="sidebar-run">
+        <ol className="sidebar-run-steps" aria-label="Tiến trình lần chạy">
+          {dssSteps.map((step) => {
+            const href = stepHref(step.code, runId, optionId)
+            const isCurrent = step.code === currentStep
+            return (
+              <li key={step.code}>
+                {href && !isCurrent ? (
+                  <Link to={href} className="sidebar-run-step" title={step.label} onClick={close}>
+                    {step.code}
+                  </Link>
+                ) : (
+                  <span
+                    className={`sidebar-run-step${isCurrent ? ' is-current' : ' is-locked'}`}
+                    title={step.label}
+                    aria-current={isCurrent ? 'step' : undefined}
+                  >
+                    {step.code}
+                  </span>
+                )}
+              </li>
+            )
+          })}
+        </ol>
+        {current && <p className="sidebar-run-label">{current.code} · {current.label}</p>}
+      </div>
+    )
   }
 
   return (
@@ -315,7 +375,7 @@ export default function AppLayout() {
           type="button"
           className="sidebar-backdrop"
           aria-label="Đóng menu"
-          onClick={() => setMobileOpen(false)}
+          onClick={close}
         />
       )}
 
@@ -331,7 +391,7 @@ export default function AppLayout() {
           to="/"
           className="sidebar-brand"
           aria-label="CoLogi - Trang chủ"
-          onClick={() => setMobileOpen(false)}
+          onClick={close}
         >
           <span className="sidebar-brand-mark">
             <img src="/images/logo.png" alt="" />
@@ -341,248 +401,83 @@ export default function AppLayout() {
             <strong>
               CoLogi<span>.</span>
             </strong>
-            <small>LOGISTICS WORKSPACE</small>
+            <small>{isManager ? 'Quản lý điều phối' : roleName}</small>
           </span>
         </NavLink>
 
-        {/* WORKSPACE */}
-        <div className="sidebar-workspace-card">
-          <span className="sidebar-workspace-kicker">
-            KHÔNG GIAN LÀM VIỆC
-          </span>
-
-          <strong>
-            {isManager
-              ? 'Quản lý điều phối'
-              : isPurchasing
-                ? 'Mua hàng'
-                : isTransport
-                  ? 'Vận chuyển'
-                  : 'Cung ứng'}
-          </strong>
-
-          <small>
-            {isManager
-              ? 'Giám sát và phê duyệt'
-              : roleName}
-          </small>
-        </div>
+        {isPurchasing && !isManager && (
+          <NavLink to="/demands/new" className="sidebar-cta" onClick={close}>
+            <SideIcon name="plus" size={18} />
+            Tạo nhu cầu mới
+          </NavLink>
+        )}
 
         {/* MENU CÓ THỂ CUỘN */}
         <div className="sidebar-scroll">
-
-          <nav
-            className="sidebar-nav"
-            aria-label="Điều hướng chính"
-          >
+          <nav className="sidebar-nav" aria-label="Điều hướng chính">
             {sections.map((section) => (
-              <section
-                className="sidebar-section"
-                key={section.heading}
-              >
-                <p className="sidebar-section-label">
-                  {section.heading}
-                </p>
+              <section className="sidebar-section" key={section.heading}>
+                <p className="sidebar-section-label">{section.heading}</p>
 
-                {section.links.map((item) => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    end={
-                      item.path === '/' ||
-                      item.path === '/demands'
-                    }
-                    onClick={() => setMobileOpen(false)}
-                    className={({ isActive }) =>
-                      `sidebar-link${isActive ? ' active' : ''}`
-                    }
-                  >
-                    <span className="sidebar-link-icon">
-                      <SideIcon name={item.icon} />
-                    </span>
-
-                    <span className="sidebar-link-label">
-                      <strong>{item.label}</strong>
-                      <small>{item.detail}</small>
-                    </span>
-                  </NavLink>
-                ))}
+                {section.links.map((item) => {
+                  const active = item.isActive?.(pathname, search)
+                  const content = (
+                    <>
+                      <span className="sidebar-link-icon">
+                        <SideIcon name={item.icon} />
+                      </span>
+                      <span className="sidebar-link-label">{item.label}</span>
+                    </>
+                  )
+                  return (
+                    <div key={item.path}>
+                      {item.isActive ? (
+                        <Link
+                          to={item.path}
+                          title={item.hint}
+                          onClick={close}
+                          aria-current={active ? 'page' : undefined}
+                          className={`sidebar-link${active ? ' active' : ''}`}
+                        >
+                          {content}
+                        </Link>
+                      ) : (
+                        <NavLink
+                          to={item.path}
+                          end={item.exact}
+                          title={item.hint}
+                          onClick={close}
+                          className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
+                        >
+                          {content}
+                        </NavLink>
+                      )}
+                      {item.withRunProgress && renderRunProgress()}
+                    </div>
+                  )
+                })}
               </section>
             ))}
-          
           </nav>
-
-          {/* HỖ TRỢ LẬP KẾ HOẠCH */}
-          {isManager && (
-            <section className="sidebar-section sidebar-dss-section">
-              <button
-                type="button"
-                className="sidebar-section-toggle"
-                aria-expanded={dssOpen}
-                aria-controls="cologi-dss-steps"
-                onClick={() =>
-                  setDssOpen((value) => !value)
-                }
-              >
-                <span>04 · HỖ TRỢ LẬP KẾ HOẠCH</span>
-                <SideIcon name="chevron" size={15} />
-              </button>
-
-              {dssOpen && (
-                <div id="cologi-dss-steps">
-                  <NavLink
-                    to="/dss"
-                    end
-                    onClick={() => setMobileOpen(false)}
-                    className={({ isActive }) =>
-                      `sidebar-link${isActive ? ' active' : ''}`
-                    }
-                  >
-                    <span className="sidebar-link-icon">
-                      <SideIcon name="chart" />
-                    </span>
-
-                    <span className="sidebar-link-label">
-                      <strong>Tổng quan lập kế hoạch</strong>
-                      <small>
-                        Thực thi F1 và lịch sử kết quả
-                      </small>
-                    </span>
-                  </NavLink>
-
-                  <ol
-                    className="sidebar-dss-list"
-                    aria-label="Năm bước hỗ trợ lập kế hoạch"
-                  >
-                    {dssSteps.map((step) => (
-                      <li
-                        key={step.code}
-                        className="sidebar-dss-step"
-                        aria-current={step.code === currentStep ? 'step' : undefined}
-                      >
-                        <span className="sidebar-dss-number">
-                          {step.code}
-                        </span>
-
-                        <span className="sidebar-dss-copy">
-                          <strong>{step.label}</strong>
-                          <small>{step.detail}</small>
-                        </span>
-                      </li>
-                    ))}
-                  </ol>
-
-                </div>
-              )}
-            </section>
-          )}
-
-          {/* QUYẾT ĐỊNH VÀ KẾ HOẠCH */}
-          {isManager && (
-            <section className="sidebar-section">
-              <p className="sidebar-section-label">
-                05 · QUYẾT ĐỊNH & KẾ HOẠCH
-              </p>
-
-              {([
-                ['/dss/decisions', 'shield', 'Phê duyệt phương án', 'Xem và ghi quyết định'],
-                ['/dss/final-plans', 'route', 'Kế hoạch cuối cùng', 'Phiên bản và bàn giao'],
-                ['/dss/decision-history', 'clock', 'Lịch sử quyết định', 'Nhật ký và so sánh phiên bản'],
-                ['/dss/accounts', 'user', 'Phân quyền và tài khoản', 'Vai trò và phạm vi truy cập'],
-                ['/dss/execution', 'route', 'Theo dõi thực hiện', 'Kế hoạch và giao nhận thực tế'],
-              ] as const).filter(([url]) => (url !== '/dss/accounts' || !user.capstone_scenario) &&
-                (url !== '/dss/execution' || executionEnabled)).map(([url, icon, title, detail]) =>
-                <NavLink key={url} to={url} onClick={() => setMobileOpen(false)} className="sidebar-link">
-                  <span className="sidebar-link-icon"><SideIcon name={icon} /></span>
-                  <span className="sidebar-link-label"><strong>{title}</strong><small>{detail}</small></span>
-                </NavLink>)}
-            </section>
-          )}
-
-          {/* XÁC NHẬN CHUYẾN */}
-          {isTransport && (
-            <section className="sidebar-section">
-              <p className="sidebar-section-label">
-                KẾ HOẠCH ĐƯỢC DUYỆT
-              </p>
-
-              <NavLink to="/provider/handovers" onClick={() => setMobileOpen(false)} className="sidebar-link">
-                <span className="sidebar-link-icon">
-                  <SideIcon name="check" />
-                </span>
-                <span className="sidebar-link-label">
-                  <strong>Xác nhận chuyến</strong>
-                  <small>Bàn giao và phản hồi kế hoạch</small>
-                </span>
-              </NavLink>
-              {executionEnabled && <NavLink to="/provider/trips" onClick={() => setMobileOpen(false)} className="sidebar-link">
-                <span className="sidebar-link-icon"><SideIcon name="truck" /></span>
-                <span className="sidebar-link-label"><strong>Điều phối chuyến</strong><small>Điểm dừng và giao nhận</small></span>
-              </NavLink>}
-            </section>
-          )}
-
-          {reconciliation?.enabled && <section className="sidebar-section">
-            <p className="sidebar-section-label">{isManager && '06 · '}ĐỐI SOÁT & HIỆU SUẤT</p>
-            {(() => {
-              const root = isManager ? '/dss/reconciliation' : isTransport ? '/provider/reconciliation'
-                : isPurchasing ? '/purchasing/reconciliation' : '/supplier/reconciliation'
-              const title = isManager ? 'Hiệu suất logistics' : isTransport ? 'Hiệu suất vận chuyển'
-                : isSupplier ? 'Hiệu suất cung ứng' : 'Hiệu suất giao nhận'
-              const active = pathname === root && (new URLSearchParams(search).get('tab') ?? 'performance') === 'performance'
-              return <Link className={`sidebar-link${active ? ' active' : ''}`} onClick={() => setMobileOpen(false)}
-                aria-current={active ? 'page' : undefined} to={`${root}?tab=performance`}>
-                <span className="sidebar-link-icon"><SideIcon name="chart" /></span>
-                <span className="sidebar-link-label"><strong>{title}</strong></span>
-              </Link>
-            })()}
-          </section>}
-
-          {/* TÀI KHOẢN */}
-          <section className="sidebar-section">
-            <p className="sidebar-section-label">
-              TÀI KHOẢN
-            </p>
-
-            <NavLink
-              to="/profile"
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `sidebar-link${isActive ? ' active' : ''}`
-              }
-            >
-              <span className="sidebar-link-icon">
-                <SideIcon name="user" />
-              </span>
-
-              <span className="sidebar-link-label">
-                <strong>Hồ sơ cá nhân</strong>
-                <small>Thông tin & vai trò</small>
-              </span>
-            </NavLink>
-          </section>
-
         </div>
-        {/* KẾT THÚC sidebar-scroll */}
 
-        {/* SIDEBAR FOOTER */}
+        {/* HỒ SƠ */}
         <div className="sidebar-footer">
-          <div className="sidebar-access-card">
-            <SideIcon name="shield" size={18} />
-
-            <div>
-              <strong>Quyền truy cập</strong>
-              <small>{accessNote}</small>
-            </div>
-          </div>
-
-          <span className="sidebar-version">
-            COLOGI DSS · MVP 2026
-          </span>
+          <NavLink
+            to="/profile"
+            onClick={close}
+            title="Hồ sơ cá nhân"
+            className={({ isActive }) => `sidebar-profile${isActive ? ' active' : ''}`}
+          >
+            <span className="sidebar-avatar" aria-hidden="true">{initials(user.full_name)}</span>
+            <span className="sidebar-profile-copy">
+              <strong>{user.full_name}</strong>
+              <small>{roleName}</small>
+            </span>
+          </NavLink>
         </div>
 
       </aside>
-
       {/* MAIN LAYOUT */}
       <div className="app-main">
         <header className="app-header">
