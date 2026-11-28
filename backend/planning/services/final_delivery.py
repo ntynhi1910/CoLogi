@@ -401,12 +401,24 @@ def _queue_row(*, actor, run, group, row, final, decision, scoped_runs):
         )
     reason = next((approval["code"] for _, approval in options if approval["code"]), None)
     best = eligible[0] if eligible else None
+
+    # Approved groups must display their published economic
+    # evaluation, not an eligible replacement option.
+    estimate_row = (
+        None if conflicts
+        else final.decision.evaluation if final
+        else best
+    )
+
     return {
         **summary, "queue_status": "CONFLICT" if conflicts else "APPROVED" if final else "WAITING" if best else "UNAVAILABLE",
         "conflicts": conflicts, "can_replace": bool(best and final),
         "risk_code": "DEMAND_ALREADY_FINALIZED" if conflicts else reason if not best and not final else None,
-        "estimate": ({"cost": best.collaborative_cost, "saving": best.cost_saving,
-                      "currency": best.snapshot["configuration"]["currency_code"]} if best else None),
+        "estimate": ({
+            "cost": estimate_row.collaborative_cost,
+            "saving": estimate_row.cost_saving,
+            "currency": estimate_row.snapshot["configuration"]["currency_code"],
+        } if estimate_row else None),
     }
 
 
@@ -429,7 +441,10 @@ def review_index(*, actor, outcome=None, code=None, date_from=None, date_to=None
     ).order_by("group_id", "-pk").distinct("group_id")}
     current_by_group = {item.decision.group_id: item for item in FinalPlan.objects.filter(
         decision__actor=actor, decision__group_id__in=group_ids, successor__isnull=True,
-    ).select_related("decision__group", "handover__reply", "supersedes")}
+    ).select_related(
+        "decision__group", "decision__evaluation",
+        "handover__reply", "supersedes",
+    )}
     history = PlanDecision.objects.filter(actor=actor, group__run_code__in=runs).select_related(
         "actor", "evaluation", "group", "final_plan__supersedes", "final_plan__handover__reply",
     )

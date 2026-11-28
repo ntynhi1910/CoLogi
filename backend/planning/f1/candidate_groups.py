@@ -63,10 +63,13 @@ class CandidateLimitExceeded(ValueError):
 
 
 def validate_candidate_limits(max_group_size, max_candidates_per_run):
-    # None/None is retained only for existing unbounded preview callers.
+    # None size means no cardinality cap.
+    # None/None remains supported for legacy preview callers.
     if max_group_size is None and max_candidates_per_run is None:
         return
-    if type(max_group_size) is not int or max_group_size < 2:
+    if max_group_size is not None and (
+        type(max_group_size) is not int or max_group_size < 2
+    ):
         raise ValueError("INVALID_MAX_GROUP_SIZE")
     if type(max_candidates_per_run) is not int or max_candidates_per_run < 1:
         raise ValueError("INVALID_MAX_CANDIDATES_PER_RUN")
@@ -247,8 +250,9 @@ def generate_candidate_groups(
 
     The matrix must already be normalized by
     normalize_cargo_compatibility_matrix(). Missing pairs fail closed.
-    Configured bounds must be supplied together. Overflow raises before any
-    partial result is returned. Legacy callers may omit both bounds.
+    A None group size permits unrestricted maximal groups.
+    Configured execution still requires a positive candidate count limit.
+    Overflow raises before any partial result is returned.
     """
     validate_candidate_limits(max_group_size, max_candidates_per_run)
     if (

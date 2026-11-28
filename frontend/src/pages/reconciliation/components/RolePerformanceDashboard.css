@@ -1,0 +1,317 @@
+
+/* Role-based logistics performance dashboard */
+
+.rpd-dashboard {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  min-width: 0;
+}
+
+.rpd-dashboard *,
+.rpd-dashboard *::before,
+.rpd-dashboard *::after {
+  box-sizing: border-box;
+}
+
+.rpd-panel {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.rpd-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.rpd-heading h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 750;
+  color: #174b31;
+}
+
+.rpd-heading p {
+  margin: 0;
+  color: #728576;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.rpd-mode,
+.rpd-count {
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: #edf5ef;
+  color: #246141;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+/* KPI cards */
+
+.rpd-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.rpd-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  min-height: 145px;
+  padding: 17px;
+  border: 1px solid #e0eae3;
+  border-radius: 10px;
+  background: #f8fbf9;
+}
+
+.rpd-kpi-label {
+  color: #607969;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.rpd-kpi-value {
+  display: block;
+  margin: 11px 0;
+  color: #165b39;
+  font-size: clamp(24px, 2.5vw, 31px);
+  font-weight: 750;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.rpd-kpi small {
+  margin-top: auto;
+  color: #7b8b7e;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.rpd-kpi progress {
+  width: 100%;
+  height: 7px;
+  margin: 0 0 12px;
+  accent-color: #278554;
+}
+
+/* Direct vs Hub */
+
+.rpd-template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.rpd-template {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid #dce8df;
+  border-radius: 10px;
+  background: #fafcfa;
+}
+
+.rpd-template h3 {
+  margin: 0 0 15px;
+  color: #1b5135;
+  font-size: 15px;
+}
+
+.rpd-template dl {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.rpd-template dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid #e7eee9;
+}
+
+.rpd-template dl > div:last-child {
+  border-bottom: none;
+}
+
+.rpd-template dt {
+  color: #728475;
+  font-size: 12px;
+}
+
+.rpd-template dd {
+  margin: 0;
+  color: #1c593a;
+  font-size: 13px;
+  font-weight: 750;
+  text-align: right;
+}
+
+/* Daily trends */
+
+.rpd-trends {
+  display: grid;
+  gap: 14px;
+}
+
+.rpd-trend-row {
+  display: grid;
+  grid-template-columns: 125px minmax(0, 1fr) 105px;
+  align-items: center;
+  gap: 14px;
+}
+
+.rpd-trend-row time {
+  color: #5d7464;
+  font-size: 12px;
+}
+
+.rpd-trend-row strong {
+  color: #1a5637;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.rpd-trend-bar {
+  min-width: 0;
+}
+
+.rpd-trend-bar progress {
+  display: block;
+  width: 100%;
+  height: 12px;
+  border-radius: 8px;
+  accent-color: #278554;
+}
+
+.rpd-trend-unavailable {
+  color: #93a198;
+  font-size: 11px;
+}
+
+/* Current FinalPlans */
+
+.rpd-table-scroll {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.rpd-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.rpd-table th,
+.rpd-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #e7eee9;
+  vertical-align: middle;
+  color: #294d37;
+  font-size: 12px;
+}
+
+.rpd-table thead th {
+  background: #f0f6f2;
+  color: #577460;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rpd-table tbody tr:hover {
+  background: #f8fbf9;
+}
+
+.rpd-plan-code {
+  color: #1a5e3b;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.rpd-table a {
+  color: #17623e;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.rpd-table a:hover {
+  text-decoration: underline;
+}
+
+.rpd-status {
+  display: inline-flex;
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: #eef2ef;
+  color: #5f7163;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rpd-status[data-status="COMPLETED"],
+.rpd-status[data-status="RECONCILED"] {
+  background: #e5f4e9;
+  color: #17643c;
+}
+
+.rpd-status[data-status="EXCEPTION"] {
+  background: #fff0e8;
+  color: #a74732;
+}
+
+.rpd-status[data-status="IN_PROGRESS"],
+.rpd-status[data-status="PENDING_RECONCILIATION"] {
+  background: #fff5dc;
+  color: #966510;
+}
+
+.rpd-empty {
+  padding: 20px;
+  border: 1px dashed #d6e4da;
+  border-radius: 9px;
+  color: #728575;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Responsive */
+
+@media (max-width: 1050px) {
+  .rpd-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .rpd-panel {
+    padding: 15px;
+  }
+
+  .rpd-kpi-grid,
+  .rpd-template-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rpd-trend-row {
+    grid-template-columns: 90px minmax(0, 1fr) 75px;
+    gap: 8px;
+  }
+}

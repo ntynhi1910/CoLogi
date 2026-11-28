@@ -191,3 +191,97 @@
   .f4-stop-detail-grid { grid-template-columns: minmax(0, 1fr); }
   .f4-compare-counts { flex-basis: 100%; }
 }
+
+/* F4 - Compact evaluation history */
+
+.f4-history {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.3fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.f4-history > .f4-card {
+  min-width: 0;
+  padding: 20px;
+  border-radius: 14px;
+}
+
+.f4-history-group {
+  padding: 13px 0;
+  border-bottom: 1px solid #e3ece6;
+}
+
+.f4-history-group:last-child {
+  border-bottom: none;
+}
+
+.f4-history-group h3 {
+  margin: 0 0 9px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #15482e;
+}
+
+.f4-history-group ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.f4-history-group li {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px 12px;
+  padding: 4px 0;
+}
+
+.f4-history-group li button {
+  padding: 8px 11px;
+  min-height: 0;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.f4-history-group li button[aria-pressed="true"] {
+  background: #e7f4eb;
+  border-color: #218453;
+  color: #145c38;
+}
+
+.f4-history-group li small {
+  font-size: 11px;
+  color: #698071;
+  line-height: 1.4;
+}
+
+.f4-history-group li .f4-history-ready {
+  color: #176740;
+  font-weight: 700;
+}
+
+.f4-history > .f4-card h2 {
+  margin: 0 0 14px;
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.f4-history > .f4-card p {
+  margin: 9px 0;
+  font-size: 13px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.f4-history > .f4-card code {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .f4-history {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

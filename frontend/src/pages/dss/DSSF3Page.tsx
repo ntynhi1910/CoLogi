@@ -1,35 +1,56 @@
+
 import { useCallback, useId, useRef, useState } from 'react'
 import type { KeyboardEvent, ReactNode } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { planningSearch } from '../../components/dss/planningSearch'
-import InternalPlanningNotice from '../../components/dss/InternalPlanningNotice'
 import { missing, runTime } from '../../components/dss/f1Display'
 import { gateLabels, kg, planName, providerName, utilization } from '../../components/dss/f3Display'
-import { F3Diagnostics, F3Evidence, F3Waves } from '../../components/dss/F3AssessmentDetails'
+import {
+  F3AllocationDashboard,
+  F3Diagnostics,
+  F3Evidence,
+  F3Waves,
+  getF3CapacityMetrics,
+} from '../../components/dss/F3AssessmentDetails'
 import { ApiError } from '../../services/api/client'
 import { dssErrorMessage } from '../../services/dss/dssService'
-import { getF3AcceptancePreview, getF3Evaluation, getF3History, getF3Preview, saveF3 } from '../../services/dss/f3Service'
+import {
+  getF3AcceptancePreview,
+  getF3Evaluation,
+  getF3History,
+  getF3Preview,
+  saveF3,
+} from '../../services/dss/f3Service'
 import { useDssQuery } from '../../services/dss/useDssQuery'
-import type { F3Evaluation, F3GateStatus, SavedF3Summary } from '../../types/f3'
+import type {
+  F3Evaluation,
+  F3GateStatus,
+  SavedF3Summary,
+} from '../../types/f3'
 import './DSSRunDetailPage.css'
 import './F1Presentation.css'
 import './DSSF3Page.css'
 
+
+
 const tabs = [
   { key: 'overview', label: 'Tổng quan' },
   { key: 'allocation', label: 'Phân bổ phương tiện' },
-  { key: 'evidence', label: 'Bằng chứng và ràng buộc' },
   { key: 'history', label: 'Lịch sử đánh giá' },
 ] as const
 
 type Tab = typeof tabs[number]['key']
+
 
 const criteria = [
   ['actions', 'Thao tác'],
   ['gate', 'Kết quả F3'],
   ['demand', 'Khối lượng nhu cầu'],
   ['sharedFleet', 'Xe cần / xe khả dụng cùng nguồn'],
-  ['utilization', 'Hiệu suất tải'],
+
+['utilization', 'Mức sử dụng công suất wave'],
+['backendUtilization', 'Hiệu suất theo thuật toán F3'],
+
   ['provider', 'Nhà vận chuyển'],
   ['vehicle', 'Loại phương tiện'],
   ['waves', 'Số wave'],
@@ -49,12 +70,20 @@ function allocationError(error: unknown) {
   return dssErrorMessage(error)
 }
 
-function Gate({ status, synthetic = false }: { status: F3GateStatus; synthetic?: boolean }) {
-  return <>
-    <span className={`f3-chip f3-chip--${status.toLowerCase()}`}>{gateLabels[status]}</span>
-    {synthetic && <small className="f3-synthetic">Dữ liệu mô phỏng</small>}
-  </>
+
+function Gate({
+  status,
+}: {
+  status: F3GateStatus
+  synthetic?: boolean
+}) {
+  return (
+    <span className={`f3-chip f3-chip--${status.toLowerCase()}`}>
+      {gateLabels[status]}
+    </span>
+  )
 }
+
 
 function latestByPlan(rows: SavedF3Summary[]) {
   const latest = new Map<string, SavedF3Summary>()
@@ -78,6 +107,7 @@ interface EvaluationSaveState {
   needsSave: boolean
 }
 
+
 function Comparison({ options, historyStatus, canSave, onSave, onOpen }: {
   options: EvaluationSaveState[]
   historyStatus: 'loading' | 'available' | 'error'
@@ -87,56 +117,262 @@ function Comparison({ options, historyStatus, canSave, onSave, onOpen }: {
 }) {
   const columns = options.map(({ result, latest, matching, needsSave }) => {
     const view = result.status === 'INVALID_PLAN' ? null : result
+
+const metrics = getF3CapacityMetrics(result)
+
+const capacityUtilization =
+  metrics.usedPercent === null
+    ? '—'
+    : `${metrics.usedPercent}%`
+
     const fleet = view?.presentation?.fleet
     const target = matching ?? latest
+
     return {
       planCode: result.plan.plan_code,
-      heading: result.plan.hub ? result.plan.hub.code : 'Direct Consolidated',
+      heading: result.plan.hub
+        ? result.plan.hub.code
+        : 'Direct Consolidated',
+      status: result.gate_status,
+      synthetic: Boolean(view?.hub_coverage?.uses_synthetic),
+      saved: Boolean(matching),
+      needsSave,
+      readyForF4: Boolean(matching?.ready_for_f4),
+      demand: kg(view?.total_required_weight_kg),
+      vehicleCount: fleet
+        ? `${view?.vehicles_required}/${fleet.available_count}`
+        : missing,
+      efficiency: capacityUtilization,
+      waveCount: view?.waves.length ?? missing,
       rows: {
-        actions: <div className="f3-option-actions">
-          {target && <button type="button" className="dssr-secondary-button" onClick={() => onOpen(target.evaluation_code)}>
-            {matching ? 'Mở kết quả đã lưu' : 'Mở bản đã lưu gần nhất'}
-          </button>}
-          {view && <button type="button" className="dssr-secondary-button" disabled={!canSave || !needsSave}
-            onClick={() => onSave(result.plan.plan_code)}>{matching ? 'Đã lưu F3' : 'Lưu F3'}</button>}
-        </div>,
-        gate: <Gate status={result.gate_status} synthetic={view?.hub_coverage?.uses_synthetic} />,
+        actions: (
+          <div className="f3-option-actions">
+            {target && (
+              <button
+                type="button"
+                className="dssr-secondary-button"
+                onClick={() => onOpen(target.evaluation_code)}
+              >
+                Xem bản đã lưu
+              </button>
+            )}
+
+            {view && (
+              <button
+                type="button"
+                className="dssr-secondary-button"
+                disabled={!canSave || !needsSave}
+                onClick={() => onSave(result.plan.plan_code)}
+              >
+                {matching ? 'Đã lưu F3' : 'Lưu F3'}
+              </button>
+            )}
+          </div>
+        ),
+        gate: (
+          <Gate
+            status={result.gate_status}
+            synthetic={view?.hub_coverage?.uses_synthetic}
+          />
+        ),
         demand: kg(view?.total_required_weight_kg),
-        sharedFleet: fleet ? `${view?.vehicles_required}/${fleet.available_count} xe` : missing,
-        utilization: utilization(view?.utilization_pct),
+        sharedFleet: fleet
+          ? `${view?.vehicles_required}/${fleet.available_count} xe`
+          : missing,
+
+utilization: capacityUtilization,
+backendUtilization: utilization(view?.utilization_pct),
+
         provider: view ? providerName(view.provider) : missing,
-        vehicle: fleet?.sources.map(offer => offer.vehicle_code).join(', ') || missing,
+        vehicle:
+          fleet?.sources
+            .map(offer => offer.vehicle_code)
+            .join(', ') || missing,
         waves: view?.waves.length ?? missing,
         needed: view?.vehicles_required ?? missing,
         fleetCapacity: kg(fleet?.available_capacity_kg),
         assignedCapacity: kg(fleet?.assigned_capacity_kg),
-        remainingCapacity: kg(fleet?.remaining_assigned_capacity_kg),
-        saved: historyStatus === 'loading' ? 'Đang đối chiếu lịch sử'
-          : historyStatus === 'error' ? 'Chưa tải được lịch sử'
-            : matching ? 'Đã lưu' : latest ? 'Có thay đổi chưa lưu' : 'Chưa lưu',
-        f4: matching?.ready_for_f4 ? 'Sẵn sàng chuẩn bị' : 'Chờ kết quả F3 đủ điều kiện',
+        remainingCapacity: kg(
+          fleet?.remaining_assigned_capacity_kg
+        ),
+        saved:
+          historyStatus === 'loading'
+            ? 'Đang đối chiếu'
+            : historyStatus === 'error'
+              ? 'Chưa tải lịch sử'
+              : matching
+                ? 'Đã lưu'
+                : latest
+                  ? 'Có thay đổi chưa lưu'
+                  : 'Chưa lưu',
+        f4: matching?.ready_for_f4
+          ? 'Sẵn sàng F4'
+          : 'Chờ lưu F3 hợp lệ',
         f5: 'Chưa đánh giá',
       } satisfies Record<typeof criteria[number][0], ReactNode>,
     }
   })
+
   return (
-    <section className="dssr-panel f3-overview" aria-labelledby="f3-comparison-title">
-      <h2 id="f3-comparison-title">So sánh phương án</h2>
-      <div className="f3-table-wrap">
-        <table className="f3-table" aria-labelledby="f3-comparison-title">
-          <thead><tr><th scope="col">Tiêu chí</th>{columns.map(column =>
-            <th key={column.planCode} scope="col">{column.heading}</th>
-          )}</tr></thead>
-          <tbody>
-            {criteria.map(([key, title]) => <tr key={key}>
-              <th scope="row">{title}</th>
-              {columns.map(column => <td key={column.planCode}>{column.rows[key]}</td>)}
-            </tr>)}
-          </tbody>
-        </table>
+    <section
+      className="dssr-panel f3-clean-overview"
+      aria-labelledby="f3-comparison-title"
+    >
+      <div className="f3-clean-heading">
+        <div>
+          <h2 id="f3-comparison-title">So sánh phương án</h2>
+          <p>Chọn phương án phù hợp để tiếp tục F4</p>
+        </div>
+
+        <span className="f3-clean-count">
+          {columns.length} phương án
+        </span>
       </div>
-      <p className="dssf-help">Các wave cùng offer dùng chung một nguồn xe CP7. Mỗi cột là một phương án thay thế. Khối lượng nhu cầu qua Hub tính một lần.</p>
-      <p className="dssf-help">Kết quả F3 dùng để chuẩn bị đánh giá thời gian và chi phí ở F4/F5.</p>
+
+      <div className="f3-clean-grid">
+        {columns.map((column, index) => (
+          <article
+            key={column.planCode}
+            className="f3-clean-card"
+          >
+            <div className="f3-clean-card-header">
+              <div>
+                <span className="f3-clean-index">
+                  PHƯƠNG ÁN {String(index + 1).padStart(2, '0')}
+                </span>
+                <h3>{column.heading}</h3>
+              </div>
+            </div>
+
+            <div className="f3-clean-gate">
+              <Gate
+                status={column.status}
+                synthetic={column.synthetic}
+              />
+            </div>
+
+            
+<div className="f3-clean-metrics f3-clean-metrics--2col">
+  <div className="f3-clean-metric">
+    <span>Khối lượng nhu cầu</span>
+    <strong>{column.demand}</strong>
+  </div>
+
+  <div className="f3-clean-metric">
+    <span>Mức sử dụng công suất wave</span>
+    <strong>{column.efficiency}</strong>
+  </div>
+</div>
+
+<div className="f3-clean-card-meta">
+  <span>🚚 {column.vehicleCount} xe cần / khả dụng</span>
+  <span>·</span>
+  <span>🔄 {column.waveCount} wave</span>
+</div>
+
+
+            <div className="f3-clean-status">
+              <span
+                className={
+                  column.saved
+                    ? 'f3-clean-saved'
+                    : 'f3-clean-unsaved'
+                }
+              >
+                {column.saved ? '✓ Đã lưu' : '● Chưa lưu'}
+              </span>
+
+              {column.readyForF4 && (
+                <span className="f3-clean-ready">
+                  ✓ Sẵn sàng F4
+                </span>
+              )}
+            </div>
+
+            <div className="f3-clean-actions">
+              {column.rows.actions}
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <details className="f3-clean-expand">
+        <summary>
+          <span>Xem bảng so sánh đầy đủ</span>
+          <span className="f3-clean-expand-hint">
+            {criteria.length - 1} thông số
+          </span>
+        </summary>
+
+        <div className="f3-table-wrap">
+          <table className="f3-table">
+            <thead>
+              <tr>
+                <th scope="col">Tiêu chí</th>
+
+                {columns.map(column => (
+                  <th key={column.planCode} scope="col">
+                    {column.heading}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+
+
+
+
+<tbody>
+  {criteria
+    .filter(([key]) => key !== 'actions')
+    .map(([key, label]) => {
+      const isNumeric = [
+        'demand',
+        'sharedFleet',
+        'utilization',
+        'backendUtilization',
+        'waves',
+        'needed',
+        'fleetCapacity',
+        'assignedCapacity',
+        'remainingCapacity',
+      ].includes(key)
+
+      const values = columns.map(column => column.rows[key])
+
+      const hasDifference =
+        isNumeric &&
+        new Set(values.map(value => String(value ?? ''))).size > 1
+
+      return (
+        <tr
+          key={key}
+          className={hasDifference ? 'f3-row-different' : ''}
+        >
+          <th scope="row">{label}</th>
+
+          {columns.map(column => (
+            <td key={column.planCode}>
+              <span
+                className={
+                  hasDifference
+                    ? 'f3-cell-content f3-cell-content--highlight'
+                    : 'f3-cell-content'
+                }
+              >
+                {column.rows[key]}
+              </span>
+            </td>
+          ))}
+        </tr>
+      )
+    })}
+</tbody>
+
+
+
+          </table>
+        </div>
+      </details>
     </section>
   )
 }
@@ -156,9 +392,13 @@ function SavedEvaluation({ runCode, groupCode, code, scenarioSearch }: {
 
   return (
     <section aria-label="Kết quả F3 đã lưu" className="dssr-panel f3-saved" data-evaluation-code={data.evaluation_code}>
-      <h2>{planName(data.plan)}</h2>
-      <InternalPlanningNotice source={data.internal_planning} />
-      <Gate status={data.gate_status} synthetic={result.hub_coverage?.uses_synthetic} />
+
+<h2>{planName(data.plan)}</h2>
+<Gate
+  status={data.gate_status}
+  synthetic={result.hub_coverage?.uses_synthetic}
+/>
+
       <p>{runTime(data.evaluated_at)} · F2 phiên bản {data.plan.revision} · Contract F3 v{data.contract_version}</p>
       <p className="dssf-help"><code>{data.evaluation_code}</code></p>
       {data.ready_for_f4 && <Link className="dssr-primary-button f3-all-link"
@@ -166,15 +406,16 @@ function SavedEvaluation({ runCode, groupCode, code, scenarioSearch }: {
         Kiểm tra thời gian F4
       </Link>}
       {!data.ready_for_f4 && <p className="dssf-help">Kết quả này chưa đủ điều kiện chuẩn bị F4 trong ngữ cảnh hiện tại.</p>}
-      <F3Diagnostics rows={result.diagnostics} />
-      <details className="dssf-technical">
-        <summary>Phân bổ trong kết quả đã lưu</summary>
-        <F3Waves result={result} />
-      </details>
-      <details className="dssf-technical">
-        <summary>Bằng chứng trong kết quả đã lưu</summary>
-        <F3Evidence result={result} presentation={data.presentation} />
-      </details>
+
+<div className="f3-saved-diagnostics">
+  <div className="f3-saved-section-heading">
+    <h3>Ràng buộc và cảnh báo</h3>
+    <span>{result.diagnostics.length} kết quả</span>
+  </div>
+
+  <F3Diagnostics rows={result.diagnostics} />
+</div>
+
     </section>
   )
 }
@@ -216,43 +457,175 @@ function History({ rows, selected, onSelect, runCode, groupCode, scenarioSearch,
   )
 }
 
-function F3Acceptance({ runId, optionId, planCode, onBack }: {
-  runId: string; optionId: string; planCode: string; onBack: () => void
+
+function F3Acceptance({
+  runId,
+  optionId,
+  planCode,
+  onBack,
+}: {
+  runId: string
+  optionId: string
+  planCode: string
+  onBack: () => void
 }) {
-  const load = useCallback(() => getF3AcceptancePreview(runId, optionId, planCode), [runId, optionId, planCode])
+  const load = useCallback(
+    () => getF3AcceptancePreview(runId, optionId, planCode),
+    [runId, optionId, planCode]
+  )
+
   const { data, error, loading, reload } = useDssQuery(load)
-  return <main className="dssr-page f3-page">
-    <header className="dssr-header f3-header">
-      <div>
-        <button type="button" className="dssr-secondary-button" onClick={onBack}>← Quay về F3 thông thường</button>
-        <h1>Xem trước F3 để nghiệm thu</h1>
+
+  return (
+    <main className="dssr-page f3-page">
+      <header className="dssr-header f3-header">
+        <div>
+          <button
+            type="button"
+            className="dssr-secondary-button"
+            onClick={onBack}
+          >
+            ← Quay về F3
+          </button>
+
+          <p className="dssr-eyebrow">
+            COLOGI · KIỂM THỬ HỆ THỐNG
+          </p>
+
+          <h1>Kiểm thử F3 với nguồn V7</h1>
+
+          <p className="dssr-description">
+            Đối chiếu kết quả phân bổ phương tiện với dữ liệu
+            V7 trong môi trường nghiệm thu.
+          </p>
+        </div>
+      </header>
+
+      <div className="f3x-acceptance-meta" role="note">
+        <span>🔎 Chế độ chỉ đọc</span>
+        <span>V7 chưa được TP001 xác minh độc lập</span>
+        <span>Không lưu kết quả hoặc chuyển F4/F5</span>
       </div>
-    </header>
-    <p className="dssf-notice">Nguồn V7 được Manager duyệt cho nghiệm thu hệ thống. TP001 chưa xác minh độc lập
-      các lịch V7 này. Chế độ chỉ đọc, không lưu kết quả hoặc mở F4/F5.</p>
-    {loading && <p role="status" className="dssr-loading">Đang kiểm tra bằng chứng nghiệm thu…</p>}
-    {error !== null && <div role="alert" className="dssr-alert">
-      {allocationError(error)}{' '}
-      <button type="button" className="dssr-secondary-button" onClick={reload}>Thử lại</button>
-    </div>}
-    {data && <section className="dssr-panel">
-      <h2>{gateLabels[data.evaluation.gate_status]} trong phạm vi nghiệm thu</h2>
-      <p>{planName(data.evaluation.plan)} · {kg(data.evaluation.total_required_weight_kg)} · {data.evaluation.waves.length} wave</p>
-      <p>Quyết định {data.decision_reference}</p>
-      <F3Diagnostics rows={data.evaluation.diagnostics} />
-      <F3Waves result={data.evaluation} />
-      <details className="dssf-technical">
-        <summary>Nguồn và lịch V7 được xét</summary>
-        <p>SHA-256 manifest <code>{data.manifest_sha256}</code></p>
-        <p>Lịch V7 dùng cho wave {data.selected_legacy_ids.map(id => `#${id}`).join(', ') || 'Không có'}</p>
-        <ul>{data.admitted_sources.map(source => <li key={source.legacy_id}>
-          #{source.legacy_id} · {source.vehicle_type} · {source.sheet}!{source.range} ·
-          {' '}{source.original_provenance} · AuditLog #{source.audit_log_id}
-        </li>)}</ul>
-        <F3Evidence result={data.evaluation} />
-      </details>
-    </section>}
-  </main>
+
+      {loading && (
+        <p className="dssr-loading" role="status">
+          Đang kiểm tra dữ liệu nghiệm thu...
+        </p>
+      )}
+
+      {error !== null && (
+        <div className="dssr-alert" role="alert">
+          {allocationError(error)}
+
+          <button
+            type="button"
+            className="dssr-secondary-button"
+            onClick={reload}
+          >
+            Thử lại
+          </button>
+        </div>
+      )}
+
+      {data && (
+        <section className="dssr-panel f3x-acceptance">
+
+
+<div className="f3x-v7-overview">
+  <div className="f3x-v7-heading">
+    <div>
+      <span className="f3x-v7-eyebrow">KẾT QUẢ KIỂM THỬ</span>
+      <h2>{gateLabels[data.evaluation.gate_status]}</h2>
+      <p>
+        {planName(data.evaluation.plan)}
+        {' · '}
+        {kg(data.evaluation.total_required_weight_kg)}
+        {' · '}
+        {data.evaluation.waves.length} wave
+      </p>
+    </div>
+
+    <span className="f3x-v7-readonly">
+      <span aria-hidden="true">●</span> Chỉ đọc
+    </span>
+  </div>
+
+  <F3AllocationDashboard result={data.evaluation} />
+</div>
+
+<div className="f3x-v7-section">
+  <div className="f3x-v7-section-head">
+    <div>
+      <h3>🚚 Phân bổ phương tiện</h3>
+      <p>Phương tiện, tải trọng và các luồng hàng đã phân bổ</p>
+    </div>
+  </div>
+
+  <F3Waves result={data.evaluation} />
+</div>
+
+<details className="f3x-v7-accordion">
+  <summary>
+    <span>🔎 Bằng chứng CP7 và ràng buộc</span>
+    <span>Xem chi tiết</span>
+  </summary>
+
+  <F3Evidence result={data.evaluation} />
+</details>
+
+<details className="f3x-v7-accordion">
+  <summary>
+    <span>🗂 Nhật ký nguồn V7 và truy vết</span>
+    <span>Thông tin kỹ thuật</span>
+  </summary>
+
+  <div className="f3x-v7-audit">
+    <div>
+      <span>Mã quyết định</span>
+      <strong>{data.decision_reference}</strong>
+    </div>
+
+    <div>
+      <span>Lịch V7 được xét</span>
+      <strong>
+        {data.selected_legacy_ids
+          .map(id => `#${id}`)
+          .join(', ') || 'Không có'}
+      </strong>
+    </div>
+
+    <div>
+      <span>SHA-256 manifest</span>
+      <code>{data.manifest_sha256}</code>
+    </div>
+
+    <details className="f3x-v7-source-details">
+      <summary>
+        Danh sách nguồn kỹ thuật ({data.admitted_sources.length})
+      </summary>
+
+      <div className="f3x-v7-source-list">
+        {data.admitted_sources.map(source => (
+          <div key={source.legacy_id}>
+            <strong>
+              #{source.legacy_id} · {source.vehicle_type}
+            </strong>
+            <small>
+              {source.sheet}!{source.range}
+            </small>
+            <small>
+              {source.original_provenance} · AuditLog #{source.audit_log_id}
+            </small>
+          </div>
+        ))}
+      </div>
+    </details>
+  </div>
+</details>
+        </section>
+      )}
+    </main>
+  )
 }
 
 function F3Page({ runId, optionId, planCode }: { runId: string; optionId: string; planCode?: string }) {
@@ -277,7 +650,37 @@ function F3Page({ runId, optionId, planCode }: { runId: string; optionId: string
     : Promise.resolve({ evaluations: [] as SavedF3Summary[] }), [runId, optionId, planCode, storage])
   const history = useDssQuery(loadHistory)
   const evaluations = data?.evaluations ?? []
+
   const focused = evaluations.find(row => row.plan.plan_code === planFocus) ?? evaluations[0]
+
+if (focused && focused.status !== 'INVALID_PLAN') {
+  console.table({
+    planCode: focused.plan.plan_code,
+    hub: focused.plan.hub?.code ?? 'DIRECT',
+    totalRequiredKg: focused.total_required_weight_kg,
+    waveCount: focused.waves.length,
+    vehiclesRequired: focused.vehicles_required,
+    backendUtilization: focused.utilization_pct,
+  })
+
+  console.table(
+    focused.waves.map((wave, index) => ({
+      wave: index + 1,
+      phase: wave.phase,
+      vehicle: wave.vehicle.vehicle_code,
+      allocatedKg: wave.allocated_weight_kg,
+      capacityKg: wave.vehicle.capacity_kg,
+      percent:
+        Number(wave.vehicle.capacity_kg) > 0
+          ? Math.round(
+              Number(wave.allocated_weight_kg) /
+              Number(wave.vehicle.capacity_kg) * 100
+            )
+          : 0,
+    }))
+  )
+}
+
   const historyRows = history.data?.evaluations ?? []
   const latest = latestByPlan(historyRows)
   const options: EvaluationSaveState[] = evaluations.map(result => {
@@ -381,8 +784,7 @@ function F3Page({ runId, optionId, planCode }: { runId: string; optionId: string
           </button>}
         </div>
       </header>
-      <InternalPlanningNotice source={evaluations.flatMap(row =>
-        row.status !== 'INVALID_PLAN' && row.internal_planning ? [row.internal_planning] : [])[0]} />
+
       {loading && <p role="status" className="dssr-loading">Đang đối chiếu phương tiện…</p>}
       {error !== null && <div className="dssr-alert" role="alert">{allocationError(error)}{' '}
         <button type="button" className="dssr-secondary-button" onClick={reload}>Thử lại</button></div>}
@@ -392,13 +794,29 @@ function F3Page({ runId, optionId, planCode }: { runId: string; optionId: string
       {saving && <p className="dssr-loading" role="status">Đang lưu kết quả F3…</p>}
       {evaluations.length > 0 && <>
         {!storage && <p className="dssf-notice">Môi trường này hỗ trợ xem trước. Lưu và lịch sử F3 cần migration 0006.</p>}
-        <div className="f3-tabs" role="tablist" aria-label="Nội dung phân bổ phương tiện">
-          {tabs.map(({ key, label }, index) => <button key={key} type="button" role="tab" id={`${tabId}-${key}`}
-            aria-selected={key === tab} aria-controls={`${tabId}-panel`} tabIndex={key === tab ? 0 : -1}
-            onClick={() => setTab(key)} onKeyDown={event => onTabKey(event, index)}>
-            {label}
-          </button>)}
-        </div>
+
+<div
+  className="f3-tabs"
+  role="tablist"
+  aria-label="Nội dung phân bổ phương tiện"
+>
+  {tabs.map(({ key, label }, index) => (
+    <button
+      key={key}
+      type="button"
+      role="tab"
+      id={`${tabId}-${key}`}
+      aria-selected={key === tab}
+      aria-controls={`${tabId}-panel`}
+      tabIndex={key === tab ? 0 : -1}
+      onClick={() => setTab(key)}
+      onKeyDown={event => onTabKey(event, index)}
+    >
+      {label}
+    </button>
+  ))}
+</div>
+
         <div role="tabpanel" id={`${tabId}-panel`} aria-labelledby={`${tabId}-${tab}`} tabIndex={0}>
           {(tab === 'overview' || tab === 'history') && storage && history.error !== null && <div className="dssr-alert" role="alert">
             {allocationError(history.error)} <button type="button" className="dssr-secondary-button" onClick={history.reload}>Tải lại lịch sử</button>
@@ -406,17 +824,47 @@ function F3Page({ runId, optionId, planCode }: { runId: string; optionId: string
           {tab === 'overview' && <Comparison options={options}
             historyStatus={history.loading ? 'loading' : history.error !== null ? 'error' : 'available'}
             canSave={canSave} onSave={code => void save([code], true)} onOpen={openSaved} />}
-          {(tab === 'allocation' || tab === 'evidence') && focused && <>
-            <div className="f3-plan-picker">
-              <label htmlFor={`${tabId}-plan`}>Phương án</label>
-              <select id={`${tabId}-plan`} value={focused.plan.plan_code} onChange={event => setPlanFocus(event.target.value)}>
-                {evaluations.map(row => <option key={row.plan.plan_code} value={row.plan.plan_code}>{planName(row.plan)}</option>)}
-              </select>
-              <Gate status={focused.gate_status} synthetic={focused.status !== 'INVALID_PLAN' && focused.hub_coverage?.uses_synthetic} />
-            </div>
-            {focused.status === 'INVALID_PLAN' ? <F3Diagnostics rows={focused.diagnostics} /> : tab === 'allocation'
-              ? <F3Waves result={focused} /> : <F3Evidence result={focused} />}
-          </>}
+
+{tab === 'allocation' && focused && (
+  <>
+    <div className="f3-plan-picker">
+      <label htmlFor={`${tabId}-plan`}>Phương án</label>
+
+      <select
+        id={`${tabId}-plan`}
+        value={focused.plan.plan_code}
+        onChange={event => setPlanFocus(event.target.value)}
+      >
+        {evaluations.map(row => (
+          <option
+            key={row.plan.plan_code}
+            value={row.plan.plan_code}
+          >
+            {planName(row.plan)}
+          </option>
+        ))}
+      </select>
+
+      <Gate
+        status={focused.gate_status}
+        synthetic={
+          focused.status !== 'INVALID_PLAN' &&
+          focused.hub_coverage?.uses_synthetic
+        }
+      />
+    </div>
+
+    {focused.status === 'INVALID_PLAN' ? (
+      <F3Diagnostics rows={focused.diagnostics} />
+    ) : (
+      <>
+        <F3AllocationDashboard result={focused} />
+        <F3Waves result={focused} />
+      </>
+    )}
+  </>
+)}
+
           {tab === 'history' && (history.loading ? <p role="status" className="dssr-loading">Đang tải lịch sử F3…</p>
             : history.data && <History rows={history.data.evaluations} selected={selected} onSelect={setSelected}
               runCode={runId} groupCode={optionId} scenarioSearch={scenarioSearch} sourceF3={sourceF3} sourceF4={sourceF4} />)}

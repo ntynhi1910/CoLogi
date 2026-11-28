@@ -1,8 +1,11 @@
 """Manager account administration constrained to established business scopes."""
 
 from django.conf import settings
-from django.db import transaction
-from django.db.models import Prefetch
+import re
+
+from django.core.exceptions import ValidationError as DjangoValidationError
+from django.db import connection, transaction
+from django.db.models import Prefetch, Q
 from django.contrib.auth.password_validation import validate_password
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
@@ -80,6 +83,93 @@ def _present(user, scopes):
             "role": assignment.role.code, "scopes": scopes, "is_active": user.is_active}
 
 
+# Registration ownership is recorded in the existing append-only audit trail.
+# New outlet scope is explicitly granted to the registering manager.
+REGISTRATION_SPECS = {
+    "new_provider": (RoleCode.TRANSPORT_PROVIDER, TransportProvider, "TP", "provider_code", "provider_id", "TRANSPORT_PROVIDER"),
+    "new_supplier": (RoleCode.SUPPLIER, Supplier, "SUP", "supplier_code", "supplier_id", "SUPPLIER"),
+    "new_outlet": (RoleCode.PURCHASING_STAFF, Outlet, "OUT", "outlet_code", "outlet_ids", "OUTLET"),
+}
+REGISTRATION_EVENT = "BUSINESS_UNIT_REGISTERED"
+
+
+def _registration_records(entity, actor=None):
+    rows = AuditLog.objects.filter(action=REGISTRATION_EVENT, entity_type=entity)
+    if actor is not None:
+        rows = rows.filter(actor_user=actor)
+    return rows
+
+
+def _registered_unit_filter(entity, code_field, actor):
+    # Match both PK and code; do not grant access by name or code alone.
+    query = Q(pk__in=[])
+    for pk, data in _registration_records(entity, actor).values_list("entity_id", "new_values"):
+        code = data.get("code") if isinstance(data, dict) else None
+        if isinstance(pk, str) and pk.isascii() and pk.isdecimal() and isinstance(code, str):
+            query |= Q(pk=int(pk), **{code_field: code})
+    return query
+
+
+def _next_unit_code(prefix, codes):
+    pattern = re.compile(re.escape(prefix) + r"([0-9]+)")
+    numbers = [int(m.group(1)) for code in codes if isinstance(code, str) and (m := pattern.fullmatch(code))]
+    code = f"{prefix}{max(numbers, default=0) + 1:03d}"
+    if len(code) > 30:
+        raise ValidationError("Không thể cấp thêm mã đơn vị.")
+    return code
+
+
+def _register_unit(actor, kind, data):
+    manager_outlets(actor)
+    if not getattr(settings, "COLOGI_ACCOUNT_ADMIN_WRITES", False):
+        raise PermissionDenied("Quản trị tài khoản đang ở chế độ chỉ đọc.")
+    if kind not in REGISTRATION_SPECS:
+        raise ValidationError("Loại đơn vị không hợp lệ.")
+    role, model, prefix, code_field, scope_field, entity = REGISTRATION_SPECS[kind]
+    allowed = {
+        "new_provider": {"provider_name", "provider_type", "service_region", "contact_email"},
+        "new_supplier": {"supplier_name", "address", "contact_name", "phone", "email"},
+        "new_outlet": {"outlet_name", "address", "contact_name", "phone"},
+    }[kind]
+    required = {
+        "new_provider": {"provider_name", "provider_type", "service_region", "contact_email"},
+        "new_supplier": {"supplier_name", "address"},
+        "new_outlet": {"outlet_name", "address"},
+    }[kind]
+    if (not isinstance(data, dict) or not required <= set(data) <= allowed
+            or any(not isinstance(data[k], str) or not data[k].strip() for k in required)
+            or (kind == "new_provider" and data["provider_type"] != "EXTERNAL")):
+        raise ValidationError({kind: "Thông tin đơn vị không hợp lệ."})
+    if connection.vendor != "postgresql" or not connection.in_atomic_block:
+        raise RuntimeError("Registration requires a PostgreSQL transaction.")
+    with connection.cursor() as cursor:
+        cursor.execute("SHOW transaction_isolation")
+        if cursor.fetchone()[0] != "read committed":
+            raise ValidationError("Đăng ký đơn vị cần transaction READ COMMITTED.")
+        cursor.execute("SELECT pg_advisory_xact_lock(%s, %s)", [16016, {"TP": 1, "SUP": 2, "OUT": 3}[prefix]])
+    codes = set(model.objects.values_list(code_field, flat=True))
+    for values in _registration_records(entity).values_list("new_values", flat=True):
+        if isinstance(values, dict) and isinstance(values.get("code"), str):
+            codes.add(values["code"])
+    # Preserve numeric codes from the earlier provider-only CP16 event, if any.
+    if kind == "new_provider":
+        for values in AuditLog.objects.filter(action="TRANSPORT_PROVIDER_REGISTERED", entity_type=entity).values_list("new_values", flat=True):
+            if isinstance(values, dict) and isinstance(values.get("provider_code"), str):
+                codes.add(values["provider_code"])
+    code = _next_unit_code(prefix, codes)
+    unit = model(**{**data, code_field: code, "is_active": True})
+    try:
+        unit.full_clean()
+    except DjangoValidationError as exc:
+        raise ValidationError({kind: exc.message_dict}) from exc
+    unit.save(force_insert=True)
+    if kind == "new_outlet":
+        UserOutletAccess.objects.create(user=actor, outlet=unit, assigned_by=actor)
+    AuditLog.objects.create(actor_user=actor, action=REGISTRATION_EVENT, entity_type=entity,
+                            entity_id=str(unit.pk), new_values={"code": code, "role": role})
+    return {scope_field: [unit.pk] if kind == "new_outlet" else unit.pk}
+
+
 def _units(outlets, actor):
     supplier_ids = DeliveryDemand.objects.filter(outlet_id__in=outlets, capstone_scenario="").values("supplier_id")
     provider_ids = FinalPlan.objects.filter(
@@ -87,9 +177,12 @@ def _units(outlets, actor):
     ).values("provider_id")
     return {
         "outlets": list(Outlet.objects.filter(is_active=True, pk__in=outlets).values("id", "outlet_code", "outlet_name")),
-        "suppliers": list(Supplier.objects.filter(is_active=True, pk__in=supplier_ids).values("id", "supplier_code", "supplier_name")),
-        "providers": list(TransportProvider.objects.filter(
-            is_active=True, provider_code="TP001", pk__in=provider_ids,
+        "suppliers": list(Supplier.objects.filter(is_active=True).filter(
+            Q(pk__in=supplier_ids) | _registered_unit_filter("SUPPLIER", "supplier_code", actor)
+        ).values("id", "supplier_code", "supplier_name")),
+        "providers": list(TransportProvider.objects.filter(is_active=True).filter(
+            Q(provider_code="TP001", pk__in=provider_ids)
+            | _registered_unit_filter("TRANSPORT_PROVIDER", "provider_code", actor)
         ).values("id", "provider_code", "provider_name")),
     }
 
@@ -155,7 +248,7 @@ def _check_scope(actor, role_code, scope):
     outlets = manager_outlets(actor)
     if role_code not in BUSINESS_ROLES:
         raise PermissionDenied("Vai trò nằm ngoài phạm vi quản trị.")
-    valid = _validate_scope(role_code, scope)
+    valid = _validate_scope(role_code, scope, allow_registered_provider=True)
     if role_code == RoleCode.PURCHASING_STAFF:
         permitted = outlets
     else:
@@ -176,14 +269,28 @@ def _check_external_reassignment(user, role_code, scope):
 
 
 @transaction.atomic
-def create_account(actor, *, email, full_name, role_code, scope, password, is_active=True):
-    _check_scope(actor, role_code, scope)
+def create_account(actor, *, email, full_name, role_code, scope, password, is_active=True,
+                   new_provider=None, new_supplier=None, new_outlet=None):
+    manager_outlets(actor)
+    new_units = {k: v for k, v in {"new_provider": new_provider, "new_supplier": new_supplier,
+                                    "new_outlet": new_outlet}.items() if v is not None}
+    if len(new_units) > 1 or (new_units and scope):
+        raise ValidationError("Chọn đơn vị hiện có hoặc tạo đúng một đơn vị mới.")
+    if new_units:
+        kind, data = next(iter(new_units.items()))
+        if role_code != REGISTRATION_SPECS[kind][0]:
+            raise ValidationError("Đơn vị mới không phù hợp vai trò.")
+    else:
+        _check_scope(actor, role_code, scope)
     normalized = User.objects.normalize_email_address(email)
     user = User(email=normalized, full_name=full_name)
     validate_password(password, user)
+    if new_units:
+        scope = _register_unit(actor, kind, data)
+        _check_scope(actor, role_code, scope)
     user.set_password(password)
     user.save(force_insert=True)
-    assign_role(actor, user.pk, role_code, scope)
+    assign_role(actor, user.pk, role_code, scope, allow_registered_provider=True)
     if not is_active:
         user.is_active = False
         user.save(update_fields=("is_active", "updated_at"))

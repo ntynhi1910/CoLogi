@@ -190,7 +190,7 @@ class F1RuleSetSerializer(serializers.Serializer):
     rule_set_name = serializers.CharField()
     version_no = serializers.IntegerField()
     effective_from = serializers.DateTimeField(allow_null=True)
-    max_group_size = serializers.IntegerField()
+    max_group_size = serializers.IntegerField(allow_null=True)
     max_candidates_per_run = serializers.IntegerField()
 
 

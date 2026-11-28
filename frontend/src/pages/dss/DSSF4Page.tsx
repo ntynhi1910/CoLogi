@@ -2,18 +2,31 @@ import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import type { KeyboardEvent, ReactNode } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { planningSearch } from '../../components/dss/planningSearch'
-import InternalPlanningNotice from '../../components/dss/InternalPlanningNotice'
 import { deliveryDate, runTime, timeWindow } from '../../components/dss/f1Display'
-import { kg, phases, planName } from '../../components/dss/f3Display'
-import { candidateInfo, duration, elapsedMinutes, firstConflict, kilometres, localTime, noValue, pointNames, roles, statuses, stopLabel } from '../../components/dss/f4Display'
+import { kg, planName } from '../../components/dss/f3Display'
+import {
+  candidateInfo,
+  duration,
+  elapsedMinutes,
+  firstConflict,
+  kilometres,
+  localTime,
+  noValue,
+  pointNames,
+} from '../../components/dss/f4Display'
 import type { StopNames } from '../../components/dss/f4Display'
 import F4GanttChart from '../../components/dss/F4GanttChart'
-import { F4AlternateSlots, F4ComparisonTables, F4Diagnostics, F4StatusBadge, F4StopTables } from '../../components/dss/F4ScheduleDetails'
+
+import { F4StatusBadge } from '../../components/dss/F4ScheduleDetails'
 import { ApiError } from '../../services/api/client'
 import { dssErrorMessage, dssService } from '../../services/dss/dssService'
 import { checkF5Readiness, getCandidateDemandLabels, getF4Evaluation, getF4History, getF4Preview, saveF4 } from '../../services/dss/f4Service'
 import { useDssQuery } from '../../services/dss/useDssQuery'
-import type { F4Configuration, F4Evaluation, F4SaveReference, SavedF4Summary } from '../../types/f4'
+import type {
+  F4Evaluation,
+  F4SaveReference,
+  SavedF4Summary,
+} from '../../types/f4'
 import './DSSRunDetailPage.css'
 import './F1Presentation.css'
 import './DSSF4Page.css'
@@ -21,7 +34,6 @@ import './DSSF4Page.css'
 const tabs = [
   ['overview', 'Tổng quan so sánh'],
   ['timeline', 'Lịch trình vận chuyển'],
-  ['evidence', 'Xung đột và bằng chứng'],
   ['history', 'Lịch sử đánh giá'],
 ] as const
 
@@ -136,50 +148,6 @@ function Overview({ options, timezone, names, runId, groupCode, scenario, saving
   </section>
 }
 
-function Evidence({ evaluation, configuration, names }: { evaluation: F4Evaluation; configuration: F4Configuration; names: StopNames }) {
-  const conflict = evaluation.status === 'PASS' ? null : firstConflict(evaluation, configuration.timezone, names)
-  return <section className="dssr-panel f4-card" aria-label="Chẩn đoán và bằng chứng F4">
-    {conflict && <div className="f4-conflict-summary">
-      <h2>Xung đột và giới hạn của lịch thử</h2>
-      <p>{conflict}</p>
-      <p>Kết quả toàn phương án · <F4StatusBadge status={evaluation.status} /></p>
-    </div>}
-    <h2>Điều kiện và nguồn đã kiểm tra</h2>
-    <F4Diagnostics rows={evaluation.diagnostics} />
-    {evaluation.evaluation_context === 'UAT'
-      ? <p className="dssf-notice">SYNTHETIC/UAT · Bằng chứng mô phỏng phục vụ nghiệm thu.</p>
-      : <p>Chế độ nguồn F4 · {evaluation.source_mode ?? noValue}</p>}
-    {evaluation.evaluation_context === 'CAPSTONE' && <p className="dssf-notice">SYNTHETIC/CAPSTONE · Dữ liệu trình diễn.</p>}
-    {evaluation.f3_uses_synthetic && evaluation.evaluation_context === 'UAT' &&
-      <p className="dssf-notice">Kết quả F3 tham chiếu dùng Hub coverage mô phỏng trong UAT.</p>}
-    <p className="dssf-help">Thứ tự lấy trước giao sau được xác định theo hạn của điểm và mã định danh. Phạm vi lịch từ điểm xử lý đầu tiên đến điểm xử lý cuối cùng.</p>
-    {evaluation.waves.map(wave => <details className="dssf-technical" key={wave.wave_no}>
-      <summary>Wave {wave.wave_no} · {phases[wave.phase]} · {statuses[wave.status]} · Bằng chứng CP7 và điểm dừng</summary>
-      <p>Giờ hoạt động xe · {timeWindow(wave.operating_hours.start_time, wave.operating_hours.end_time)}</p>
-      {wave.vehicle.windows.map(window => <p key={window.id}>
-        Lịch xe #{window.id} · {deliveryDate(window.service_date)} · {timeWindow(window.start_time, window.end_time)} · {window.count} xe · {window.source}
-      </p>)}
-      <details className="dssf-technical">
-        <summary>Offer, số xe và bằng chứng khả dụng đã dùng</summary>
-        <pre>{JSON.stringify({ offer: wave.vehicle, availability: wave.fleet_evidence }, null, 2)}</pre>
-      </details>
-      <F4Diagnostics rows={wave.diagnostics} />
-      {wave.stops.map(stop => <div className="f4-stop-evidence" key={stop.sequence}>
-        <strong>{stopLabel(stop, evaluation, names)} · {roles[stop.role]}</strong>
-        <F4Diagnostics rows={stop.diagnostics} />
-        <F4AlternateSlots stop={stop} timezone={configuration.timezone} />
-        <details className="dssf-technical">
-          <summary>Lịch nhận, di chuyển và xử lý tại điểm</summary>
-          <pre>{JSON.stringify({ ...stop.evidence, travel_from_previous: stop.travel_from_previous, diagnostics: stop.diagnostics }, null, 2)}</pre>
-        </details>
-      </div>)}
-    </details>)}
-    <details className="dssf-technical">
-      <summary>RuleSet và tham số đã đối chiếu</summary>
-      <pre>{JSON.stringify(configuration, null, 2)}</pre>
-    </details>
-  </section>
-}
 
 function F5Preparation({ runId, groupCode, code, scenario }: {
   runId: string; groupCode: string; code: string; scenario?: string | null
@@ -212,10 +180,23 @@ function F5Preparation({ runId, groupCode, code, scenario }: {
   </div>
 }
 
-function SavedEvaluation({ runId, groupCode, code, historyLabel, current, names, activeScenario }: {
-  runId: string; groupCode: string; code: string; historyLabel: string; current: boolean; names: StopNames
+
+function SavedEvaluation({
+  runId,
+  groupCode,
+  code,
+  historyLabel,
+  current,
+  activeScenario,
+}: {
+  runId: string
+  groupCode: string
+  code: string
+  historyLabel: string
+  current: boolean
   activeScenario?: string | null
 }) {
+
   const load = useCallback(() => getF4Evaluation(runId, groupCode, code), [runId, groupCode, code])
   const { data, error, loading, reload } = useDssQuery(load)
   if (loading) return <p className="dssr-loading" role="status">Đang đọc kết quả đã lưu…</p>
@@ -228,19 +209,12 @@ function SavedEvaluation({ runId, groupCode, code, historyLabel, current, names,
     <p>{historyLabel}{current && ' · Thuộc kịch bản đang xem'}</p>
     {data.evaluation_context === 'UAT' && <p>Dữ liệu mô phỏng UAT</p>}
     {data.evaluation_context === 'CAPSTONE' && <p>SYNTHETIC/CAPSTONE · Dữ liệu trình diễn</p>}
-    <InternalPlanningNotice source={data.internal_planning} />
     <p>Đã lưu {runTime(data.evaluated_at)} · F2 phiên bản {data.plan.revision} · F4 cấu hình {data.configuration_version}</p>
     {data.scenario_id && <p>Kịch bản · {data.scenario_id}</p>}
     <p>F3 tham chiếu · <code>{data.f3_evaluation_code}</code></p>
     {data.ready_for_f5 && <F5Preparation runId={runId} groupCode={groupCode} code={code}
       scenario={current ? activeScenario : data.scenario_id} />}
-    <details className="dssf-technical"><summary>Lịch trình đã lưu</summary>
-      <F4GanttChart evaluations={[data.result]} visible={[data.result]} timezone={data.configuration.timezone} names={names} />
-      <F4StopTables evaluation={data.result} timezone={data.configuration.timezone} names={names} />
-    </details>
-    <details className="dssf-technical"><summary>Bằng chứng đã lưu</summary>
-      <Evidence evaluation={data.result} configuration={data.configuration} names={names} />
-    </details>
+    
   </section>
 }
 
@@ -389,7 +363,6 @@ function F4Page({ runId, groupCode, evaluationCode }: { runId: string; groupCode
           : savedCount > 0 ? `Lưu ${pending.length} phương án còn lại` : 'Lưu tất cả kết quả F4'}
       </button>}
     </header>
-    <InternalPlanningNotice source={previews.find(row => row.internal_planning)?.internal_planning} />
     {loading && <p role="status" className="dssr-loading">Đang đối chiếu lịch trình…</p>}
     {error !== null && <div className="dssr-alert" role="alert">{errorMessage(error)}{' '}
       <button type="button" className="dssr-secondary-button" onClick={reload}>Thử lại</button>
@@ -445,28 +418,19 @@ function F4Page({ runId, groupCode, evaluationCode }: { runId: string; groupCode
               <F4StatusBadge status={focused.status} />
             </>}
           </div>
-          <div className="f4-stack">
-            <F4GanttChart key={compare ? 'compare' : focused.plan.plan_code}
-              evaluations={previews} visible={compare ? previews : [focused]} timezone={data.configuration.timezone} names={names} />
-            <div hidden={compare} className="f4-schedule-detail">
-              <F4StopTables key={focused.plan.plan_code} evaluation={focused}
-                timezone={focused.configuration?.timezone ?? data.configuration.timezone} names={names} />
-            </div>
-            <div hidden={!compare} className="f4-schedule-detail">
-              <F4ComparisonTables evaluations={previews} timezone={data.configuration.timezone} names={names} />
-            </div>
-          </div>
+          
+<div className="f4-stack">
+  <F4GanttChart
+    key={compare ? 'compare' : focused.plan.plan_code}
+    evaluations={previews}
+    visible={compare ? previews : [focused]}
+    timezone={data.configuration.timezone}
+    names={names}
+  />
+</div>
+
         </div>}
-        {tab === 'evidence' && focused && <>
-          <div className="f4-picker">
-            <label htmlFor={`${tabId}-evidence-plan`}>Phương án</label>
-            <select id={`${tabId}-evidence-plan`} value={focused.plan.plan_code} onChange={e => setPlanCode(e.target.value)}>
-              {previews.map(row => <option key={row.plan.plan_code} value={row.plan.plan_code}>{planName(row.plan)}</option>)}
-            </select>
-            <F4StatusBadge status={focused.status} />
-          </div>
-          <Evidence evaluation={focused} configuration={focused.configuration ?? data.configuration} names={names} />
-        </>}
+        
         {tab === 'history' && !storage && <section className="dssr-panel f4-card">
           <h2>Lịch sử đánh giá F4</h2>
           <p className="dssf-help">Lịch sử F4 sẽ khả dụng sau migration planning/0007.</p>
@@ -503,9 +467,18 @@ function F4Page({ runId, groupCode, evaluationCode }: { runId: string; groupCode
                 </li>)}</ul>
               </div>)}
           </section>
-          {selectedSaved && <SavedEvaluation key={selectedSaved.evaluation_code} runId={runId}
-            groupCode={groupCode} code={selectedSaved.evaluation_code} historyLabel={historyLabel(selectedSaved.evaluation_code)}
-            current={currentCodes.has(selectedSaved.evaluation_code)} names={names} activeScenario={activeScenario} />}
+          
+          {selectedSaved && (
+            <SavedEvaluation
+              key={selectedSaved.evaluation_code}
+              runId={runId}
+              groupCode={groupCode}
+              code={selectedSaved.evaluation_code}
+              historyLabel={historyLabel(selectedSaved.evaluation_code)}
+              current={currentCodes.has(selectedSaved.evaluation_code)}
+              activeScenario={activeScenario}
+            />
+          )}
         </div>}
       </div>
     </>}

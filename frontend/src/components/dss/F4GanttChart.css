@@ -175,3 +175,152 @@
   .f4-gantt-canvas--wide { --label-width: 166px; }
   .f4-gantt { scroll-margin-top: 77px; }
 }
+
+/* =====================================
+   F4 GANTT - RIGHT SIDE DETAIL DRAWER
+   ===================================== */
+
+.f4-drawer-root {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+.f4-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  background: rgba(15, 34, 25, 0.32);
+  cursor: pointer;
+  animation: f4BackdropIn 0.22s ease-out;
+}
+
+.f4-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(520px, 100vw);
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  box-shadow: -12px 0 36px rgba(12, 43, 28, 0.16);
+  animation: f4DrawerSlideIn 0.28s ease-out both;
+  overflow: hidden;
+}
+
+.f4-drawer-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px;
+  border-bottom: 1px solid #e2ebe5;
+  background: #f7faf8;
+  flex-shrink: 0;
+}
+
+.f4-drawer-eyebrow {
+  display: block;
+  margin-bottom: 8px;
+  color: #4c8d65;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+}
+
+.f4-drawer-header h2 {
+  margin: 0;
+  color: #163c2a;
+  font-size: 20px;
+  font-weight: 750;
+}
+
+.f4-drawer-header p {
+  margin: 8px 0 0;
+  color: #698176;
+  font-size: 12px;
+}
+
+.f4-drawer-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #dce8df;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #365a43;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.f4-drawer-close:hover {
+  background: #eaf4ed;
+}
+
+.f4-drawer-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 24px 32px;
+  overscroll-behavior: contain;
+}
+
+.f4-drawer-content .f4-stop-details {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  box-shadow: none;
+}
+
+.f4-drawer-content * {
+  min-width: 0;
+}
+
+@keyframes f4DrawerSlideIn {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes f4BackdropIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .f4-drawer {
+    width: 100vw;
+  }
+
+  .f4-drawer-header {
+    padding: 18px;
+  }
+
+  .f4-drawer-content {
+    padding: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .f4-drawer,
+  .f4-drawer-backdrop {
+    animation: none;
+  }
+}

@@ -1076,3 +1076,190 @@
     padding: 14px;
   }
 }
+
+
+/* ==========================================
+   CLOSE UNPLANNED DEMAND - MODAL
+========================================== */
+
+/* Khu vực các nút bên phải tiêu đề */
+
+.dssr-header-action-column {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 18px;
+}
+
+/* Nút kết thúc nhu cầu */
+
+.dssr-close-unplanned-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 12px 18px;
+  border: 1px solid #e5c6c6;
+  border-radius: 11px;
+  background: #fff7f7;
+  color: #a34545;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.dssr-close-unplanned-button:hover {
+  transform: translateY(-2px);
+  background: #fcecec;
+  box-shadow: 0 6px 18px #a3454515;
+}
+
+/* Nền phía sau modal */
+
+.dssr-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 38, 24, 0.45);
+  backdrop-filter: blur(3px);
+}
+
+/* Khung modal */
+
+.dssr-modal {
+  width: 100%;
+  max-width: 650px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: 26px;
+  border: 1px solid #dfe8e0;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 24px 80px rgba(15, 38, 24, 0.22);
+  animation: dssr-modal-enter 0.22s ease-out;
+}
+
+/* Tiêu đề modal */
+
+.dssr-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 18px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e5ece6;
+}
+
+.dssr-modal-header h2 {
+  margin: 0;
+  color: #183b29;
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+/* Nút X */
+
+.dssr-modal-close {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: 9px;
+  background: #f0f5f1;
+  color: #547060;
+  font-size: 24px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.dssr-modal-close:hover {
+  background: #e4ede6;
+}
+
+/* Form bên trong modal */
+
+.dssr-modal .dssc-form {
+  display: grid;
+  gap: 16px;
+}
+
+.dssr-modal .dssc-field select,
+.dssr-modal .dssc-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dssr-modal .dssc-field textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+/* Nút cuối modal */
+
+.dssr-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5ece6;
+}
+
+/* Hiệu ứng mở modal */
+
+@keyframes dssr-modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Responsive */
+
+@media (max-width: 760px) {
+  .dssr-header-action-column {
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .dssr-modal {
+    padding: 20px;
+  }
+
+  .dssr-modal-header h2 {
+    font-size: 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dssr-modal {
+    animation: none;
+  }
+
+  .dssr-close-unplanned-button {
+    transition: none;
+  }
+
+  .dssr-close-unplanned-button:hover {
+    transform: none;
+  }
+}

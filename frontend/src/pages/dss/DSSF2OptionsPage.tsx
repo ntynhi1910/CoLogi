@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, type ReactNode } from 'react'
+import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { planningSearch } from '../../components/dss/planningSearch'
 import { deliveryDate, deliveryWarning, masterdataLabel, missing, runTime, skuName, timeWindow, weight as formatWeight } from '../../components/dss/f1Display'
@@ -6,7 +6,7 @@ import { dssService } from '../../services/dss/dssService'
 import { f2ErrorMessage, f2Service } from '../../services/dss/f2Service'
 import { useDssQuery } from '../../services/dss/useDssQuery'
 import type { F1DemandDisplayLabels, F1DemandEvidence } from '../../types/f1'
-import type { F2Demand, F2Leg, F2Option, F2Options, F2PlanSummary, F2Stop } from '../../types/f2'
+import type { F2Demand, F2Option, F2Options, F2PlanSummary, F2Stop } from '../../types/f2'
 import './DSSRunDetailPage.css'
 import './F1Presentation.css'
 import './DSSF2OptionsPage.css'
@@ -31,8 +31,7 @@ const diagnosticLabels: Record<string, string> = {
 }
 
 const optionLabels = { DIRECT_CONSOLIDATED: 'Direct Consolidated', HUB_BASED: 'Hub-based' }
-const phaseLabels = { DIRECT: 'Trực tiếp', INBOUND: 'Vào Hub (Inbound)', OUTBOUND: 'Ra Hub (Outbound)' }
-const completeLabel = 'Đủ dữ liệu xây dựng phương án'
+const completeLabel = 'Đủ dữ liệu'
 const pendingCriteria = [
   'F3 · Phương tiện, tải trọng và số chuyến',
   'F4 · Thời gian và khả thi của lịch lấy/giao',
@@ -78,6 +77,303 @@ function stopName(stop: F2Stop | undefined, evidence: SnapshotEvidence) {
   return `Hub ${stop.code || `#${stop.entity_id}`}`
 }
 
+function TransportFlowDiagram({
+  option,
+  demands,
+  evidence,
+}: {
+  option: F2Option
+  demands: Map<number, F2Demand>
+  evidence: SnapshotEvidence
+}) {
+  const [selection, setSelection] = useState<{
+    optionKey: string
+    stopKey: string
+  } | null>(null)
+
+  const viaHub = option.template_type === 'HUB_BASED'
+
+  const kinds: F2Stop['kind'][] = viaHub
+    ? ['SUPPLIER', 'HUB', 'OUTLET']
+    : ['SUPPLIER', 'OUTLET']
+
+  const columns = kinds.map(kind => ({
+    kind,
+    stops: option.stops.filter(stop => stop.kind === kind),
+  }))
+
+  const height =
+    Math.max(1, ...columns.map(column => column.stops.length))
+    * 84 + 18
+
+  const labels = {
+    SUPPLIER: 'Nhà cung cấp',
+    HUB: 'Hub',
+    OUTLET: 'Outlet',
+  }
+
+  const roles = {
+    SUPPLIER: 'Điểm lấy hàng',
+    HUB: 'Điểm trung chuyển',
+    OUTLET: 'Điểm nhận hàng',
+  }
+
+  const nodes = columns.flatMap(
+    ({ stops }, columnIndex) =>
+      stops.map((stop, index) => ({
+        stop,
+        x: columns.length === 2
+          ? (columnIndex === 0 ? 3 : 71)
+          : 3 + columnIndex * 34,
+        y: (height - stops.length * 84) / 2
+          + index * 84 + 8,
+      }))
+  )
+
+  const byKey = new Map(
+    nodes.map(node => [node.stop.key, node])
+  )
+
+  const selected =
+    selection?.optionKey === option.option_key
+      ? byKey.get(selection.stopKey)?.stop
+      : undefined
+
+  
+  
+  const stopCode = (stop: F2Stop) => {
+    const fullName = stopName(stop, evidence)
+
+    if (stop.kind === 'SUPPLIER') {
+      const supplierCode = fullName.match(/\bSUP\d+\b/i)?.[0]
+
+      return supplierCode || stop.code || `#${stop.entity_id}`
+    }
+
+    if (stop.kind === 'OUTLET') {
+      const outletCode = fullName.match(/\bOUT\d+\b/i)?.[0]
+
+      return outletCode || stop.code || `#${stop.entity_id}`
+    }
+
+    return stop.code || `#${stop.entity_id}`
+  }
+
+
+
+  const links = option.legs.flatMap(leg => {
+    const from = byKey.get(leg.from_stop)
+    const to = byKey.get(leg.to_stop)
+
+    return from && to
+      ? [{ leg, from, to }]
+      : []
+  })
+
+  if (!nodes.length) {
+    return (
+      <p className="dssf-help">
+        Chưa có điểm giao nhận để hiển thị.
+      </p>
+    )
+  }
+
+  return (
+    <div className="f2-network">
+
+      <div className="f2-network-scroll">
+
+        <div className="f2-network-inner">
+
+          {/* Tiêu đề các cột */}
+
+          <div className="f2-network-headings">
+            {columns.map(({ kind }, index) => (
+              <span
+                key={kind}
+                style={{
+                  left: `${
+                    columns.length === 2
+                      ? (index === 0 ? 3 : 71)
+                      : 3 + index * 34
+                  }%`,
+                }}
+              >
+                {labels[kind]}
+              </span>
+            ))}
+          </div>
+
+          {/* Sơ đồ luồng hàng */}
+
+          <div
+            className="f2-network-canvas"
+            style={{ height }}
+          >
+
+            {/* Đường nối giữa các điểm */}
+
+            <svg
+              className="f2-network-links"
+              viewBox={`0 0 1000 ${height}`}
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              {links.map(({ leg, from, to }, index) => {
+
+                const x1 = (from.x + 26) * 10
+                const x2 = to.x * 10
+
+                const y1 = from.y + 34
+                const y2 = to.y + 34
+
+                const mid = (x1 + x2) / 2
+
+                const active =
+                  selected?.key === from.stop.key ||
+                  selected?.key === to.stop.key
+
+                return (
+                  <g
+                    key={`${leg.phase}-${leg.from_stop}-${leg.to_stop}-${index}`}
+                    className={active ? 'is-active' : ''}
+                  >
+                    <path
+                      d={`M${x1} ${y1}
+                          C${mid} ${y1},
+                           ${mid} ${y2},
+                           ${x2 - 5} ${y2}`}
+                    />
+
+                    <path
+                      d={`M${x2 - 19} ${y2 - 5}
+                          L${x2 - 5} ${y2}
+                          L${x2 - 19} ${y2 + 5}`}
+                    />
+                  </g>
+                )
+              })}
+            </svg>
+
+            {/* Các điểm Supplier, Hub và Outlet */}
+
+            {nodes.map(({ stop, x, y }) => (
+              <button
+                key={stop.key}
+                type="button"
+                className={`f2-network-node ${
+                  stop.kind === 'HUB'
+                    ? 'is-hub'
+                    : stop.kind === 'OUTLET'
+                      ? 'is-outlet'
+                      : ''
+                } ${
+                  selected?.key === stop.key
+                    ? 'is-selected'
+                    : ''
+                }`}
+                style={{
+                  left: `${x}%`,
+                  top: y,
+                }}
+                aria-expanded={selected?.key === stop.key}
+                title={stopName(stop, evidence)}
+                onClick={() =>
+                  setSelection(
+                    selected?.key === stop.key
+                      ? null
+                      : {
+                          optionKey: option.option_key,
+                          stopKey: stop.key,
+                        }
+                  )
+                }
+              >
+
+                <strong>{stopCode(stop)}</strong>
+
+                <small>{weight(stop.load_kg)}</small>
+
+                <span aria-hidden="true">
+                  {selected?.key === stop.key ? '⌃' : '⌄'}
+                </span>
+
+              </button>
+            ))}
+
+          </div>
+
+        </div>
+
+      </div>
+
+      {/* Thông tin của điểm được chọn */}
+
+      {selected ? (
+        <section
+          className="f2-network-detail"
+          aria-label={roles[selected.kind]}
+        >
+
+          <header>
+            <div>
+              <small>{roles[selected.kind]}</small>
+              <strong>
+                {stopName(selected, evidence)}
+              </strong>
+            </div>
+
+            <button
+              type="button"
+              aria-label="Đóng thông tin điểm"
+              onClick={() => setSelection(null)}
+            >
+              ×
+            </button>
+          </header>
+
+          <dl>
+
+            <div>
+              <dt>Địa chỉ</dt>
+              <dd>{selected.address || missing}</dd>
+            </div>
+
+            <div>
+              <dt>Khối lượng</dt>
+              <dd>{weight(selected.load_kg)}</dd>
+            </div>
+
+            <div>
+              <dt>Nhu cầu liên quan</dt>
+              <dd>
+                {selected.demand_ids.length
+                  ? selected.demand_ids.map(
+                      id => demands.get(id)?.code ?? `#${id}`
+                    ).join(', ')
+                  : missing}
+              </dd>
+            </div>
+
+          </dl>
+
+          {selected.kind === 'HUB' && option.hub && (
+            <small className="dssf-help">
+              {option.hub.name}
+            </small>
+          )}
+
+        </section>
+      ) : (
+        <p className="f2-network-hint">
+          Nhấn vào một điểm để xem địa chỉ và nhu cầu liên quan.
+        </p>
+      )}
+
+    </div>
+  )
+}
+
 function OptionCard({ option, demands, evidence, saved, children }: {
   option: F2Option
   demands: Map<number, F2Demand>
@@ -87,11 +383,6 @@ function OptionCard({ option, demands, evidence, saved, children }: {
 }) {
   const viaHub = option.template_type === 'HUB_BASED'
   const complete = option.structural_status === 'COMPLETE'
-  const suppliers = option.stops.filter((stop) => stop.kind === 'SUPPLIER')
-  const outlets = option.stops.filter((stop) => stop.kind === 'OUTLET')
-  const stopByKey = new Map(option.stops.map((stop) => [stop.key, stop]))
-  const demandCodes = (ids: number[]) => ids.map((id) => demands.get(id)?.code ?? `#${id}`).join(', ')
-  const phases: F2Leg['phase'][] = viaHub ? ['INBOUND', 'OUTBOUND'] : ['DIRECT']
 
   return (
     <article className="dssr-panel f2-option">
@@ -104,138 +395,869 @@ function OptionCard({ option, demands, evidence, saved, children }: {
           {saved ? 'Đã lưu · DRAFT' : complete ? completeLabel : 'Thiếu dữ liệu'}
         </span>
       </header>
-      <div className="f2-flow" aria-label="Sơ đồ luồng hàng">
-        <span><strong>{suppliers.length} điểm lấy</strong><small>Nhà cung cấp</small></span>
-        <span aria-hidden="true" className="f2-arrow">→</span>
-        {viaHub && <>
-          <span className="f2-flow-hub"><strong>{option.hub?.code ?? 'Hub'}</strong><small>{option.hub?.name ?? 'Chưa chọn'}</small></span>
-          <span aria-hidden="true" className="f2-arrow">→</span>
-        </>}
-        <span><strong>{outlets.length} điểm nhận</strong><small>Outlet</small></span>
+
+      <TransportFlowDiagram
+        option={option}
+        demands={demands}
+        evidence={evidence}
+      />
+
+      <div className="f2-network-metrics">
+
+        <div>
+          <small>
+            {viaHub ? 'Luồng vào Hub' : 'Luồng trực tiếp'}
+          </small>
+
+          <strong>
+            {complete
+              ? option.legs.filter(
+                  leg =>
+                    leg.phase === (viaHub ? 'INBOUND' : 'DIRECT')
+                ).length
+              : missing}
+          </strong>
+        </div>
+
+        <div>
+          <small>
+            {viaHub ? 'Luồng ra Hub' : 'Điểm tập kết'}
+          </small>
+
+          <strong>
+            {viaHub
+              ? (
+                  complete
+                    ? option.legs.filter(
+                        leg => leg.phase === 'OUTBOUND'
+                      ).length
+                    : missing
+                )
+              : 'Không qua Hub'}
+          </strong>
+        </div>
+
       </div>
-      {option.hub && <p className="dssf-help">{option.hub.address} · {saved ? 'Thông tin Hub tại thời điểm lưu' : 'Nguồn masterdata hiện tại'}</p>}
       {option.diagnostics.length > 0 && <ul className="dssf-notice f2-diagnostics">
         {option.diagnostics.map((issue, index) => <li key={`${issue.code}-${index}`}>
           {issue.demand_id && <strong>{demands.get(issue.demand_id)?.code ?? `#${issue.demand_id}`} · </strong>}
           {diagnosticLabels[issue.code] ?? issue.code}
         </li>)}
       </ul>}
-
-      {complete && phases.map((phase) => {
-        const legs = option.legs.filter((leg) => leg.phase === phase)
-        const path = phase === 'INBOUND' ? 'Nhà cung cấp → Hub'
-          : phase === 'OUTBOUND' ? 'Hub → Outlet' : 'Nhà cung cấp → Outlet'
-        return (
-          <section className="f2-leg-section" key={phase}>
-            <h3>{phaseLabels[phase]} <span>{legs.length} luồng</span></h3>
-            <p className="dssf-help">{path}</p>
-            <ul className="f2-legs">
-              {legs.map((leg) => <li key={`${leg.from_stop}-${leg.to_stop}`}>
-                <strong>{stopName(stopByKey.get(leg.from_stop), evidence)} → {stopName(stopByKey.get(leg.to_stop), evidence)}</strong>
-                <strong>{weight(leg.load_kg)}</strong>
-                <small>{demandCodes(leg.demand_ids)}</small>
-              </li>)}
-            </ul>
-          </section>
-        )
-      })}
-
-      <details className="dssf-technical">
-        <summary>Danh sách điểm lấy và nhận hàng</summary>
-        <ul className="f2-stop-list">
-          {option.stops.map((stop) => <li key={stop.key}>
-            <strong>{stopName(stop, evidence)} · {weight(stop.load_kg)}</strong>
-            {stop.address && <span className="dssf-evidence-line">{stop.address}</span>}
-            <span className="dssf-evidence-line">{demandCodes(stop.demand_ids)}</span>
-          </li>)}
-        </ul>
-      </details>
-      <details className="dssf-technical">
-        <summary>Mã phương án và chẩn đoán</summary>
-        <p><code>{option.option_key}</code></p>
-        <p><code>{option.status} · {option.structural_status}</code></p>
-        {option.diagnostics.length > 0 && <p><code>{[...new Set(option.diagnostics.map((item) => item.code))].join(', ')}</code></p>}
-      </details>
       {children}
     </article>
   )
 }
 
-function SavedPlanDetail({ runCode, groupCode, planCode, evidence, scenario }: {
-  runCode: string; groupCode: string; planCode: string; evidence: SnapshotEvidence; scenario: string | null
+function evidenceNumber(value: unknown): number | null {
+  if (
+    value === null ||
+    value === undefined ||
+    String(value).trim() === ''
+  ) {
+    return null
+  }
+
+  const result = Number(value)
+
+  return Number.isFinite(result) && result >= 0
+    ? result
+    : null
+}
+
+function evidenceSum(values: unknown[]): number | null {
+  if (!values.length) return null
+
+  const numbers = values.map(evidenceNumber)
+
+  if (numbers.some(value => value === null)) {
+    return null
+  }
+
+  return numbers.reduce<number>(
+    (total, value) => total + (value ?? 0),
+    0
+  )
+}
+
+function evidenceWeight(value: number | null) {
+  return value === null
+    ? missing
+    : weight(value.toFixed(3))
+}
+
+function evidencePercent(
+  required: unknown,
+  confirmed: unknown
+): number | null {
+  const requested = evidenceNumber(required)
+  const accepted = evidenceNumber(confirmed)
+
+  if (
+    requested === null ||
+    accepted === null ||
+    requested <= 0
+  ) {
+    return null
+  }
+
+  return accepted / requested * 100
+}
+
+function EvidenceFulfillmentBar({
+  required,
+  confirmed,
+}: {
+  required: unknown
+  confirmed: unknown
 }) {
-  const load = useCallback(() => f2Service.getPlan(runCode, groupCode, planCode), [runCode, groupCode, planCode])
-  const plan = useDssQuery(load)
-  if (plan.loading) return <div className="dssr-loading" role="status">Đang tải bản nháp đã lưu…</div>
-  if (!plan.data) return <p className="dssr-alert" role="alert">{f2ErrorMessage(plan.error)}</p>
-  const { f2_structure: structure, revision, status } = plan.data
-  const demandMap = new Map(structure.basis.demands.map((demand) => [demand.id, demand]))
+  const percent = evidencePercent(required, confirmed)
+
+  if (percent === null) {
+    return (
+      <span className="f2-evidence-muted">
+        {missing}
+      </span>
+    )
+  }
+
+  const fulfilled = percent >= 100
+
   return (
-    <section aria-label="Chi tiết bản nháp đã lưu" className="f2-plan-detail">
-      <h2>Bản nháp đã lưu</h2>
-      <p><code>{planCode}</code> · Phiên bản {revision} · {status}</p>
-      {plan.data.supersedes_plan_code && <p>Thay thế <code>{plan.data.supersedes_plan_code}</code></p>}
-      <p>
-        <Link to={{ pathname: `/dss/runs/${structure.lineage.run_code}/options/${structure.lineage.group_code}`,
-          search: planningSearch(scenario, { plan: planCode }) }}>Nhóm ứng viên F1</Link>
-        {' · '}{deliveryDate(structure.basis.requested_date)} · {timeWindow(structure.basis.common_start_time, structure.basis.common_end_time)}
+    <div
+      className={`f2-evidence-fulfillment ${
+        fulfilled ? 'is-complete' : 'is-partial'
+      }`}
+    >
+      <strong>
+        {percent.toLocaleString('vi-VN', {
+          maximumFractionDigits: 1,
+        })}%
+      </strong>
+
+      <div
+        className="f2-evidence-progress"
+        role="progressbar"
+        aria-label="Mức đáp ứng cung ứng"
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.min(100, percent)}
+      >
+        <span
+          style={{
+            width: `${Math.min(100, percent)}%`,
+          }}
+        />
+      </div>
+    </div>
+  )
+}
+
+function evidenceTimestamp(
+  date: string | null | undefined,
+  time: string | null | undefined
+): number | null {
+  if (!date || !time) return null
+
+  const value = Date.parse(`${date}T${time}Z`)
+
+  return Number.isFinite(value) ? value : null
+}
+
+function EvidenceTimeline({
+  demand,
+  requestedDate,
+}: {
+  demand: F2Demand
+  requestedDate: string | null | undefined
+}) {
+  const windows = [
+    {
+      label: 'Sẵn sàng lấy hàng',
+      kind: 'pickup',
+      date: demand.pickup_ready_date,
+      start: demand.pickup_ready_start_time,
+      end: demand.pickup_ready_end_time,
+    },
+    {
+      label: 'Yêu cầu nhận hàng',
+      kind: 'delivery',
+      date: requestedDate,
+      start: demand.requested_start_time,
+      end: demand.requested_end_time,
+    },
+  ].map(entry => ({
+    ...entry,
+    startValue: evidenceTimestamp(
+      entry.date,
+      entry.start
+    ),
+    endValue: evidenceTimestamp(
+      entry.date,
+      entry.end
+    ),
+  }))
+
+  const valid = windows.flatMap(entry => {
+    if (
+      entry.startValue === null ||
+      entry.endValue === null ||
+      entry.endValue <= entry.startValue
+    ) {
+      return []
+    }
+
+    return [{
+      ...entry,
+      from: entry.startValue,
+      to: entry.endValue,
+    }]
+  })
+
+  const hour = 60 * 60 * 1000
+
+  const axisStart = valid.length
+    ? Math.floor(
+        Math.min(...valid.map(entry => entry.from))
+        / hour
+      ) * hour
+    : 0
+
+  const axisEnd = valid.length
+    ? Math.ceil(
+        Math.max(...valid.map(entry => entry.to))
+        / hour
+      ) * hour
+    : 0
+
+  const range = axisEnd - axisStart
+
+  const position = (value: number) =>
+    range > 0
+      ? (value - axisStart) / range * 100
+      : 0
+
+  const step = range <= 6 * hour
+    ? hour
+    : range <= 12 * hour
+      ? 2 * hour
+      : range <= 24 * hour
+        ? 4 * hour
+        : range <= 48 * hour
+          ? 8 * hour
+          : Math.ceil(range / (6 * hour)) * hour
+
+  const ticks: number[] = []
+
+  if (range > 0) {
+    ticks.push(axisStart)
+
+    for (
+      let tick = axisStart + step;
+      tick < axisEnd;
+      tick += step
+    ) {
+      if (axisEnd - tick >= step / 2) {
+        ticks.push(tick)
+      }
+    }
+
+    ticks.push(axisEnd)
+  }
+
+  const spansDays =
+    new Date(axisStart).toISOString().slice(0, 10) !==
+    new Date(axisEnd).toISOString().slice(0, 10)
+
+  const formatTick = (value: number) => {
+    const date = new Date(value)
+
+    const clock = date.toISOString().slice(11, 16)
+
+    return spansDays
+      ? `${date.toISOString().slice(8, 10)}/${date.toISOString().slice(5, 7)} ${clock}`
+      : clock
+  }
+
+  return (
+    <section className="f2-evidence-timeline">
+
+      <h4>Khung giờ giao nhận</h4>
+
+      <div className="f2-evidence-window-cards">
+        {windows.map(entry => (
+          <div
+            className={`f2-evidence-window is-${entry.kind}`}
+            key={entry.kind}
+          >
+            <small>{entry.label}</small>
+
+            <strong>
+              {timeWindow(entry.start, entry.end)}
+            </strong>
+
+            <span>
+              {deliveryDate(entry.date)}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {valid.length === windows.length &&
+       range > 0 ? (
+        <div className="f2-evidence-chart-scroll">
+
+          <div className="f2-evidence-chart">
+
+            <div className="f2-evidence-axis">
+              {ticks.map((tick, index) => (
+                <span
+                  key={tick}
+                  className={
+                    index === 0
+                      ? 'is-first'
+                      : index === ticks.length - 1
+                        ? 'is-last'
+                        : ''
+                  }
+                  style={{
+                    left: `${position(tick)}%`,
+                  }}
+                >
+                  {formatTick(tick)}
+                </span>
+              ))}
+            </div>
+
+            <div className="f2-evidence-tracks">
+
+              {ticks.map(tick => (
+                <i
+                  className="f2-evidence-gridline"
+                  aria-hidden="true"
+                  key={tick}
+                  style={{
+                    left: `${position(tick)}%`,
+                  }}
+                />
+              ))}
+
+              {valid.map(entry => (
+                <div
+                  className="f2-evidence-track"
+                  key={entry.kind}
+                >
+                  <span
+                    className={`f2-evidence-timebar is-${entry.kind}`}
+                    title={`${entry.label}: ${deliveryDate(entry.date)} · ${timeWindow(entry.start, entry.end)}`}
+                    style={{
+                      left: `${position(entry.from)}%`,
+                      width: `${
+                        (entry.to - entry.from)
+                        / range * 100
+                      }%`,
+                    }}
+                  />
+                </div>
+              ))}
+
+            </div>
+
+          </div>
+
+        </div>
+      ) : (
+        <p className="f2-evidence-muted">
+          Chưa đủ dữ liệu để dựng biểu đồ thời gian.
+        </p>
+      )}
+
+      <div className="f2-evidence-legend">
+        <span>
+          <i className="is-pickup" />
+          Sẵn sàng lấy hàng
+        </span>
+
+        <span>
+          <i className="is-delivery" />
+          Yêu cầu nhận hàng
+        </span>
+      </div>
+
+      <p className="f2-evidence-timeline-note">
+        Khung giờ đầu vào từ F1, chưa phải lịch trình
+        vận chuyển được đánh giá tại F4.
       </p>
-      <p>{structure.basis.demand_ids.length} nhu cầu · {weight(structure.basis.total_required_weight_kg)}</p>
-      <p><Link className="dssr-secondary-button f2-allocation-link"
-        to={{ pathname: `/dss/runs/${runCode}/options/${groupCode}/f3/${encodeURIComponent(planCode)}`,
-          search: planningSearch(scenario) }}>
-        Phân bổ phương tiện F3
-      </Link></p>
-      <OptionCard option={structure.option} demands={demandMap} evidence={evidence} saved />
+
     </section>
   )
 }
 
-function InputEvidence({ options, evidence }: { options: F2Options; evidence: SnapshotEvidence }) {
-  const { basis, lineage } = options
+
+
+function InputEvidence({
+  options,
+  evidence,
+}: {
+  options: F2Options
+  evidence: SnapshotEvidence
+}) {
+  const { basis } = options
+
+  const cargoCategories = [
+    ...new Set(
+      basis.demands
+        .map(demand => demand.cargo_category_code)
+        .filter(Boolean)
+    ),
+  ]
+
+  const commonCargoCategory =
+    cargoCategories.length === 1 &&
+    basis.demands.every(
+      demand => Boolean(demand.cargo_category_code)
+    )
+      ? cargoCategories[0]
+      : cargoCategories.length > 1
+        ? 'Nhiều nhóm hàng'
+        : missing
+
+  const [expanded, setExpanded] = useState<number[]>([])
+
+  const totalRequired = evidenceNumber(
+    basis.total_required_weight_kg
+  )
+
+  const totalConfirmed = basis.demands.every(
+    demand => demand.items.length > 0
+  )
+    ? evidenceSum(
+        basis.demands.flatMap(
+          demand => demand.items.map(
+            item => item.confirmed_weight_kg
+          )
+        )
+      )
+    : null
+
+  function toggleDemand(demandId: number) {
+    setExpanded(current =>
+      current.includes(demandId)
+        ? current.filter(id => id !== demandId)
+        : [...current, demandId]
+    )
+  }
+
   return (
-    <>
-      <details className="dssr-panel dssf-technical">
-        <summary>Dữ liệu nhu cầu và xác nhận cung ứng đã lưu</summary>
-        <div className="dssf-results-list f2-evidence">
-          {basis.demands.map((demand) => {
-            const row = evidence.get(demand.id)
-            const snapshot = row?.snapshot
-            const supplier = masterdataLabel(snapshot?.supplier_code, snapshot?.supplier_name, row?.labels?.supplier, `Nhà cung cấp #${demand.supplier_id}`)
-            const outlet = masterdataLabel(snapshot?.outlet_code || demand.outlet_code, snapshot?.outlet_name, row?.labels?.outlet, `Outlet #${demand.outlet_id}`)
-            return (
-              <article className="dssf-result-row" key={demand.id}>
-                <strong>{demand.code} · {weight(demand.required_weight_kg)}</strong>
-                <dl className="dssf-facts">
-                  <div><dt>Lấy hàng</dt><dd>{supplier} · {demand.pickup_address ?? missing}</dd></div>
-                  <div><dt>Sẵn sàng lấy</dt><dd>{deliveryDate(demand.pickup_ready_date)} · {timeWindow(demand.pickup_ready_start_time, demand.pickup_ready_end_time)}</dd></div>
-                  <div><dt>Điểm và giờ nhận yêu cầu</dt><dd>{outlet} · {timeWindow(demand.requested_start_time, demand.requested_end_time)}</dd></div>
-                  <div><dt>Nhóm hàng</dt><dd>{demand.cargo_category_code || missing}</dd></div>
-                </dl>
-                <ul className="dssf-lines">
-                  {demand.items.map((item) => <li key={item.item_id}>{skuName(item.item_id, snapshot, row?.labels)} · Yêu cầu {weight(item.required_weight_kg)} · Xác nhận đủ điều kiện {weight(item.confirmed_weight_kg)}</li>)}
-                </ul>
-                <small>Snapshot v{demand.snapshot_version} · {runTime(demand.snapshot_captured_at)}</small>
-              </article>
-            )
-          })}
+    <section
+      className="dssr-panel f2-input-evidence"
+      aria-labelledby="f2-input-title"
+    >
+
+      {/* Tiêu đề */}
+
+      <header className="f2-evidence-heading">
+        <h2 id="f2-input-title">
+          Nhu cầu và xác nhận cung ứng
+        </h2>
+
+        <p>
+          Dữ liệu đầu vào được ghi nhận tại lần chạy F1
+        </p>
+      </header>
+
+      {/* KPI tổng quan */}
+
+      
+      <div className="f2-evidence-stats">
+
+        <div className="f2-evidence-category">
+          <small>Nhóm hàng</small>
+          <strong>{commonCargoCategory}</strong>
         </div>
-      </details>
-      <details className="dssr-panel dssf-technical">
-        <summary>Nguồn dữ liệu và liên kết lần chạy F1</summary>
-        <dl className="dssf-facts">
-          <div><dt>PlanningRun</dt><dd><Link to={`/dss/runs/${lineage.run_code}?tab=groups`}>{lineage.run_code}</Link></dd></div>
-          <div><dt>Candidate Group</dt><dd><code>{lineage.group_code}</code></dd></div>
-          <div><dt>RuleSet đã chốt</dt><dd>{lineage.rule_set_code ?? missing}{lineage.rule_set_version && ` · v${lineage.rule_set_version}`}</dd></div>
-          <div><dt>Thời điểm chốt cấu hình</dt><dd>{runTime(lineage.configuration_captured_at)}</dd></div>
-          <div><dt>Rule F1 đã chốt</dt><dd>{lineage.f1_rule_codes.join(', ') || missing}</dd></div>
-          <div><dt>Phiên bản hợp đồng F2</dt><dd>{options.contract_version}</dd></div>
-          <div><dt>Mã kiểm tra cấu hình</dt><dd><code>{lineage.configuration_fingerprint ?? missing}</code></dd></div>
-        </dl>
-      </details>
-    </>
+
+        <div>
+          <small>Tổng nhu cầu</small>
+          <strong>{basis.demand_ids.length}</strong>
+        </div>
+
+        <div>
+          <small>Khối lượng yêu cầu</small>
+          <strong>{evidenceWeight(totalRequired)}</strong>
+        </div>
+
+        <div>
+          <small>Khối lượng xác nhận</small>
+          <strong>{evidenceWeight(totalConfirmed)}</strong>
+        </div>
+
+      </div>
+
+
+      {/* Bảng nhu cầu */}
+
+      <div className="f2-evidence-table-wrap">
+
+        <table className="f2-evidence-table">
+
+          <thead>
+            <tr>
+              <th scope="col">Mã nhu cầu</th>
+              <th scope="col">Nhà cung cấp</th>
+              <th scope="col">Outlet</th>
+              <th scope="col">Khối lượng</th>
+              <th scope="col">Chi tiết</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {basis.demands.map(demand => {
+
+              const row = evidence.get(demand.id)
+              const snapshot = row?.snapshot
+
+              const isExpanded = expanded.includes(
+                demand.id
+              )
+
+              const detailId =
+                `f2-evidence-detail-${demand.id}`
+
+              const supplierCode =
+                snapshot?.supplier_code ||
+                row?.labels?.supplier?.code ||
+                `#${demand.supplier_id}`
+
+              const outletCode =
+                snapshot?.outlet_code ||
+                demand.outlet_code ||
+                row?.labels?.outlet?.code ||
+                `#${demand.outlet_id}`
+
+              const supplier = masterdataLabel(
+                snapshot?.supplier_code,
+                snapshot?.supplier_name,
+                row?.labels?.supplier,
+                `Nhà cung cấp #${demand.supplier_id}`
+              )
+
+              const outlet = masterdataLabel(
+                snapshot?.outlet_code ||
+                  demand.outlet_code,
+                snapshot?.outlet_name,
+                row?.labels?.outlet,
+                `Outlet #${demand.outlet_id}`
+              )
+
+              const required = evidenceSum(
+                demand.items.map(
+                  item => item.required_weight_kg
+                )
+              )
+
+              const confirmed = evidenceSum(
+                demand.items.map(
+                  item => item.confirmed_weight_kg
+                )
+              )
+
+              return (
+                <Fragment key={demand.id}>
+
+                  {/* Dòng nhu cầu chính */}
+
+                  <tr
+                    className={`f2-evidence-main-row ${
+                      isExpanded ? 'is-expanded' : ''
+                    }`}
+                    onClick={() => toggleDemand(demand.id)}
+                  >
+
+                    <td>
+                      <button
+                        type="button"
+                        className="f2-evidence-demand-code"
+                        aria-expanded={isExpanded}
+                        aria-controls={
+                          isExpanded ? detailId : undefined
+                        }
+                        onClick={event => {
+                          event.stopPropagation()
+                          toggleDemand(demand.id)
+                        }}
+                      >
+                        {demand.code}
+                      </button>
+
+                      <small>
+                        {demand.items.length} mặt hàng
+                      </small>
+                    </td>
+
+                    <td>
+                      <strong>{supplierCode}</strong>
+                    </td>
+
+                    <td>
+                      <strong>{outletCode}</strong>
+                    </td>
+
+                    <td>
+                      <strong>
+                        {weight(demand.required_weight_kg)}
+                      </strong>
+                    </td>
+
+                    <td>
+                      <button
+                        type="button"
+                        className="f2-evidence-toggle"
+                        aria-label={
+                          isExpanded
+                            ? `Thu gọn ${demand.code}`
+                            : `Xem chi tiết ${demand.code}`
+                        }
+                        aria-expanded={isExpanded}
+                        aria-controls={
+                          isExpanded ? detailId : undefined
+                        }
+                        onClick={event => {
+                          event.stopPropagation()
+                          toggleDemand(demand.id)
+                        }}
+                      >
+                        <svg
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d={
+                              isExpanded
+                                ? 'M6 15l6-6 6 6'
+                                : 'M6 9l6 6 6-6'
+                            }
+                          />
+                        </svg>
+                      </button>
+                    </td>
+
+                  </tr>
+
+                  {/* Nội dung mở rộng */}
+
+                  {isExpanded && (
+                    <tr className="f2-evidence-expanded-row">
+
+                      <td colSpan={5}>
+
+                        <div
+                          className="f2-evidence-expanded"
+                          id={detailId}
+                        >
+
+                          {/* Thông tin giao nhận */}
+
+                          <div className="f2-evidence-parties">
+
+                            <div>
+                              <small>Điểm lấy hàng</small>
+
+                              <strong>{supplier}</strong>
+
+                              <p>
+                                {demand.pickup_address ||
+                                  missing}
+                              </p>
+                            </div>
+
+                            <div>
+                              <small>Điểm nhận hàng</small>
+
+                              <strong>{outlet}</strong>
+
+                              <p>
+                                Ngày nhận yêu cầu:{' '}
+                                {deliveryDate(
+                                  demand.requested_date
+                                )}
+                              </p>
+                            </div>
+
+                          </div>
+
+                          {/* Timeline */}
+
+                          <EvidenceTimeline
+                            demand={demand}
+                            requestedDate={
+                              demand.requested_date
+                            }
+                          />
+
+                          {/* Bảng xác nhận cung ứng */}
+
+                          <section className="f2-evidence-supply">
+
+                            <header>
+                              <h4>
+                                Chi tiết xác nhận cung ứng
+                              </h4>
+
+                              <small>
+                                {demand.items.length} mặt hàng
+                              </small>
+                            </header>
+
+                            <div className="f2-evidence-items-wrap">
+
+                              <table className="f2-evidence-items">
+
+                                <thead>
+                                  <tr>
+                                    <th scope="col">
+                                      SKU / Mặt hàng
+                                    </th>
+                                    <th scope="col">
+                                      Yêu cầu
+                                    </th>
+                                    <th scope="col">
+                                      Xác nhận
+                                    </th>
+                                    <th scope="col">
+                                      Mức đáp ứng
+                                    </th>
+                                  </tr>
+                                </thead>
+
+                                <tbody>
+
+                                  {demand.items.map(item => (
+                                    <tr key={item.item_id}>
+
+                                      <td>
+                                        {skuName(
+                                          item.item_id,
+                                          snapshot,
+                                          row?.labels
+                                        )}
+                                      </td>
+
+                                      <td>
+                                        {weight(
+                                          item.required_weight_kg
+                                        )}
+                                      </td>
+
+                                      <td>
+                                        {weight(
+                                          item.confirmed_weight_kg
+                                        )}
+                                      </td>
+
+                                      <td>
+                                        <EvidenceFulfillmentBar
+                                          required={
+                                            item.required_weight_kg
+                                          }
+                                          confirmed={
+                                            item.confirmed_weight_kg
+                                          }
+                                        />
+                                      </td>
+
+                                    </tr>
+                                  ))}
+
+                                  {demand.items.length === 0 && (
+                                    <tr>
+                                      <td colSpan={4}>
+                                        Chưa có dữ liệu mặt hàng.
+                                      </td>
+                                    </tr>
+                                  )}
+
+                                </tbody>
+
+                                <tfoot>
+                                  <tr>
+
+                                    <th scope="row">
+                                      Tổng cộng
+                                    </th>
+
+                                    <td>
+                                      {evidenceWeight(required)}
+                                    </td>
+
+                                    <td>
+                                      {evidenceWeight(confirmed)}
+                                    </td>
+
+                                    <td>
+                                      <EvidenceFulfillmentBar
+                                        required={required}
+                                        confirmed={confirmed}
+                                      />
+                                    </td>
+
+                                  </tr>
+                                </tfoot>
+
+                              </table>
+
+                            </div>
+
+                          </section>
+
+                          {/* Thông tin snapshot */}
+
+                          <p className="f2-evidence-snapshot">
+                            Snapshot v{demand.snapshot_version}
+                            {' · '}
+                            {runTime(
+                              demand.snapshot_captured_at
+                            )}
+                          </p>
+
+                        </div>
+
+                      </td>
+
+                    </tr>
+                  )}
+
+                </Fragment>
+              )
+            })}
+
+            {basis.demands.length === 0 && (
+              <tr>
+                <td colSpan={5}>
+                  Chưa có dữ liệu nhu cầu.
+                </td>
+              </tr>
+            )}
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <p className="f2-evidence-count">
+        Hiển thị {basis.demands.length} nhu cầu
+      </p>
+
+    </section>
   )
 }
+
 
 function flowCount(option: F2Option) {
   if (option.structural_status !== 'COMPLETE') return 'Chưa tạo'
@@ -300,11 +1322,7 @@ function ComparisonOverview({ targets, allowSave, saving, onSave }: {
           </tbody>
         </table>
       </div>
-      <p className="f2-comparison-note">Luồng hàng mô tả phần nhu cầu đi giữa hai điểm. Số chuyến xe được xác định ở F3.</p>
-      <p className="f2-comparison-note">
-        Chưa thể kết luận phương án nào tốt hơn khi F3–F5 chưa có kết quả phân bổ phương tiện, kiểm tra lịch lấy/giao và đánh giá chi phí.
-        Manager quyết định sau khi xem kết quả F1–F5 và thông qua CP09.
-      </p>
+      
     </section>
   )
 }
@@ -330,57 +1348,204 @@ function SaveResults({ results, reload }: { results: SaveOutcome[]; reload: () =
   )
 }
 
-function SavedOptions({ plans, selectedPlan, onSelect, allocationPath, scenario }: {
-  plans: F2PlanSummary[][]; selectedPlan?: string; onSelect: (code: string) => void; allocationPath: string; scenario: string | null
+
+function SavedOptions({
+  plans,
+  allocationPath,
+  scenario,
+}: {
+  plans: F2PlanSummary[][]
+  allocationPath: string
+  scenario: string | null
 }) {
   if (plans.length === 0) return null
+
+  const directCount = plans.filter(
+    history =>
+      history.at(-1)?.template_type === 'DIRECT_CONSOLIDATED'
+  ).length
+
+  const hubCount = plans.length - directCount
+
   return (
-    <section className="dssr-panel f2-saved-options" aria-labelledby="f2-saved-title">
-      <div className="f2-overview-heading">
-        <h2 id="f2-saved-title">Phương án đã lưu</h2>
-        <Link className="dssr-primary-button f2-allocation-link" to={{ pathname: allocationPath, search: planningSearch(scenario) }}>
-          Đánh giá F3 tất cả phương án
+    <section
+      className="dssr-panel f2-saved-options"
+      aria-labelledby="f2-saved-title"
+    >
+      <div className="f2-saved-heading">
+        <div>
+          <h2 id="f2-saved-title">
+            Phương án đã lưu
+          </h2>
+
+          <p>
+            {plans.length} phương án
+            {' · '}
+            {directCount} trực tiếp
+            {' · '}
+            {hubCount} qua Hub
+          </p>
+        </div>
+
+        <Link
+          className="dssr-primary-button f2-allocation-link"
+          to={{
+            pathname: allocationPath,
+            search: planningSearch(scenario),
+          }}
+        >
+          Đánh giá F3 tất cả phương án →
         </Link>
       </div>
-      <ul className="f2-saved-list">
-        {plans.map((history) => {
-          const latest = history.at(-1)!
-          const identity = optionIdentity(latest.template_type, latest.hub_id)
-          const title = latest.template_type === 'DIRECT_CONSOLIDATED' ? optionLabels.DIRECT_CONSOLIDATED
-            : partyName(latest.hub?.code, latest.hub?.name, `Hub #${latest.hub_id}`)
-          return (
-            <li key={identity} className="f2-saved-option">
-              <h3>{title}</h3>
-              <p>Phiên bản {latest.revision} · {latest.status}</p>
-              <code>{latest.plan_code}</code>
-              <button type="button" className="dssr-secondary-button"
-                aria-label={`Xem bản đã lưu: ${title}`}
-                aria-pressed={selectedPlan === latest.plan_code} onClick={() => onSelect(latest.plan_code)}>
-                Xem bản đã lưu
-              </button>
-              <Link className="dssr-secondary-button f2-allocation-link"
-                to={{ pathname: `${allocationPath}/${encodeURIComponent(latest.plan_code)}`, search: planningSearch(scenario) }}>
-                Phân bổ phương tiện F3
-              </Link>
-              {history.length > 1 && <details className="dssf-technical">
-                <summary>Các phiên bản trước ({history.length - 1})</summary>
-                <ul className="f2-plan-list">
-                  {history.slice(0, -1).toReversed().map((plan) => <li key={plan.plan_code}>
-                    <button type="button" className="dssr-secondary-button"
-                      aria-pressed={selectedPlan === plan.plan_code} onClick={() => onSelect(plan.plan_code)}>
-                      Phiên bản {plan.revision} · {plan.status}
-                    </button>
-                    <code>{plan.plan_code}</code>
-                  </li>)}
-                </ul>
-              </details>}
-            </li>
-          )
-        })}
-      </ul>
+
+      <div className="f2-saved-table-wrap">
+        <table className="f2-saved-table">
+
+          <thead>
+            <tr>
+              <th scope="col">Phương án</th>
+              <th scope="col">Điểm tập kết</th>
+              <th scope="col">Trạng thái</th>
+              <th scope="col">Phân bổ phương tiện</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {plans.map(history => {
+              const latest = history.at(-1)!
+
+              const isDirect =
+                latest.template_type ===
+                'DIRECT_CONSOLIDATED'
+
+              const identity = optionIdentity(
+                latest.template_type,
+                latest.hub_id
+              )
+
+              return (
+                <tr key={identity}>
+
+                  {/* Phương án */}
+
+                  <td>
+                    <div className="f2-saved-type">
+
+                      <span
+                        className={`f2-saved-icon ${
+                          isDirect
+                            ? 'is-direct'
+                            : 'is-hub'
+                        }`}
+                        aria-hidden="true"
+                      >
+                        {isDirect ? (
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.7"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M2 4h13v13H2z" />
+                            <path d="M15 9h4l3 4v4h-7" />
+                            <circle cx="6" cy="18" r="2" />
+                            <circle cx="18" cy="18" r="2" />
+                          </svg>
+                        ) : (
+                          <svg
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.7"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M3 10l9-6 9 6v11H3z" />
+                            <path d="M8 21v-9h8v9" />
+                            <path d="M8 15h8M8 18h8" />
+                          </svg>
+                        )}
+                      </span>
+
+                      <div>
+                        <strong>
+                          {optionLabels[latest.template_type]}
+                        </strong>
+
+                        <small>
+                          {isDirect
+                            ? 'Gom hàng trực tiếp'
+                            : 'Gom hàng qua Hub'}
+                        </small>
+                      </div>
+                    </div>
+                  </td>
+
+                  {/* Điểm tập kết */}
+
+                  <td>
+                    {isDirect ? (
+                      <span className="f2-saved-muted">
+                        Không qua Hub
+                      </span>
+                    ) : (
+                      <div className="f2-saved-hub">
+                        <strong>
+                          {latest.hub?.code ||
+                            `Hub #${latest.hub_id}`}
+                        </strong>
+
+                        {latest.hub?.name && (
+                          <small>{latest.hub.name}</small>
+                        )}
+                      </div>
+                    )}
+                  </td>
+
+                  {/* Trạng thái */}
+
+                  <td>
+                    <span className="f2-saved-status">
+                      {latest.status === 'DRAFT'
+                        ? 'Nháp'
+                        : latest.status}
+                    </span>
+                  </td>
+
+                  {/* Phân bổ phương tiện F3 */}
+
+                  <td>
+                    <Link
+                      className="f2-saved-f3-link"
+                      to={{
+                        pathname:
+                          `${allocationPath}/${encodeURIComponent(latest.plan_code)}`,
+                        search: planningSearch(scenario),
+                      }}
+                    >
+                      Phân bổ F3
+                      <span aria-hidden="true">→</span>
+                    </Link>
+                  </td>
+
+                </tr>
+              )
+            })}
+          </tbody>
+
+        </table>
+      </div>
+
+      <p className="f2-saved-count">
+        Hiển thị {plans.length} phương án
+      </p>
+
     </section>
   )
 }
+
 
 export default function DSSF2OptionsPage() {
   const { runId = '', optionId = '' } = useParams()
@@ -393,6 +1558,25 @@ export default function DSSF2OptionsPage() {
   const saving = pending.length > 0
   const saveLock = useRef(false)
   const hubs = useDssQuery(f2Service.listHubs)
+  
+  const hasInitializedHub = useRef(false)
+
+  useEffect(() => {
+    const firstHub = hubs.data?.[0]
+
+    if (
+      !hasInitializedHub.current &&
+      !hubs.loading &&
+      firstHub
+    ) {
+      hasInitializedHub.current = true
+
+      const defaultHubId = String(firstHub.id)
+
+      setHubId(current => current || defaultHubId)
+    }
+  }, [hubs.loading, hubs.data])
+
   const loadF1 = useCallback(() => dssService.getRun(runId), [runId])
   const f1 = useDssQuery(loadF1)
   const evidence: SnapshotEvidence = new Map(f1.data?.demand_results.map(({ demand_id, evidence }) => [
@@ -465,8 +1649,24 @@ export default function DSSF2OptionsPage() {
         <dl className="dssf-run-stats">
           <div><dt>Nhu cầu</dt><dd>{basis.demand_ids.length}</dd></div>
           <div><dt>Outlet phân biệt</dt><dd>{basis.outlet_count ?? missing}</dd></div>
-          <div><dt>Tổng khối lượng yêu cầu</dt><dd>{weight(basis.total_required_weight_kg)}</dd></div>
-          <div><dt>Ngày và khung giờ giao chung</dt><dd>{deliveryDate(basis.requested_date)} · {timeWindow(basis.common_start_time, basis.common_end_time)}</dd></div>
+          <div><dt>Tổng khối lượng yêu cầu</dt><dd>{weight(basis.total_required_weight_kg)}</dd></div>          
+          <div>
+            <dt>Ngày và khung giờ giao chung</dt>
+
+            <dd className="f2-common-window">
+              <span>
+                {deliveryDate(basis.requested_date)}
+              </span>
+
+              <span>
+                {timeWindow(
+                  basis.common_start_time,
+                  basis.common_end_time
+                )}
+              </span>
+            </dd>
+          </div>
+
         </dl>
         {dayWarning && <p className="dssf-notice">{dayWarning}</p>}
       </section>}
@@ -487,7 +1687,18 @@ export default function DSSF2OptionsPage() {
           {hubs.loading && <p className="dssf-help" role="status">Đang tải danh sách Hub…</p>}
           {hubs.error !== null && <div className="dssf-help" role="alert">{f2ErrorMessage(hubs.error)} <button className="dssr-secondary-button" onClick={hubs.reload}>Tải lại Hub</button></div>}
           {hubs.data?.length === 0 && <p className="dssf-help">Masterdata chưa có Hub hợp lệ.</p>}
-          {!!hubs.data?.length && <p className="dssf-help">Hub do Manager chọn từ danh sách đang hoạt động.</p>}
+          {!!hubs.data?.length && (
+            <div className="f2-hub-recommendation">
+              <strong>ⓘ Khuyến nghị</strong>
+
+              <p>
+                Nên xây dựng phương án lần lượt với cả hai Hub
+                để mở rộng phạm vi so sánh và lựa chọn phương án
+                vận chuyển tối ưu dựa trên kết quả đánh giá DSS
+                (F3–F5).
+              </p>
+            </div>
+          )}
         </div>
       </section>
       {saveResults.length > 0 && <SaveResults results={saveResults} reload={() => {
@@ -499,14 +1710,13 @@ export default function DSSF2OptionsPage() {
         {options.persistence === 'MIGRATION_REQUIRED' && <p className="dssf-notice f2-state-note">
           Có thể xem trước và đọc các phương án đã lưu. Cần migration F2 để lưu phương án theo Hub.
         </p>}
-        <ComparisonOverview targets={targets} allowSave={allowSave} saving={saving} onSave={() => void savePlans(targets)} />
+        
         <div className="f2-comparison">
           {targets.map((target) => {
             const { option, latest, isSaved } = target
             return (
               <OptionCard key={option.template_type} option={option} demands={demands} evidence={evidence} saved={isSaved}>
                 <footer className="f2-plan-actions">
-                  {latest && <p>Đã lưu <code>{latest.plan_code}</code> · Phiên bản {latest.revision} · {latest.status}</p>}
                   {option.structural_status === 'COMPLETE' && !isSaved && (
                     <button type="button" className="dssr-secondary-button f2-save-single" disabled={saving || !allowSave}
                       onClick={() => void savePlans([target])}>
@@ -518,9 +1728,13 @@ export default function DSSF2OptionsPage() {
             )
           })}
         </div>
-        <SavedOptions plans={savedOptions.map(([, plans]) => plans)} selectedPlan={selectedPlan}
-          onSelect={setSelectedPlan} allocationPath={`${candidatePath}/f3`} scenario={scenario} />
-        {selectedPlan && <SavedPlanDetail runCode={runId} groupCode={optionId} planCode={selectedPlan} evidence={evidence} scenario={scenario} />}
+        <ComparisonOverview targets={targets} allowSave={allowSave} saving={saving} onSave={() => void savePlans(targets)} />
+        <SavedOptions
+          plans={savedOptions.map(([, plans]) => plans)}
+          allocationPath={`${candidatePath}/f3`}
+          scenario={scenario}
+        />
+        
         <InputEvidence options={options} evidence={evidence} />
       </>}
     </main>

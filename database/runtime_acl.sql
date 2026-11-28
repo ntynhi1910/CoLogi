@@ -199,6 +199,10 @@ GRANT INSERT ON TABLE "public"."transport_handovers" TO cologi_cp08_runtime;
 GRANT SELECT ON TABLE "public"."transport_handovers" TO cologi_cp08_runtime;
 GRANT UPDATE ("service_region") ON TABLE "public"."transport_providers" TO cologi_cp08_runtime;
 GRANT SELECT ON TABLE "public"."transport_providers" TO cologi_cp08_runtime;
+-- CP16: account workspace registration (no UPDATE/DELETE expansion).
+GRANT INSERT (provider_code, provider_name, provider_type, service_region, contact_email, is_active) ON TABLE "public"."transport_providers" TO cologi_cp08_runtime;
+GRANT INSERT (supplier_code, supplier_name, contact_name, phone, email, address, is_active, created_at, updated_at) ON TABLE "public"."suppliers" TO cologi_cp08_runtime;
+GRANT USAGE ON SEQUENCE "public"."transport_providers_id_seq", "public"."suppliers_id_seq" TO cologi_cp08_runtime;
 GRANT INSERT ("assigned_at") ON TABLE "public"."user_outlet_access" TO cologi_cp08_runtime;
 GRANT INSERT ("assigned_by_id") ON TABLE "public"."user_outlet_access" TO cologi_cp08_runtime;
 GRANT INSERT ("is_active") ON TABLE "public"."user_outlet_access" TO cologi_cp08_runtime;

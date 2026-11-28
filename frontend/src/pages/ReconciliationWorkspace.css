@@ -51,3 +51,1440 @@
   .cp12-panel { border-color: #ccc; }
   .cp12 table { font-size: 8pt; }
 }
+
+/* =========================================
+   COLOGI - LOGISTICS CONTROL CENTER
+   Manager interface
+   ========================================= */
+
+.cp12--manager {
+  --cp12-green: #185d3b;
+  --cp12-dark: #153f2b;
+  --cp12-border: #dbe7df;
+  --cp12-muted: #708375;
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+  color: var(--cp12-dark);
+}
+
+/* Page heading */
+
+.cp12--manager .cp12-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 8px 0 12px;
+}
+
+.cp12--manager .cp12-page-heading {
+  min-width: 0;
+}
+
+.cp12--manager .cp12-eyebrow {
+  display: block;
+  margin-bottom: 9px;
+  color: #56846a;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 1.5px;
+}
+
+.cp12--manager .cp12-page-heading h1 {
+  margin: 0;
+  color: #15422d;
+  font-size: clamp(25px, 2.5vw, 34px);
+  line-height: 1.2;
+  font-weight: 750;
+}
+
+.cp12--manager .cp12-page-heading p {
+  margin: 9px 0 0;
+  color: var(--cp12-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.cp12--manager .cp12-header-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border: 1px solid var(--cp12-border);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--cp12-green);
+  font-size: 12px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+/* Filter panel */
+
+.cp12--manager .cp12-filter-panel {
+  padding: 18px 20px;
+  border: 1px solid var(--cp12-border);
+  border-radius: 13px;
+  background: #fff;
+}
+
+.cp12--manager .cp12-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.cp12--manager .cp12-filter-header h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.cp12--manager .cp12-filter-header p {
+  margin: 4px 0 0;
+  color: var(--cp12-muted);
+  font-size: 12px;
+}
+
+.cp12--manager .cp12-reset-filter {
+  padding: 8px 12px;
+  border: 1px solid #cddfd2;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--cp12-green);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.cp12--manager .cp12-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cp12--manager .cp12-filter-grid label {
+  min-width: 0;
+  gap: 6px;
+  color: #47624f;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cp12--manager .cp12-filter-grid input,
+.cp12--manager .cp12-filter-grid select {
+  min-height: 39px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  border: 1px solid #d4e2d8;
+  background: #fcfdfc;
+  color: #183e2a;
+  font-size: 13px;
+}
+
+/* Five main tabs */
+
+.cp12--manager .cp12-main-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  overflow-x: auto;
+  padding: 6px;
+  border: 1px solid #dbe7de;
+  border-radius: 11px;
+  background: #edf4ef;
+  scrollbar-width: thin;
+}
+
+.cp12--manager .cp12-main-tabs button {
+  flex: 0 0 auto;
+  padding: 10px 15px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #3d5f47;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+
+.cp12--manager .cp12-main-tabs button:hover {
+  background: #fff;
+}
+
+.cp12--manager .cp12-main-tabs button[aria-pressed="true"] {
+  border-color: #cfe2d4;
+  background: #fff;
+  color: #175d39;
+  box-shadow: 0 1px 3px rgba(20, 68, 40, .06);
+}
+
+/* Shared panels */
+
+.cp12--manager .cp12-panel {
+  padding: 20px;
+  border: 1px solid var(--cp12-border);
+  border-radius: 13px;
+  background: #fff;
+  min-width: 0;
+}
+
+.cp12--manager .cp12-panel > h2 {
+  margin-bottom: 14px;
+  font-size: 17px;
+  color: #17462f;
+}
+
+.cp12--manager .cp12-section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.cp12--manager .cp12-section-heading h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #17462f;
+}
+
+.cp12--manager .cp12-section-heading p {
+  margin: 5px 0 0;
+  color: var(--cp12-muted);
+  font-size: 12px;
+}
+
+.cp12--manager .cp12-context-label {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: #eaf3ec;
+  color: #276546;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+/* Performance KPI grid */
+
+.cp12--manager .cp12-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.cp12--manager .cp12-kpis > div {
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid #e0e9e2;
+  border-radius: 10px;
+  background: #f9fbf9;
+}
+
+.cp12--manager .cp12-kpis dt {
+  color: #59705f;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cp12--manager .cp12-kpis dd {
+  margin: 10px 0 8px;
+  color: #155b38;
+  font-size: clamp(21px, 2vw, 29px);
+  font-weight: 750;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp12--manager .cp12-kpis small {
+  font-size: 11px;
+  color: #718678;
+  line-height: 1.5;
+}
+
+/* Trends */
+
+.cp12--manager .cp12-trend {
+  display: grid;
+  gap: 9px;
+  margin-top: 16px;
+}
+
+.cp12--manager .cp12-trend > div {
+  display: grid;
+  grid-template-columns: 105px minmax(0, 1fr) 75px;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+}
+
+.cp12--manager .cp12-trend progress {
+  width: 100%;
+  height: 10px;
+  accent-color: #287a50;
+}
+
+.cp12--manager .cp12-trend strong {
+  text-align: right;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tables and reconciliation */
+
+.cp12--manager .cp12-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e0e9e2;
+  border-radius: 9px;
+}
+
+.cp12--manager table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.cp12--manager thead {
+  background: #eaf2ec;
+}
+
+.cp12--manager th,
+.cp12--manager td {
+  padding: 11px 13px;
+  border-bottom: 1px solid #e7eee9;
+  vertical-align: middle;
+}
+
+.cp12--manager tbody tr:hover {
+  background: #f8fbf9;
+}
+
+/* FinalPlan list */
+
+.cp12--manager .cp12-plans {
+  display: grid;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.cp12--manager .cp12-plans li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+  padding: 13px 15px;
+  border: 1px solid #e0e9e2;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.cp12--manager .cp12-plans li:hover {
+  background: #f7faf8;
+}
+
+.cp12--manager .cp12-plans li a {
+  color: #185c3a;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cp12--manager .cp12-plans li small {
+  margin-top: 5px;
+}
+
+.cp12--manager .cp12-badge {
+  display: inline-flex;
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: #e7f2e9;
+  color: #286445;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+/* Exception tab */
+
+.cp12--manager[data-active-tab="exceptions"] .cp12-plans li {
+  border-left: 3px solid #c28a40;
+}
+
+/* Reports */
+
+.cp12--manager[data-active-tab="reports"] .delivery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.cp12--manager[data-active-tab="reports"] .delivery-actions button {
+  padding: 10px 15px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+/* Responsive */
+
+@media (max-width: 1050px) {
+  .cp12--manager .cp12-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .cp12--manager .cp12-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .cp12--manager .cp12-filter-grid,
+  .cp12--manager .cp12-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp12--manager .cp12-panel {
+    padding: 15px;
+  }
+
+  .cp12--manager .cp12-page-heading h1 {
+    font-size: 25px;
+  }
+
+  .cp12--manager .cp12-trend > div {
+    grid-template-columns: 80px minmax(0, 1fr) 65px;
+    gap: 8px;
+  }
+}
+
+/* Manager - Live logistics performance */
+
+.cp12--manager .cp12-performance {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+/* Main KPIs */
+
+.cp12--manager .cp12-performance-main-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cp12--manager .cp12-performance-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 0;
+  padding: 17px;
+  border: 1px solid #dfebe2;
+  border-radius: 10px;
+  background: #f8fbf9;
+}
+
+.cp12--manager .cp12-performance-kpi > span {
+  min-height: 34px;
+  color: #526e5d;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cp12--manager .cp12-performance-kpi > strong {
+  margin: 6px 0 10px;
+  color: #145f3a;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp12--manager .cp12-performance-kpi > small {
+  margin-top: auto;
+  color: #76897b;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.cp12--manager .cp12-performance-supporting {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e1eae4;
+}
+
+.cp12--manager .cp12-performance-supporting > div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 4px 16px;
+  border-right: 1px solid #e4ece6;
+  min-width: 0;
+}
+
+.cp12--manager .cp12-performance-supporting > div:first-child {
+  padding-left: 0;
+}
+
+.cp12--manager .cp12-performance-supporting > div:last-child {
+  border-right: none;
+}
+
+.cp12--manager .cp12-performance-supporting span {
+  color: #6b8172;
+  font-size: 12px;
+}
+
+.cp12--manager .cp12-performance-supporting strong {
+  color: #1b5738;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Unit selector */
+
+.cp12--manager .cp12-group-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.cp12--manager .cp12-group-switch button {
+  padding: 9px 13px;
+  border: 1px solid #d4e3d8;
+  border-radius: 8px;
+  background: #fff;
+  color: #456750;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cp12--manager .cp12-group-switch button[aria-pressed="true"] {
+  border-color: #87b39a;
+  background: #e9f4ed;
+  color: #155b39;
+}
+
+.cp12--manager .cp12-performance-table {
+  width: 100%;
+}
+
+.cp12--manager .cp12-performance-table th:first-child {
+  min-width: 160px;
+}
+
+.cp12--manager .cp12-performance-table tbody th {
+  color: #1b5437;
+  font-weight: 700;
+}
+
+.cp12--manager .cp12-performance-table tbody th small {
+  margin-top: 4px;
+  font-weight: 400;
+}
+
+.cp12--manager .cp12-empty-table {
+  padding: 24px;
+  text-align: center;
+  color: #718577;
+}
+
+/* Direct vs Hub */
+
+.cp12--manager .cp12-template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cp12--manager .cp12-template-item {
+  display: grid;
+  gap: 11px;
+  padding: 16px;
+  border: 1px solid #e0eae3;
+  border-radius: 10px;
+  background: #fafcfb;
+}
+
+.cp12--manager .cp12-template-item > strong {
+  padding-bottom: 9px;
+  border-bottom: 1px solid #e4ebe6;
+  color: #19583a;
+  font-size: 14px;
+}
+
+.cp12--manager .cp12-template-item > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.cp12--manager .cp12-template-item span {
+  color: #687c6f;
+}
+
+.cp12--manager .cp12-template-item b {
+  color: #1a5035;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Trends */
+
+.cp12--manager .cp12-trend-section {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e2eae4;
+}
+
+.cp12--manager .cp12-trend-section h3 {
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.cp12--manager .cp12-trend-empty {
+  color: #849488;
+  font-size: 11px;
+}
+
+/* Current FinalPlans */
+
+.cp12--manager .cp12-performance-plans {
+  display: grid;
+  gap: 8px;
+}
+
+.cp12--manager .cp12-performance-plan {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 15px;
+  border: 1px solid #dfe9e2;
+  border-radius: 9px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.cp12--manager .cp12-performance-plan:hover {
+  background: #f5faf6;
+}
+
+.cp12--manager .cp12-performance-plan > div {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+}
+
+.cp12--manager .cp12-performance-plan strong {
+  color: #185b39;
+  font-size: 13px;
+}
+
+.cp12--manager .cp12-performance-plan small {
+  color: #758779;
+  font-size: 11px;
+}
+
+.cp12--manager .cp12-empty-message {
+  color: #758779;
+  font-size: 13px;
+}
+
+@media (max-width: 1050px) {
+  .cp12--manager .cp12-performance-main-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 650px) {
+  .cp12--manager .cp12-performance-main-kpis,
+  .cp12--manager .cp12-template-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cp12--manager .cp12-performance-supporting {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .cp12--manager .cp12-performance-supporting > div {
+    border-right: none;
+    padding: 4px 0;
+  }
+
+  .cp12--manager .cp12-performance-plan {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* ===========================================
+   COLOGI - MANAGER LOGISTICS WORKSPACE
+   Layout refinement
+   =========================================== */
+
+.cp12--manager {
+  --cp12-green: #155d3a;
+  --cp12-border: #dce8df;
+  --cp12-muted: #708476;
+  --cp12-bg: #f6f9f7;
+  --cp12-radius: 12px;
+  min-width: 0;
+  width: 100%;
+}
+
+.cp12--manager *,
+.cp12--manager *::before,
+.cp12--manager *::after {
+  box-sizing: border-box;
+}
+
+.cp12--manager .cp12-page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.cp12--manager .cp12-page-header h1 {
+  margin: 0;
+  font-size: clamp(23px, 2.4vw, 30px);
+  line-height: 1.2;
+  color: #123d29;
+}
+
+.cp12--manager .cp12-page-header p {
+  margin: 0;
+  color: var(--cp12-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Filter panel */
+
+.cp12--manager .cp12-filter-panel {
+  padding: 20px;
+  margin-bottom: 18px;
+  border: 1px solid var(--cp12-border);
+  border-radius: var(--cp12-radius);
+  background: white;
+  min-width: 0;
+}
+
+.cp12--manager .cp12-filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 17px;
+}
+
+.cp12--manager .cp12-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 16px;
+  align-items: end;
+  min-width: 0;
+}
+
+.cp12--manager .cp12-filter-grid > * {
+  min-width: 0;
+  width: 100%;
+}
+
+.cp12--manager .cp12-filter-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  color: #496652;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.cp12--manager .cp12-filter-grid input,
+.cp12--manager .cp12-filter-grid select {
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 8px 11px;
+  border: 1px solid #d4e2d8;
+  border-radius: 8px;
+  background: #fff;
+  color: #214c34;
+  font-size: 13px;
+}
+
+.cp12--manager .cp12-filter-grid input:focus,
+.cp12--manager .cp12-filter-grid select:focus {
+  outline: 2px solid #b5ddc3;
+  outline-offset: 1px;
+}
+
+/* Main navigation */
+
+.cp12--manager .cp12-main-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 5px;
+  margin-bottom: 18px;
+  width: fit-content;
+  max-width: 100%;
+  border: 1px solid #e0e9e2;
+  border-radius: 11px;
+  background: #f0f5f1;
+}
+
+.cp12--manager .cp12-main-tabs > * {
+  min-height: 37px;
+  padding: 9px 14px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+/* Shared content */
+
+.cp12--manager .cp12-panel {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cp12--manager .cp12-performance {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.cp12--manager .cp12-performance > section {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--cp12-border);
+  border-radius: var(--cp12-radius);
+  background: #fff;
+}
+
+.cp12--manager .cp12-performance h2 {
+  margin-top: 0;
+  margin-bottom: 7px;
+  color: #17482f;
+  font-size: 17px;
+}
+
+.cp12--manager .cp12-performance p {
+  line-height: 1.55;
+}
+
+/* KPI */
+
+.cp12--manager .cp12-performance-main-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+
+.cp12--manager .cp12-performance-main-kpis > * {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid #dce8df;
+  border-radius: 10px;
+  background: #f8fbf9;
+}
+
+.cp12--manager .cp12-performance-main-kpis strong {
+  display: block;
+  margin: 9px 0;
+  color: var(--cp12-green);
+  font-size: clamp(24px, 2.5vw, 31px);
+  font-weight: 750;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.cp12--manager .cp12-performance-main-kpis small {
+  color: var(--cp12-muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.cp12--manager .cp12-group-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.cp12--manager .cp12-template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+
+.cp12--manager .cp12-template-grid > * {
+  min-width: 0;
+}
+
+.cp12--manager .cp12-performance-plan {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Tables and records */
+
+.cp12--manager .manager-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.cp12--manager .manager-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cp12--manager .manager-table th,
+.cp12--manager .manager-table td {
+  padding: 12px 14px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #e5ede7;
+  font-size: 12px;
+}
+
+.cp12--manager .manager-table th {
+  background: #f0f5f1;
+  color: #4c6955;
+  font-weight: 700;
+}
+
+.cp12--manager .manager-table td {
+  color: #284d36;
+}
+
+.cp12--manager .manager-table tbody tr:hover {
+  background: #f8fbf9;
+}
+
+/* Responsive */
+
+@media (max-width: 1100px) {
+  .cp12--manager .cp12-performance-main-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 850px) {
+  .cp12--manager .cp12-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cp12--manager .cp12-main-tabs {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .cp12--manager .cp12-filter-grid,
+  .cp12--manager .cp12-performance-main-kpis,
+  .cp12--manager .cp12-template-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp12--manager .cp12-filter-panel,
+  .cp12--manager .cp12-performance > section {
+    padding: 15px;
+  }
+
+  .cp12--manager .cp12-main-tabs > * {
+    flex: 1 1 auto;
+    white-space: normal;
+    text-align: center;
+  }
+}
+/* =========================================
+   SUPPLIER - PERFORMANCE KPI
+   ========================================= */
+
+.cp12--supplier .cp12-supplier-kpis {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 16px;
+  margin: 20px 0 0;
+}
+
+/* Ba KPI đầu */
+
+.cp12--supplier .cp12-supplier-kpis > div {
+  grid-column: span 2;
+  min-width: 0;
+  min-height: 150px;
+  padding: 20px;
+  border: 1px solid #dce7df;
+  border-radius: 14px;
+  background: #ffffff;
+  box-sizing: border-box;
+
+  box-shadow: 0 3px 12px
+    rgba(24, 59, 41, 0.04);
+
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    background-color 0.22s ease,
+    border-color 0.22s ease;
+}
+
+/* Hai KPI tỷ lệ ở hàng dưới */
+
+.cp12--supplier .cp12-supplier-kpis
+> div[data-metric="on_time_pickup_pct"],
+
+.cp12--supplier .cp12-supplier-kpis
+> div[data-metric="exception_pct"] {
+  grid-column: span 3;
+}
+
+/* Tên KPI */
+
+.cp12--supplier .cp12-supplier-kpis dt {
+  color: #52695b;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+/* Giá trị KPI */
+
+.cp12--supplier .cp12-supplier-kpis dd {
+  margin: 12px 0 10px;
+  color: #183b29;
+  font-size: 30px;
+  font-weight: 750;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Mô tả cách tính */
+
+.cp12--supplier .cp12-supplier-kpis small {
+  color: #718377;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* KPI lấy hàng đúng hạn */
+
+.cp12--supplier .cp12-supplier-kpis
+> div[data-tone="green"] {
+  background: #edf5ef;
+  border-color: #d3e4d8;
+}
+
+.cp12--supplier .cp12-supplier-kpis
+> div[data-tone="green"] dd {
+  color: #23754a;
+}
+
+/* KPI ngoại lệ */
+
+.cp12--supplier .cp12-supplier-kpis
+> div[data-tone="amber"] {
+  background: #faf0da;
+  border-color: #eadcb9;
+}
+
+.cp12--supplier .cp12-supplier-kpis
+> div[data-tone="amber"] :is(dt, dd, small) {
+  color: #916c22;
+}
+
+/* Hover nâng nhẹ */
+
+.cp12--supplier .cp12-supplier-kpis > div:hover {
+  transform: translateY(-4px);
+  background: #eaf4ed;
+  border-color: #a8cbb3;
+
+  box-shadow: 0 8px 20px
+    rgba(24, 59, 41, 0.10);
+}
+
+.cp12--supplier .cp12-supplier-kpis
+> div[data-tone="amber"]:hover {
+  background: #f6e8c8;
+  border-color: #d8bd80;
+
+  box-shadow: 0 8px 20px
+    rgba(145, 108, 34, 0.12);
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .cp12--supplier .cp12-supplier-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cp12--supplier .cp12-supplier-kpis
+  > div[data-metric] {
+    grid-column: span 1;
+  }
+
+  .cp12--supplier .cp12-supplier-kpis
+  > div[data-metric="shipped_kg"] {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 550px) {
+  .cp12--supplier .cp12-supplier-kpis {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cp12--supplier .cp12-supplier-kpis > div {
+    transition: none;
+  }
+
+  .cp12--supplier .cp12-supplier-kpis > div:hover {
+    transform: none;
+  }
+}
+/* =========================================
+   SUPPLIER PERFORMANCE - ADDITIONAL UI
+   ========================================= */
+
+/* KPI progress */
+
+.cp12--supplier .cp12-supplier-kpi-progress {
+  display: block;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 7px;
+  margin: 0 0 12px;
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #d3e6d8;
+  accent-color: #23754a;
+}
+
+.cp12--supplier .cp12-supplier-kpi-progress::-webkit-progress-bar {
+  background: #d3e6d8;
+  border-radius: 20px;
+}
+
+.cp12--supplier .cp12-supplier-kpi-progress::-webkit-progress-value {
+  background: #23754a;
+  border-radius: 20px;
+}
+
+.cp12--supplier .cp12-supplier-kpi-progress::-moz-progress-bar {
+  background: #23754a;
+}
+
+.cp12--supplier [data-tone="amber"] .cp12-supplier-kpi-progress,
+.cp12--supplier [data-tone="amber"] .cp12-supplier-kpi-progress::-webkit-progress-bar {
+  background: #eadcb9;
+}
+
+.cp12--supplier [data-tone="amber"] .cp12-supplier-kpi-progress::-webkit-progress-value {
+  background: #b88a35;
+}
+
+.cp12--supplier [data-tone="amber"] .cp12-supplier-kpi-progress::-moz-progress-bar {
+  background: #b88a35;
+}
+
+
+/* Analytics layout */
+
+.cp12--supplier .cp12-supplier-analytics {
+  display: grid;
+  gap: 20px;
+  min-width: 0;
+}
+
+
+/* Direct / Hub */
+
+.cp12--supplier .cp12-supplier-template-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.cp12--supplier .cp12-supplier-template {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #dce7df;
+  border-radius: 12px;
+  background: #f7faf8;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.cp12--supplier .cp12-supplier-template:hover {
+  transform: translateY(-3px);
+  border-color: #a8cbb3;
+  box-shadow: 0 8px 20px rgba(24, 59, 41, 0.09);
+}
+
+.cp12--supplier .cp12-supplier-template h3 {
+  margin: 0 0 18px;
+  color: #183b29;
+  font-size: 16px;
+}
+
+.cp12--supplier .cp12-supplier-template dl {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.cp12--supplier .cp12-supplier-template dl > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.cp12--supplier .cp12-supplier-template dt {
+  font-size: 13px;
+  color: #52695b;
+}
+
+.cp12--supplier .cp12-supplier-template dd {
+  margin: 0;
+  color: #23754a;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: right;
+}
+
+
+/* Trends */
+
+.cp12--supplier .cp12-supplier-trend {
+  display: grid;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.cp12--supplier .cp12-supplier-trend-row {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr) 130px;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.cp12--supplier .cp12-supplier-trend-row:hover {
+  background: #edf5ef;
+}
+
+.cp12--supplier .cp12-supplier-trend-row span {
+  color: #52695b;
+  font-size: 12px;
+}
+
+.cp12--supplier .cp12-supplier-trend-row strong {
+  color: #183b29;
+  font-size: 13px;
+  text-align: right;
+}
+
+.cp12--supplier .cp12-supplier-trend-row progress {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 12px;
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #e5eee7;
+  accent-color: #23754a;
+}
+
+.cp12--supplier .cp12-supplier-trend-row progress::-webkit-progress-bar {
+  background: #e5eee7;
+  border-radius: 20px;
+}
+
+.cp12--supplier .cp12-supplier-trend-row progress::-webkit-progress-value {
+  background: #23754a;
+  border-radius: 20px;
+}
+
+.cp12--supplier .cp12-supplier-trend-row progress::-moz-progress-bar {
+  background: #23754a;
+}
+
+
+/* Plan table */
+
+.cp12--supplier .cp12-supplier-plan-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.cp12--supplier .cp12-supplier-plan-table thead th {
+  padding: 14px 16px;
+  background: #edf4ee;
+  color: #365643;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cp12--supplier .cp12-supplier-plan-table tbody td,
+.cp12--supplier .cp12-supplier-plan-table tbody th {
+  padding: 16px;
+  border-bottom: 1px solid #e5ece6;
+  color: #52695b;
+  font-size: 13px;
+  transition: background-color 0.2s ease;
+}
+
+.cp12--supplier .cp12-supplier-plan-table tbody tr:hover > * {
+  background: #edf6ef;
+}
+
+.cp12--supplier .cp12-supplier-plan-table a {
+  color: #23754a;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+
+.cp12--supplier .cp12-supplier-plan-table .cp12-badge[data-status="COMPLETED"],
+.cp12--supplier .cp12-supplier-plan-table .cp12-badge[data-status="RECONCILED"] {
+  background: #e4f2e8;
+  color: #23754a;
+}
+
+.cp12--supplier .cp12-supplier-plan-table .cp12-badge[data-status="EXCEPTION"],
+.cp12--supplier .cp12-supplier-plan-table .cp12-badge[data-status="PENDING_RECONCILIATION"] {
+  background: #faf0da;
+  color: #916c22;
+}
+
+
+/* Responsive */
+
+@media (max-width: 700px) {
+
+  .cp12--supplier .cp12-supplier-template-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cp12--supplier .cp12-supplier-trend-row {
+    grid-template-columns: 80px minmax(0, 1fr) 90px;
+    gap: 8px;
+    padding: 8px 0;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .cp12--supplier .cp12-supplier-template {
+    transition: none;
+  }
+
+  .cp12--supplier .cp12-supplier-template:hover {
+    transform: none;
+  }
+
+}
+
+
+/* Highlight active reconciliation tabs */
+
+.cp12 .rco-tabs button[aria-pressed="true"],
+.cp12 .cp12-main-tabs button[aria-pressed="true"] {
+  background: #17623e !important;
+  border-color: #17623e !important;
+  color: #fff !important;
+  box-shadow: 0 3px 10px rgba(23, 98, 62, 0.16);
+}
+
+/* Space between new SKU reconciliation and legacy table */
+
+.cp12 .grd {
+  margin-bottom: 28px;
+}
+
+/* Three final panels: two-column grid */
+
+.cp12 .cp12-bottom-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 18px;
+  width: 100%;
+  min-width: 0;
+  margin-top: 24px;
+}
+
+.cp12 .cp12-bottom-grid > * {
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  max-height: 390px;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+
+/* Preserve horizontal scrolling for cost tables */
+
+.cp12 .cp12-bottom-grid table {
+  width: 100%;
+}
+
+/* Responsive */
+
+@media (max-width: 900px) {
+  .cp12 .cp12-bottom-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cp12 .cp12-bottom-grid > * {
+    max-height: none;
+    overflow: visible;
+  }
+}

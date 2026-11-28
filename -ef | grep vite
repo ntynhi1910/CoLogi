@@ -1,0 +1,25 @@
+[1mdiff --git a/frontend/src/pages/dss/DSSDashboardPage.tsx b/frontend/src/pages/dss/DSSDashboardPage.tsx[m
+[1mindex e4170b5..57055a5 100644[m
+[1m--- a/frontend/src/pages/dss/DSSDashboardPage.tsx[m
+[1m+++ b/frontend/src/pages/dss/DSSDashboardPage.tsx[m
+[36m@@ -4,8 +4,6 @@[m [mimport { f1Label, missing, runTime } from '../../components/dss/f1Display'[m
+ import RunSummaryStats from '../../components/dss/RunSummaryStats'[m
+ import { dssErrorMessage, dssService } from '../../services/dss/dssService'[m
+ import { useDssQuery } from '../../services/dss/useDssQuery'[m
+[31m-import CloseUnplannedForm from '../foundation/CloseUnplannedForm'[m
+[31m-import { f1BusinessDate } from '../../components/dss/f1Display'[m
+ import type { DSSOutletContext } from './ManagerRoute'[m
+ import './DSSDashboardPage.css'[m
+ import './F1Presentation.css'[m
+[36m@@ -55,10 +53,7 @@[m [mexport default function DSSDashboardPage() {[m
+         <article className="dssd-stat"><span>BỊ LOẠI KHỎI F1</span><strong>{selectable.data?.counts.excluded ?? '—'}</strong></article>[m
+         <article className="dssd-stat dssd-stat-amber"><span>LẦN CHẠY F1</span><strong>{recentHistory.data?.count ?? '—'}</strong></article>[m
+       </section>[m
+[31m-      {scope.unplanned_closure_enabled && <CloseUnplannedForm demands={(demands.data ?? [])[m
+[31m-        .filter(row => row.status === 'SUBMITTED' && row.requested_date < f1BusinessDate())[m
+[31m-        .map(row => ({ id: row.id, label: `${row.demand_code} · ${row.outlet_code}` }))} />}[m
+[31m-[m
+[32m+[m[41m      [m
+       <div className="dssd-workspace dssf-dashboard-workspace">[m
+         <section className="dssd-panel">[m
+           <div className="dssd-panel-heading"><div><h2>RuleSet khả dụng</h2></div></div>[m

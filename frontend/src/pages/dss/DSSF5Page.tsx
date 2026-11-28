@@ -4,9 +4,8 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { deliveryDate, runTime } from '../../components/dss/f1Display'
 import { kg, planName } from '../../components/dss/f3Display'
 import { planningSearch } from '../../components/dss/planningSearch'
-import InternalPlanningNotice from '../../components/dss/InternalPlanningNotice'
 import { diagnostic, money, number, percent, syntheticNotice } from '../../components/dss/f5Display'
-import { Allocations, CostBreakdown, Overview, Rank, Savings, Sources, Table, WaveCosts } from '../../components/dss/F5DecisionPanels'
+import { Allocations, CostBreakdown, Overview, Rank, Sources } from '../../components/dss/F5DecisionPanels'
 import { ApiError } from '../../services/api/client'
 import { dssErrorMessage } from '../../services/dss/dssService'
 import { getF5Evaluation, getF5History, getF5Preview, saveF5 } from '../../services/dss/f5Service'
@@ -30,48 +29,174 @@ function sameResult(row: F5Saved, ref: F5SaveReference, version: number) {
     && row.input_fingerprint === ref.input_fingerprint && row.configuration_fingerprint === ref.configuration_fingerprint
 }
 
-function HistoryDetail({ runId, groupCode, code, isCurrent }: { runId: string; groupCode: string; code: string; isCurrent: boolean }) {
-  const load = useCallback(() => getF5Evaluation(runId, groupCode, code), [runId, groupCode, code])
+
+function HistoryDetail({
+  runId,
+  groupCode,
+  code,
+  isCurrent,
+}: {
+  runId: string
+  groupCode: string
+  code: string
+  isCurrent: boolean
+}) {
+  const load = useCallback(
+    () => getF5Evaluation(runId, groupCode, code),
+    [runId, groupCode, code]
+  )
+
   const { data, loading, error, reload } = useDssQuery(load)
-  if (loading) return <p role="status">Đang tải snapshot…</p>
-  if (!data || data.evaluation_code !== code) return <div className="dssr-alert" role="alert">
-    {dssErrorMessage(error)} <button type="button" className="dssr-secondary-button" onClick={reload}>Thử lại</button>
-  </div>
-  const { configuration, result, comparison } = data.snapshot
-  return <article className="dssr-panel f5-panel f5-snapshot" data-evaluation-code={code}>
-    <div className="f5-panel-heading">
-      <div><h2>{planName(data.plan)} · Kết quả đã lưu</h2>
-        <p>{runTime(data.calculated_at)} · {data.configuration_version} · {data.scenario ?? 'Vận hành'}</p></div>
-      <div className="f5-badges"><Rank rank={result.option.rank} /><span className={'f5-badge ' + (isCurrent ? 'f5-rank--first' : 'f5-neutral')}>
-        {isCurrent ? 'Kết quả hiện tại' : 'Kết quả lịch sử'}
-      </span></div>
+
+  if (loading) {
+    return <p role="status">Đang tải kết quả đã lưu…</p>
+  }
+
+  if (!data || data.evaluation_code !== code) {
+    return (
+      <div className="dssr-alert" role="alert">
+        {dssErrorMessage(error)}{' '}
+        <button
+          type="button"
+          className="dssr-secondary-button"
+          onClick={reload}
+        >
+          Thử lại
+        </button>
+      </div>
+    )
+  }
+
+  return (
+    <article
+      className="dssr-panel f5-panel f5-history-summary"
+      data-evaluation-code={code}
+    >
+      <div className="f5-panel-heading">
+        <div>
+          <h2>{planName(data.plan)}</h2>
+          <p>{runTime(data.calculated_at)}</p>
+        </div>
+
+        <span
+          className={
+            'f5-badge ' +
+            (isCurrent ? 'f5-rank--first' : 'f5-neutral')
+          }
+        >
+          {isCurrent ? 'Kết quả hiện tại' : 'Kết quả lịch sử'}
+        </span>
+      </div>
+
+      {data.evaluation_context === 'UAT' && (
+        <p className="f5-notice">{syntheticNotice}</p>
+      )}
+
+      {data.evaluation_context === 'CAPSTONE' && (
+        <p className="f5-notice">
+          SYNTHETIC/CAPSTONE · Chi phí mô phỏng.
+        </p>
+      )}
+
+
+{(() => {
+  const saving = number(data.cost_saving)
+  const rate = number(data.saving_rate_pct)
+
+  const negative = saving !== null && saving < 0
+  const positive = saving !== null && saving > 0
+
+  const amount = saving === null
+    ? '—'
+    : money(String(Math.abs(saving)))
+
+  const rateText = rate === null
+    ? null
+    : percent(String(Math.abs(rate)))
+
+  return (
+    <div className="f5-history-cost-summary">
+      <div className="f5-history-metrics">
+        <div>
+          <span>Giao độc lập</span>
+          <strong>{money(data.baseline_cost)}</strong>
+        </div>
+
+        <div>
+          <span>Chi phí phối hợp</span>
+          <strong>{money(data.collaborative_cost)}</strong>
+        </div>
+
+        <div>
+          <span>Tiết kiệm</span>
+          <strong
+            className={
+              negative
+                ? 'f5-history-saving-negative'
+                : positive
+                  ? 'f5-history-saving-positive'
+                  : ''
+            }
+          >
+            {saving === null
+              ? '—'
+              : `${negative ? '−' : positive ? '+' : ''}${amount}`}
+          </strong>
+        </div>
+      </div>
+
+      {saving !== null && saving !== 0 && (
+        <p className={
+          'f5-history-saving-note ' +
+          (negative
+            ? 'f5-history-saving-note--negative'
+            : 'f5-history-saving-note--positive')
+        }>
+          <span aria-hidden="true">
+            {negative ? '!' : '✓'}
+          </span>
+
+          {negative
+            ? `Phương án này tốn thêm ${amount}${rateText ? ` (${rateText})` : ''} so với giao độc lập.`
+            : `Phương án này tiết kiệm ${amount}${rateText ? ` (${rateText})` : ''} so với giao độc lập.`}
+        </p>
+      )}
     </div>
-    {data.evaluation_context === 'UAT' && <p className="f5-notice">{syntheticNotice}</p>}
-    {data.evaluation_context === 'CAPSTONE' && <p className="f5-notice">SYNTHETIC/CAPSTONE · Chi phí mô phỏng.</p>}
-    <InternalPlanningNotice source={data.internal_planning} />
-    <dl className="f5-kpis f5-kpis--snapshot">
-      <div><dt>Chi phí giao độc lập</dt><dd>{money(data.baseline_cost)}</dd></div>
-      <div><dt>Chi phí phối hợp</dt><dd>{money(data.collaborative_cost)}</dd></div>
-      <div><dt>Tiết kiệm</dt><dd><Savings value={data.cost_saving} /></dd><small>{percent(data.saving_rate_pct)}</small></div>
-    </dl>
-    <details className="f5-disclosure"><summary>Thứ hạng tại thời điểm lưu</summary>
-      <Table label="So sánh trong snapshot đã lưu" columns={['Phương án', 'Chi phí đã tính', 'Hạng đã lưu']}>
-        {comparison.options.map(row => <tr key={row.plan.plan_code}><th scope="row">{planName(row.plan)}</th>
-          <td>{money(row.collaborative_cost)}</td><td><Rank rank={row.rank} /></td></tr>)}
-      </Table>
-    </details>
-    <details className="f5-disclosure"><summary>Chi phí theo wave và cấu phần</summary><WaveCosts option={result.option} /></details>
-    <details className="f5-disclosure"><summary>Phân bổ chi phí theo Outlet</summary>
-      <Allocations data={{ ...result, configuration, options: [result.option] }} />
-    </details>
-    <details className="f5-disclosure"><summary>Lineage F1–F5, nguồn giá và fingerprint</summary>
-      <pre>{JSON.stringify({ lineage: data.snapshot.lineage, configuration, price_inputs: data.snapshot.price_inputs,
-        evaluation_code: data.evaluation_code, input_fingerprint: data.input_fingerprint,
-        configuration_fingerprint: data.configuration_fingerprint, comparison_fingerprint: comparison.fingerprint,
-      }, null, 2)}</pre>
-    </details>
-  </article>
+  )
+})()}
+
+
+      <div className="f5-history-meta">
+        <span>Thứ hạng tại thời điểm lưu</span>
+        <Rank rank={data.snapshot.result.option.rank} />
+      </div>
+
+      
+
+
+<section
+  className="f5-history-info-section"
+  aria-label="Thông tin bản đánh giá"
+>
+  <h3>Thông tin bản đánh giá</h3>
+
+  <div className="f5-history-info">
+    <div className="f5-history-info-row">
+      <span>Trạng thái kết quả</span>
+      <strong>
+        {isCurrent
+          ? 'Thuộc kết quả hiện tại'
+          : 'Kết quả lịch sử'}
+      </strong>
+    </div>
+  </div>
+</section>
+
+
+    </article>
+  )
 }
+
 
 function History({ runId, groupCode, rows, current, active, onOpen }: {
   runId: string; groupCode: string; rows: F5Saved[]; current: Set<string>; active?: string; onOpen: (code: string) => void
@@ -94,7 +219,6 @@ function History({ runId, groupCode, rows, current, active, onOpen }: {
           <span className={'f5-badge ' + (current.has(row.evaluation_code) ? 'f5-rank--first' : 'f5-neutral')}>
             {current.has(row.evaluation_code) ? 'Kết quả hiện tại' : 'Kết quả lịch sử'}
           </span>
-          <span>{row.configuration_version} · {row.scenario ?? 'Vận hành'}</span>
           <small>{runTime(row.calculated_at)}</small>
         </button>)}
       </section>)}
@@ -172,10 +296,21 @@ export default function DSSF5Page() {
   }
   return <main className="dssr-page f5-page">
     <header className="dssr-header"><div><Link className="dssr-back-link" to={back}>← Kiểm tra thời gian F4</Link>
-      <p className="dssr-eyebrow">COLOGI · DSS F5</p><h1>Đánh giá kinh tế F5</h1>
-      {rows.length > 0 && <Link className="dssr-secondary-button" to={`/dss/decisions/${runId}/${optionId}`}>
-        Xem phương án để quyết định
-      </Link>}
+      <p className="dssr-eyebrow">COLOGI · DSS F5</p>
+<div className="f5-heading-row">
+  <h1>Đánh giá kinh tế F5</h1>
+
+  {rows.length > 0 && (
+    <Link
+      className="f5-decision-button"
+      to={`/dss/decisions/${runId}/${optionId}`}
+    >
+      <span>Xem phương án để quyết định</span>
+      <span aria-hidden="true">→</span>
+    </Link>
+  )}
+</div>
+
       {data && <p className="dssr-description">{data.demands.length} nhu cầu · {kg(data.total_weight_kg)}
         {' · '}{deliveryDate(data.service_date)}{data.scenario && ` · ${data.scenario}`}</p>}</div></header>
     {loading && <p className="dssr-loading" role="status">Đang đối chiếu chi phí và kết quả đã lưu…</p>}
@@ -187,7 +322,6 @@ export default function DSSF5Page() {
       <div className="f5-context-bar">
         {data.evaluation_context === 'UAT' && <p className="f5-notice">{syntheticNotice}</p>}
         {data.evaluation_context === 'CAPSTONE' && <p className="f5-notice">SYNTHETIC/CAPSTONE · Chi phí mô phỏng.</p>}
-        <InternalPlanningNotice source={data.price_evidence?.internal_planning} />
         {data.persistence_available && <div className="f5-save-bar">
           <button type="button" className="dssr-primary-button" disabled={!canSave || !pending.length}
             onClick={() => void publish(pending)}>

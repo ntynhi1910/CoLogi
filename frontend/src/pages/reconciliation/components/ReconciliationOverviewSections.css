@@ -1,0 +1,371 @@
+
+/* CoLogi - shared reconciliation overview */
+
+.rco-panel {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100%;
+  padding: 20px;
+  border: 1px solid #dbe7df;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.rco-panel *,
+.rco-panel *::before,
+.rco-panel *::after {
+  box-sizing: border-box;
+}
+
+.rco-section-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.rco-section-heading h2 {
+  margin: 0 0 6px;
+  color: #174b31;
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.rco-section-heading p {
+  margin: 0;
+  color: #718575;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* Filter layout */
+
+.rco-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 15px;
+  width: 100%;
+}
+
+.rco-filter-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  font-size: 12px;
+  font-weight: 650;
+  color: #415f4a;
+}
+
+.rco-filter-grid input,
+.rco-filter-grid select {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  margin: 0;
+  padding: 8px 11px;
+  border: 1px solid #ceded3;
+  border-radius: 8px;
+  background: #fff;
+  color: #214d34;
+  font: inherit;
+  font-size: 13px;
+}
+
+.rco-filter-grid input:focus,
+.rco-filter-grid select:focus {
+  outline: 2px solid #b7dac4;
+  outline-offset: 1px;
+}
+
+/* Tabs */
+
+.rco-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  width: 100%;
+  margin: 18px 0;
+}
+
+.rco-tabs button {
+  min-height: 40px;
+  padding: 10px 15px;
+  border: 1px solid #d5e4da;
+  border-radius: 8px;
+  background: #fff;
+  color: #41634c;
+  font-size: 12px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.rco-tabs button[aria-pressed="true"] {
+  border-color: #17623e;
+  background: #17623e;
+  color: #fff;
+}
+
+.rco-tabs button:hover:not([aria-pressed="true"]) {
+  background: #f2f8f4;
+}
+
+/* Buttons */
+
+.rco-button {
+  min-height: 38px;
+  padding: 9px 13px;
+  border: 1px solid #17623e;
+  border-radius: 8px;
+  background: #17623e;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.rco-button-secondary {
+  border-color: #d5e4da;
+  background: white;
+  color: #17623e;
+}
+
+.rco-button:hover {
+  filter: brightness(.96);
+}
+
+/* FinalPlan table */
+
+.rco-count {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #eaf5ed;
+  color: #246441;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.rco-table-scroll {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.rco-table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.rco-table th,
+.rco-table td {
+  padding: 13px 12px;
+  border-bottom: 1px solid #e7eee9;
+  vertical-align: middle;
+  font-size: 12px;
+}
+
+.rco-table thead th {
+  background: #f1f7f3;
+  color: #54705d;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.rco-table tbody td {
+  color: #294d37;
+}
+
+.rco-table tbody tr:hover {
+  background: #f9fcfa;
+}
+
+.rco-table td strong {
+  display: block;
+  color: #174e31;
+  font-weight: 750;
+}
+
+.rco-table td small {
+  display: block;
+  margin-top: 5px;
+  color: #778a7d;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.rco-table a {
+  color: #17623e;
+  text-decoration: none;
+  font-weight: 650;
+}
+
+.rco-table a:hover {
+  text-decoration: underline;
+}
+
+.rco-detail-link {
+  white-space: nowrap;
+}
+
+.rco-status {
+  display: inline-flex;
+  max-width: 180px;
+  padding: 6px 9px;
+  border-radius: 7px;
+  background: #eef3ef;
+  color: #597363;
+  line-height: 1.4;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.rco-status[data-status="COMPLETED"],
+.rco-status[data-status="RECONCILED"],
+.rco-status[data-status="APPROVED"] {
+  color: #17653e;
+  background: #e6f4e9;
+}
+
+.rco-status[data-status="EXCEPTION"],
+.rco-status[data-status="RETURNED"] {
+  color: #a94a33;
+  background: #fff0e8;
+}
+
+.rco-status[data-status="PENDING_RECONCILIATION"],
+.rco-status[data-status="SUBMITTED"] {
+  color: #96650d;
+  background: #fff6de;
+}
+
+/* Reports */
+
+.rco-reports {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.rco-export-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.rco-report-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px 22px;
+  margin-bottom: 18px;
+  color: #708376;
+  font-size: 12px;
+}
+
+.rco-report-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.rco-report-kpis article {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #dfeae2;
+  border-radius: 10px;
+  background: #f8fbf9;
+}
+
+.rco-report-kpis article span {
+  color: #64806d;
+  font-size: 12px;
+}
+
+.rco-report-kpis article strong {
+  color: #155a39;
+  font-size: 25px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.rco-empty {
+  padding: 28px 15px;
+  border: 1px dashed #d5e3d9;
+  border-radius: 9px;
+  text-align: center;
+  color: #708475;
+  font-size: 13px;
+}
+
+.rco-error {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff0eb;
+  color: #a13d2a;
+  font-size: 12px;
+}
+
+/* Responsive */
+
+@media (max-width: 1000px) {
+  .rco-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .rco-report-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .rco-panel {
+    padding: 15px;
+  }
+
+  .rco-filter-grid,
+  .rco-report-kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rco-tabs button {
+    flex: 1 1 auto;
+  }
+
+  .rco-section-heading {
+    flex-direction: column;
+  }
+}
+
+@media print {
+  .rco-filters,
+  .rco-tabs,
+  .rco-export-actions,
+  .rco-detail-link {
+    display: none !important;
+  }
+
+  .rco-panel {
+    border: none;
+    box-shadow: none;
+  }
+
+  .rco-table-scroll {
+    overflow: visible;
+  }
+
+  .rco-table {
+    min-width: 0;
+  }
+}

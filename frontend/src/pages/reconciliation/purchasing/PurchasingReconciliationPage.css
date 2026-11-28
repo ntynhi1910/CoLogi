@@ -1,0 +1,81 @@
+
+/* ===================================
+   PURCHASING RECONCILIATION
+   =================================== */
+
+.purchasing-reconciliation {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+}
+
+.purchasing-reconciliation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.purchasing-reconciliation-eyebrow {
+  color: #638573;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.purchasing-reconciliation-header h1 {
+  margin: 8px 0;
+  color: #164b30;
+  font-size: 28px;
+  line-height: 1.25;
+}
+
+.purchasing-reconciliation-header p {
+  max-width: 680px;
+  margin: 0;
+  color: #718475;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.purchasing-reconciliation-back {
+  color: #17653f;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.purchasing-reconciliation-back:hover {
+  text-decoration: underline;
+}
+
+.purchasing-reconciliation-panel {
+  padding: 20px;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.purchasing-reconciliation-panel h2 {
+  margin: 0 0 10px;
+  color: #194b32;
+  font-size: 18px;
+}
+
+.purchasing-reconciliation-panel p {
+  color: #718475;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+@media (max-width: 700px) {
+  .purchasing-reconciliation-header {
+    flex-direction: column;
+  }
+
+  .purchasing-reconciliation-panel {
+    padding: 15px;
+  }
+}

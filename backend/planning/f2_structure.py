@@ -64,7 +64,7 @@ F2_STRUCTURE_SCHEMA = {
             run_code={"type": "string", "format": "uuid"}, group_code=TEXT,
             run_status={"const": "COMPLETED"}, candidate_status={"const": "CANDIDATE"},
             rule_set_id=ID, rule_set_code=TEXT, rule_set_version=ID, configuration_captured_at=STAMP,
-            configuration_fingerprint=HASH, max_group_size=ID, max_candidates_per_run=ID,
+            configuration_fingerprint=HASH, max_group_size=_optional(ID), max_candidates_per_run=ID,
             cargo_matrix_source=_optional(TEXT), cargo_matrix_sheet=_optional(TEXT),
             f1_rule_codes=_array(TEXT, unique=True),
         ),

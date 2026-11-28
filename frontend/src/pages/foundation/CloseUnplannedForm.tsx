@@ -3,8 +3,14 @@ import { ApiError } from '../../services/api/client'
 import { dssService } from '../../services/dss/dssService'
 import { useDssQuery } from '../../services/dss/useDssQuery'
 
-export default function CloseUnplannedForm({ demands, runCode }: {
-  demands: { id: number; label: string }[]; runCode?: string
+export default function CloseUnplannedForm({
+  demands,
+  runCode,
+  embedded = false
+}: {
+  demands: { id: number; label: string }[]
+  runCode?: string
+  embedded?: boolean
 }) {
   const [id, setId] = useState('')
   const [reason, setReason] = useState('')
@@ -33,8 +39,7 @@ export default function CloseUnplannedForm({ demands, runCode }: {
   }
 
   if (!demands.length) return null
-  return <details className="dssr-panel">
-    <summary>Kết thúc nhu cầu không lập được kế hoạch</summary>
+  const formContent = (
     <form className="dssc-form" onSubmit={save}>
       <p>Cam kết cung ứng sẽ bị hủy và lượng hàng giữ chỗ được giải phóng. Số tồn thực tế và trạng thái Demand được giữ nguyên.</p>
       <label className="dssc-field">Nhu cầu<select required value={id} onChange={event => { setId(event.target.value); setConfirmed(false) }} disabled={busy}>
@@ -46,6 +51,19 @@ export default function CloseUnplannedForm({ demands, runCode }: {
       <label><input type="checkbox" required checked={confirmed} onChange={event => setConfirmed(event.target.checked)} disabled={busy} /> Tôi xác nhận đã kết thúc lần lập kế hoạch và không còn phương án khả thi.</label>
       <button className="dssr-primary-button" disabled={busy || !id || !attempt.data || !reason.trim() || !confirmed} type="submit">{busy ? 'Đang xử lý…' : 'Xác nhận hủy cam kết cung ứng'}</button>
       {message && <p role={message.error ? 'alert' : 'status'}>{message.text}</p>}
-    </form>
-  </details>
+        </form>
+  )
+
+  if (embedded) {
+    return formContent
+  }
+
+  return (
+    <details className="dssr-panel">
+      <summary>
+        Kết thúc nhu cầu không lập được kế hoạch
+      </summary>
+      {formContent}
+    </details>
+  )
 }

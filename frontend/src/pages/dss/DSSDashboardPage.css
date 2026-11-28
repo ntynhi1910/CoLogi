@@ -164,7 +164,7 @@
 
 .dssd-stats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
@@ -172,21 +172,55 @@
 .dssd-stat {
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  justify-content: flex-start;
+  gap: 10px;
   min-height: 125px;
-  padding: 21px;
-  border: 1px solid #e2eae4;
-  border-radius: 15px;
-  background: #fff;
-  border-left: 4px solid #829eaf;
+  min-width: 0;
+  padding: 19px 20px;
+  border: 1px solid #e3ebe5;
+  border-radius: 17px;
+  background: linear-gradient(145deg, #ffffff, #fcfefc);
+  box-shadow: 0 7px 28px rgba(18, 60, 27, 0.07);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  border-left: none;
+}
+
+.dssd-stat:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 31px rgba(18, 60, 27, 0.12);
 }
 
 .dssd-stat-green {
-  border-left-color: #3c9d60;
+  border-color: #d7eadc;
 }
 
 .dssd-stat-amber {
-  border-left-color: #d4ac55;
+  border-color: #f0e1b8;
+}
+
+.dssd-stat > span {
+  color: #647c6b;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.5;
+  letter-spacing: 0.2px;
+}
+
+.dssd-stat > strong {
+  display: block;
+  margin: 8px 0 2px;
+  color: #183b29;
+  font-size: 34px;
+  font-weight: 850;
+  line-height: 1.2;
+  letter-spacing: -1.2px;
+}
+
+.dssd-stat > small {
+  margin: 0;
+  color: #91a094;
+  font-size: 11px;
+  line-height: 1.6;
 }
 
 .dssd-stat > span {
@@ -734,13 +768,35 @@
 
 /* RESPONSIVE */
 
-@media (max-width: 1180px) {
+@media (max-width: 1280px) {
   .dssd-stats {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .dssd-workspace {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 900px) {
+  .dssd-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 560px) {
+  .dssd-stats {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .dssd-stat {
+    padding: 14px;
+    min-height: 110px;
+  }
+
+  .dssd-stat > strong {
+    font-size: 27px;
   }
 }
 

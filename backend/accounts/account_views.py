@@ -28,10 +28,47 @@ class AccountAssignmentInput(StrictInput, RoleAssignmentSerializer):
     is_active = serializers.BooleanField(default=True)
 
 
+class NewProviderInput(StrictInput, serializers.Serializer):
+    provider_name = serializers.CharField(max_length=200)
+    provider_type = serializers.ChoiceField(choices=("EXTERNAL",), default="EXTERNAL")
+    service_region = serializers.CharField(max_length=1000)
+    contact_email = serializers.EmailField(max_length=254)
+
+
+class NewOutletInput(StrictInput, serializers.Serializer):
+    outlet_name = serializers.CharField(max_length=200)
+    address = serializers.CharField(max_length=2000)
+    contact_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    phone = serializers.CharField(max_length=30, required=False, allow_blank=True)
+
+
+class NewSupplierInput(StrictInput, serializers.Serializer):
+    supplier_name = serializers.CharField(max_length=200)
+    address = serializers.CharField(max_length=2000)
+    contact_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
+    phone = serializers.CharField(max_length=30, required=False, allow_blank=True)
+    email = serializers.EmailField(max_length=254, required=False, allow_blank=True)
+
+
 class CreateAccountInput(AccountAssignmentInput):
     email = serializers.EmailField(max_length=254)
     full_name = serializers.CharField(max_length=255)
     password = serializers.CharField(write_only=True, trim_whitespace=False, min_length=12, max_length=128)
+    new_provider = NewProviderInput(required=False)
+    new_supplier = NewSupplierInput(required=False)
+    new_outlet = NewOutletInput(required=False)
+
+    def validate(self, attrs):
+        modes = {"new_provider": RoleCode.TRANSPORT_PROVIDER, "new_supplier": RoleCode.SUPPLIER,
+                 "new_outlet": RoleCode.PURCHASING_STAFF}
+        selected = [k for k in modes if k in attrs]
+        if not selected:
+            return super().validate(attrs)
+        if len(selected) != 1 or attrs["role_code"] != modes[selected[0]] or any(
+            k in attrs for k in ("provider_id", "supplier_id", "outlet_ids")
+        ):
+            raise serializers.ValidationError("Chọn đúng một đơn vị mới phù hợp vai trò, không gửi kèm phạm vi hiện có.")
+        return attrs
 
 
 class ConfirmedWrite:
@@ -94,6 +131,7 @@ class AccountListView(AccountManagerView):
             **list_accounts(request.user), "writes_enabled": getattr(settings, "COLOGI_ACCOUNT_ADMIN_WRITES", False),
             "profile_writes_enabled": getattr(settings, "COLOGI_ACCOUNT_PROFILE_WRITES", False),
             "external_scope_writes_enabled": getattr(settings, "COLOGI_ACCOUNT_EXTERNAL_SCOPE_WRITES", False),
+            "unit_registration_enabled": getattr(settings, "COLOGI_ACCOUNT_ADMIN_WRITES", False),
         })
 
     def post(self, request):
@@ -102,7 +140,8 @@ class AccountListView(AccountManagerView):
         data.is_valid(raise_exception=True)
         return Response(self.mutate(
             create_account, actor=request.user, scope=data.get_scope(),
-            **{key: data.validated_data[key] for key in ("email", "full_name", "role_code", "password", "is_active")},
+            **{key: value for key, value in data.validated_data.items()
+               if key in ("email", "full_name", "role_code", "password", "is_active", "new_provider", "new_supplier", "new_outlet")},
         ), status=status.HTTP_201_CREATED)
 
 

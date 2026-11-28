@@ -671,3 +671,185 @@
     animation: none;
   }
 }
+/* Làm nổi bật Đối soát & hiệu suất logistics và Thông báo kết quả lập kế hoạch */
+.clh-reconcil-panel {
+  border: 1px solid #cfe2d5 !important;
+  border-top: 4px solid #166534 !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fcfa 100%) !important;
+  box-shadow: 0 8px 22px rgba(17, 56, 34, 0.06) !important;
+  border-radius: 16px !important;
+  padding: 20px 22px !important;
+}
+
+.clh-panel-head-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.clh-panel-head-row h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #113822;
+}
+
+.clh-panel-sub {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: #546e5e;
+}
+
+.clh-panel-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: #166534;
+  color: #ffffff !important;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: background 150ms ease;
+}
+
+.clh-panel-cta:hover {
+  background: #14532d;
+}
+
+.clh-count-pill {
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #e6f3eb;
+  color: #166534;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.clh-metrics--highlight {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)) !important;
+  gap: 12px !important;
+  margin: 0 !important;
+}
+
+.clh-metrics--highlight .clh-metric {
+  padding: 14px 16px !important;
+  border-radius: 12px !important;
+  border: 1px solid #d5e6db !important;
+  background: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(17, 56, 34, 0.04);
+}
+
+.clh-metrics--highlight .clh-metric dt {
+  font-size: 12px;
+  font-weight: 600;
+  color: #496354;
+}
+
+.clh-metrics--highlight .clh-metric dd {
+  margin: 8px 0 0;
+  font-size: 26px;
+  font-weight: 800;
+  color: #14532d;
+  font-variant-numeric: tabular-nums;
+}
+
+.clh-notice-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.clh-notice-card {
+  border: 1px solid #d7e6dc;
+  border-left: 4px solid #166534;
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 12px 16px;
+}
+
+.clh-notice-card--success {
+  border-left-color: #16a34a;
+  background: #f5fbf7;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.clh-notice-card--warning {
+  border-left-color: #d97706;
+  background: #fffdf7;
+}
+
+.clh-notice-card--resolved {
+  border-left-color: #0284c7;
+  background: #f6fbff;
+}
+
+.clh-notice-card-head,
+.clh-notice-card summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.clh-notice-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.clh-notice-badge--success {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.clh-notice-badge--warning {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.clh-notice-badge--resolved {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.clh-notice-meta {
+  font-size: 12px;
+  color: #556e5f;
+}
+
+.clh-notice-body {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #d7e5dc;
+  font-size: 13px;
+  color: #213b2c;
+}
+
+.clh-empty-box {
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px dashed #c8ddd0;
+  background: #f7fbf8;
+  text-align: center;
+}
+
+.clh-empty-box strong {
+  display: block;
+  color: #165638;
+  font-size: 14px;
+}
+
+.clh-empty-box p {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: #5b7365;
+}

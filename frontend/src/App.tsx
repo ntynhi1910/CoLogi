@@ -50,7 +50,12 @@ const OutletWorkspacePage = lazy(() => import('./pages/OutletWorkspacePage'))
 const PlanPublicationPage = lazy(() => import('./pages/PlanPublicationPage'))
 const InventoryWorkspace = lazy(() => import('./pages/ExecutionWorkspace').then(module => ({ default: module.InventoryWorkspace })))
 const ExecutionWorkspace = lazy(() => import('./pages/ExecutionWorkspace').then(module => ({ default: module.ExecutionWorkspace })))
-const ReconciliationWorkspace = lazy(() => import('./pages/ReconciliationWorkspace'))
+const ReconciliationWorkspace = lazy(() => import('./pages/ReconciliationWorkspace.tsx'))
+const SupplierReconciliationPage = lazy(
+  () => import(
+    './pages/reconciliation/supplier/SupplierReconciliationPage.tsx'
+  )
+)
 const DecisionPage = lazy(() => import('./pages/dss/PlanDeliveryPage').then(module => ({ default: module.DecisionPage })))
 const FinalPlanPage = lazy(() => import('./pages/dss/PlanDeliveryPage').then(module => ({ default: module.FinalPlanPage })))
 const ProviderHandoversPage = lazy(() => import('./pages/dss/PlanDeliveryPage').then(module => ({ default: module.ProviderHandoversPage })))
@@ -176,7 +181,14 @@ export default function App() {
 
           {/* SUPPLIER */}
           <Route element={<SupplierRoute />}>
-            <Route path="/supplier/reconciliation/:code?" element={<Suspense fallback={<p>Đang tải đối soát…</p>}><ReconciliationWorkspace audience="supplier" /></Suspense>} />
+            <Route
+              path="/supplier/reconciliation/:code?"
+              element={
+                <Suspense fallback={<p>Đang tải đối soát…</p>}>
+                  <SupplierReconciliationPage />
+                </Suspense>
+              }
+            />
             <Route path="/supplier/inventory" element={<Suspense fallback={<p>Đang tải tồn kho…</p>}><InventoryWorkspace /></Suspense>} />
             <Route path="/supplier/shipments/:code?" element={<Suspense fallback={<p>Đang tải lịch xuất…</p>}><PlanPublicationPage audience="supplier" /></Suspense>} />
             <Route

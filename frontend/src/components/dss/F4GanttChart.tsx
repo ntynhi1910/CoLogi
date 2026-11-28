@@ -2,8 +2,8 @@ import { useEffect, useId, useRef, useState } from 'react'
 import type { CSSProperties, FocusEvent, PointerEvent } from 'react'
 import { createPortal } from 'react-dom'
 import { deliveryDate } from './f1Display'
-import { kg, phases, planName } from './f3Display'
-import { duration, localTime, statuses, stopIdentity, stopLabel } from './f4Display'
+import { phases, planName } from './f3Display'
+import { localTime, statuses, stopIdentity, stopLabel } from './f4Display'
 import type { StopNames } from './f4Display'
 import { F4Diagnostics, F4StatusBadge, F4StopDetails } from './F4ScheduleDetails'
 import type { F4Evaluation, F4Stop, F4Wave } from '../../types/f4'
@@ -74,16 +74,40 @@ export default function F4GanttChart({ evaluations, visible, timezone, names }: 
   names: StopNames
 }) {
   const detailsId = useId()
+  const drawerRef = useRef<HTMLElement>(null)
+
   const canvasRef = useRef<HTMLDivElement>(null)
   const axisRef = useRef<HTMLDivElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
-  const detailsRef = useRef<HTMLElement>(null)
   const [wideNames, setWideNames] = useState(false)
   const [tip, setTip] = useState<{ text: string; left: number; top: number; above: boolean }>()
   const [chosen, setChosen] = useState<{ plan: string; wave: number; sequence: number }>()
   const chosenPlan = visible.find(evaluation => evaluation.plan.plan_code === chosen?.plan)
   const chosenStop = chosenPlan?.waves.find(wave => wave.wave_no === chosen?.wave)
     ?.stops.find(stop => stop.sequence === chosen?.sequence)
+
+const drawerOpen = Boolean(chosenPlan && chosenStop)
+useEffect(() => {
+  if (drawerOpen) {
+    drawerRef.current?.focus()
+  }
+}, [drawerOpen, chosen])
+useEffect(() => {
+  if (!drawerOpen) return
+
+  function handleEscape(event: KeyboardEvent) {
+    if (event.key === 'Escape') {
+      setChosen(undefined)
+    }
+  }
+
+  window.addEventListener('keydown', handleEscape)
+
+  return () => {
+    window.removeEventListener('keydown', handleEscape)
+  }
+}, [drawerOpen])
+
   const windows = new Map(evaluations.flatMap(evaluation => {
     const clock = snapshotClock(evaluation.service_date, evaluation.configuration?.timezone ?? timezone)
     return evaluation.waves.flatMap(wave => wave.stops.map(stop => [stop, outletWindows(stop, clock)] as const))
@@ -131,11 +155,25 @@ export default function F4GanttChart({ evaluations, visible, timezone, names }: 
     if (axisRef.current && scrollRef.current) axisRef.current.scrollLeft = scrollRef.current.scrollLeft
   }
 
-  function inspect(evaluation: F4Evaluation, wave: F4Wave, stop: F4Stop) {
-    setTip(undefined)
-    setChosen({ plan: evaluation.plan.plan_code, wave: wave.wave_no, sequence: stop.sequence })
-    detailsRef.current?.focus()
-  }
+
+function inspect(
+  evaluation: F4Evaluation,
+  wave: F4Wave,
+  stop: F4Stop
+) {
+  setTip(undefined)
+
+  setChosen({
+    plan: evaluation.plan.plan_code,
+    wave: wave.wave_no,
+    sequence: stop.sequence,
+  })
+}
+
+function closeDrawer() {
+  setChosen(undefined)
+}
+
 
   const chosenIdentity = chosenPlan && chosenStop && stopIdentity(chosenStop, chosenPlan, names)
   return <section className="dssr-panel f4-card f4-gantt" aria-label="Biểu đồ Gantt F4">
@@ -262,25 +300,89 @@ export default function F4GanttChart({ evaluations, visible, timezone, names }: 
                   <li key={`${from}/${to}`}>Wave {inboundWave} sẵn hàng {localTime(start, timezone)}
                     {' → '}Wave {outboundWave} bắt đầu bàn giao {localTime(end, timezone)}</li>)}
               </ul>}
-              {evaluation.metrics && <dl className="f4-gantt-totals">
-                <div><dt>Di chuyển</dt><dd>{duration(evaluation.metrics.travel_minutes)}</dd></div>
-                <div><dt>Chờ</dt><dd>{duration(evaluation.metrics.wait_minutes)}</dd></div>
-                {evaluation.plan.hub && <div><dt>Xử lý tại Hub</dt><dd>{duration(evaluation.metrics.hub_handling_minutes)}</dd></div>}
-                {evaluation.demand_weight_kg && <div><dt>Khối lượng nhu cầu</dt><dd>{kg(evaluation.demand_weight_kg)}</dd></div>}
-              </dl>}
+
             </> : <F4Diagnostics rows={evaluation.diagnostics} />}
           </section>
         })}
         </div>
       </div>
     </div>
-    <section id={detailsId} ref={detailsRef} tabIndex={-1} className="f4-gantt-detail" aria-label="Chi tiết điểm trên biểu đồ">
-      {chosenPlan && chosenStop
-        ? <F4StopDetails stop={chosenStop} label={stopLabel(chosenStop, chosenPlan, names)} timezone={timezone}
-          fromCatalog={chosenIdentity ? chosenIdentity.fromCatalog : false} windows={windows.get(chosenStop)} />
-        : <p className="dssf-help">Chọn một thanh hoặc điểm dừng để xem chi tiết.</p>}
-    </section>
-    {tip && createPortal(<div className="f4-gantt-tooltip" aria-hidden="true"
-      style={{ left: tip.left, top: tip.top, transform: tip.above ? 'translateY(-100%)' : undefined }}>{tip.text}</div>, document.body)}
+
+{drawerOpen && chosenPlan && chosenStop && createPortal(
+  <div className="f4-drawer-root">
+    <button
+      type="button"
+      className="f4-drawer-backdrop"
+      aria-label="Đóng chi tiết điểm dừng"
+      onClick={closeDrawer}
+    />
+
+    <aside
+  ref={drawerRef}
+  id={detailsId}
+  tabIndex={-1}
+  className="f4-drawer"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby={`${detailsId}-title`}
+>
+      <header className="f4-drawer-header">
+        <div>
+          <span className="f4-drawer-eyebrow">
+            COLOGI · DSS F4
+          </span>
+
+          <h2 id={`${detailsId}-title`}>
+            Chi tiết điểm dừng
+          </h2>
+
+          <p>
+            {planName(chosenPlan.plan)} · Wave {chosenPlan.waves.find(wave =>
+  wave.stops.some(stop => stop === chosenStop)
+)?.wave_no ?? '—'}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="f4-drawer-close"
+          onClick={closeDrawer}
+          aria-label="Đóng"
+        >
+          ×
+        </button>
+      </header>
+
+      <div className="f4-drawer-content">
+        <F4StopDetails
+          stop={chosenStop}
+          label={stopLabel(chosenStop, chosenPlan, names)}
+          timezone={timezone}
+          fromCatalog={chosenIdentity ? chosenIdentity.fromCatalog : false}
+          windows={windows.get(chosenStop)}
+        />
+      </div>
+    </aside>
+
+  </div>,
+  document.body
+)}
+
+{tip && createPortal(
+  <div
+    className="f4-gantt-tooltip"
+    aria-hidden="true"
+    style={{
+      left: tip.left,
+      top: tip.top,
+      transform: tip.above ? 'translateY(-100%)' : undefined,
+    }}
+  >
+    {tip.text}
+  </div>,
+  document.body
+)}
+
   </section>
 }
+

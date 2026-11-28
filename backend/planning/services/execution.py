@@ -93,8 +93,16 @@ def _gate(plan, projection, provenance, approval=None):
                 or source["price_source"] != "OPERATIONAL"):
             return "COMMERCIAL_EVIDENCE_REQUIRED"
     today = timezone.localdate(timezone=ZoneInfo(projection["timezone"]))
-    if today < date.fromisoformat(projection["service_date"]):
+    service_date = date.fromisoformat(
+        projection["service_date"]
+    )
+
+    if today < service_date:
         return "SERVICE_DATE_NOT_REACHED"
+
+    if provenance == "OPERATIONAL" and today > service_date:
+        return "SERVICE_DATE_PASSED"
+
     return None
 
 
@@ -264,7 +272,11 @@ def record_event(*, actor, audience, code, quantity_rows, reason="", reason_code
             raise ExecutionBlocked("IDEMPOTENCY_KEY_REUSED")
         return _event_record(previous, approval), False
     blocker = _gate(plan, projection, provenance, approval)
-    if blocker and (blocker != "SERVICE_DATE_NOT_REACHED" or action != "READY"):
+    if blocker and not (
+        provenance != "OPERATIONAL"
+        and blocker == "SERVICE_DATE_NOT_REACHED"
+        and action == "READY"
+    ):
         raise ExecutionBlocked(blocker)
     if not FinalPlanDemand.objects.select_for_update().filter(demand_id=demand_id, plan=plan).exists():
         raise ExecutionBlocked("FINAL_PLAN_SUPERSEDED")

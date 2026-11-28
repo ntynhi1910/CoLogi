@@ -42,6 +42,24 @@ class RunExecutionTests(TestCase):
                          EligibilityStatus.NOT_EVALUATED)
         self.assertEqual(PlanningRun._meta.get_field("failure_diagnostics").get_default(), [])
 
+    def test_cp15_unlimited_configuration(self):
+        configuration = self.run.parameters_snapshot
+        configuration["parameters"]["max_group_size"]["value"] = None
+
+        self.assertEqual(
+            service.require_f1_execution_configuration(configuration),
+            (None, 100),
+        )
+
+        del configuration["parameters"]["max_group_size"]
+
+        with self.assertRaises(ValidationError):
+            service.require_f1_execution_configuration(configuration)
+
+    def test_cp15_unlimited_result_persistence(self):
+        self.run.parameters_snapshot["parameters"]["max_group_size"]["value"] = None
+        self.test_completed_result_persists_memberships_and_status_without_changing_snapshots()
+
     def test_execution_requires_both_pinned_limits(self):
         with self.assertRaisesRegex(ValidationError, "F1_EXECUTION_REQUIRES_CANDIDATE_LIMITS"):
             service.require_f1_execution_configuration(valid_configuration())

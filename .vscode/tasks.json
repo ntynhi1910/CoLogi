@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "CoLogi: Auto Frontend 15174",
+      "type": "process",
+      "command": "/bin/bash",
+      "args": [
+        "-lc",
+        "export NVM_DIR=\"/home/vscode/.nvm\"; if [ -s \"$NVM_DIR/nvm.sh\" ]; then . \"$NVM_DIR/nvm.sh\"; fi; if ! command -v npm >/dev/null 2>&1; then export PATH=\"$NVM_DIR/versions/node/v26.13.1/bin:$PATH\"; fi; node --version && npm --version || exit 1; exec python3 .vscode/cologi-vite-watchdog.py"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "runOptions": {
+        "runOn": "folderOpen",
+        "instanceLimit": 1
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "focus": false,
+        "clear": false
+      }
+    },
+    {
+      "type": "npm",
+      "script": "preview",
+      "path": "frontend",
+      "problemMatcher": [
+        "$go"
+      ],
+      "label": "npm: preview - frontend",
+      "detail": "vite preview"
+    }
+  ]
+}

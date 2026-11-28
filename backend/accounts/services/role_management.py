@@ -102,7 +102,7 @@ def _snapshot(user):
     }
 
 
-def _validate_scope(role_code, scope):
+def _validate_scope(role_code, scope, *, allow_registered_provider=False):
     scope = scope or {}
 
     if not isinstance(scope, dict):
@@ -171,14 +171,14 @@ def _validate_scope(role_code, scope):
             raise RoleManagementError("A valid provider_id is required.")
 
         try:
-            provider = TransportProvider.objects.get(
-                pk=provider_id,
-                provider_code="TP001",
-                is_active=True,
-            )
+            providers = TransportProvider.objects.filter(pk=provider_id, is_active=True)
+            if not allow_registered_provider:
+                providers = providers.filter(provider_code="TP001")
+            provider = providers.get()
         except TransportProvider.DoesNotExist:
             raise RoleManagementError(
-                "MVP only permits the active TP001 provider."
+                "Transport provider does not exist, is inactive or is not permitted."
+                if allow_registered_provider else "MVP only permits the active TP001 provider."
             )
         return {"provider": provider}
 
@@ -276,7 +276,7 @@ def _write_audit(actor, user, action, old_values, new_values, ip_address):
 
 
 @transaction.atomic
-def assign_role(actor, target_user_id, role_code, scope=None, ip_address=None):
+def assign_role(actor, target_user_id, role_code, scope=None, ip_address=None, *, allow_registered_provider=False):
     user = _get_target(target_user_id)
     _require_manager(actor, user)
 
@@ -290,7 +290,7 @@ def assign_role(actor, target_user_id, role_code, scope=None, ip_address=None):
         )
 
     role = _get_role(role_code)
-    validated_scope = _validate_scope(role.code, scope)
+    validated_scope = _validate_scope(role.code, scope, allow_registered_provider=allow_registered_provider)
     old_values = _snapshot(user)
 
     # Clean up any stale scopes before establishing the new assignment.

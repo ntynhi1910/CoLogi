@@ -1,0 +1,38 @@
+
+.manager-reconciliation {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+}
+
+.manager-reconciliation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.manager-reconciliation-header h1 {
+  margin: 8px 0;
+  color: #164b30;
+  font-size: 28px;
+}
+
+.manager-reconciliation-header p {
+  color: #718475;
+  font-size: 13px;
+}
+
+.manager-reconciliation-panel {
+  padding: 20px;
+  border: 1px solid #dce8df;
+  border-radius: 12px;
+  background: #fff;
+}
+
+@media (max-width: 700px) {
+  .manager-reconciliation-header {
+    flex-direction: column;
+  }
+}

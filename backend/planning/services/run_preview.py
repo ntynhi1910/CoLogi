@@ -234,9 +234,19 @@ def _candidate_limits(configuration):
     values = []
     for key in keys:
         entry = parameters.get(key)
-        if not isinstance(entry, Mapping) or type(entry.get("value")) is not int:
+        if not isinstance(entry, Mapping) or "value" not in entry:
             raise ValidationError("RUN_CONFIGURATION_CANDIDATE_LIMIT_INVALID")
-        values.append(entry["value"])
+
+        value = entry["value"]
+
+        if key == "max_group_size" and value is None:
+            values.append(None)
+            continue
+
+        if type(value) is not int:
+            raise ValidationError("RUN_CONFIGURATION_CANDIDATE_LIMIT_INVALID")
+
+        values.append(value)
     try:
         validate_candidate_limits(*values)
     except ValueError as exc:
@@ -247,7 +257,7 @@ def _candidate_limits(configuration):
 def require_f1_execution_configuration(configuration):
     _validate_configuration_snapshot(configuration)
     size, count = _candidate_limits(configuration)
-    if size is None or count is None:
+    if count is None:
         raise ValidationError("F1_EXECUTION_REQUIRES_CANDIDATE_LIMITS")
     return size, count
 

@@ -1,8 +1,7 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { useNavigate, useOutletContext, useParams, useSearchParams } from 'react-router-dom'
 import CandidateTable from '../../components/dss/CandidateTable'
 import DemandResultTable from '../../components/dss/DemandResultTable'
-import DSSProgressSteps from '../../components/dss/DSSProgressSteps'
 import ExclusionReasonList from '../../components/dss/ExclusionReasonList'
 import SnapshotViewer from '../../components/dss/SnapshotViewer'
 import RunSummaryStats from '../../components/dss/RunSummaryStats'
@@ -24,7 +23,7 @@ export default function DSSRunDetailPage() {
   const [params, setParams] = useSearchParams()
   const tab = params.get('tab') === 'groups' ? 'groups' : 'demands'
   const scenario = params.get('scenario')
-
+  const [showCloseUnplanned, setShowCloseUnplanned] = useState(false)
   if (!run) {
     return (
       <main className="dssr-page">
@@ -49,10 +48,52 @@ export default function DSSRunDetailPage() {
             {run.matching_outcome && <span className="dssr-run-badge">{f1Label(run.matching_outcome)}</span>}
           </div>
         </div>
-        <div className="dssr-header-actions">
-          <button className="dssr-secondary-button" onClick={reload}>↻ Làm mới</button>
-          <button className="dssr-secondary-button" onClick={() => navigate('/dss/scenarios/new')}>Tạo lần chạy F1</button>
+
+        <div className="dssr-header-action-column">
+          <div className="dssr-header-actions">
+            <button
+              className="dssr-secondary-button"
+              onClick={reload}
+            >
+              ↻ Làm mới
+            </button>
+
+            <button
+              className="dssr-secondary-button"
+              onClick={() => navigate('/dss/scenarios/new')}
+            >
+              Tạo lần chạy F1
+            </button>
+          </div>
+
+          {scope.unplanned_closure_enabled &&
+            run.status === 'COMPLETED' &&
+            run.demand_results.length > 0 && (
+              <button
+                type="button"
+                className="dssr-close-unplanned-button"
+                onClick={() => setShowCloseUnplanned(true)}
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                >
+                  <rect x="5" y="4" width="14" height="17" rx="2" />
+                  <path d="m9 11 6 6m0-6-6 6" />
+                </svg>
+
+                Kết thúc nhu cầu
+              </button>
+            )}
         </div>
+
       </header>
 
       {run.status === 'IN_PROGRESS' && <div className="dssr-alert" role="status">F1 đang được xử lý. Chọn Làm mới để kiểm tra lại.</div>}
@@ -68,13 +109,6 @@ export default function DSSRunDetailPage() {
       </section>
 
       <RunSummaryStats run={run} />
-      {scope.unplanned_closure_enabled && run.status === 'COMPLETED' && <CloseUnplannedForm runCode={run.run_code}
-        demands={run.demand_results.map(row => ({ id: row.demand_id, label: `Nhu cầu #${row.demand_id}` }))} />}
-
-      <section className="dssr-panel">
-        <div className="dssr-panel-heading"><div><h2>Tiến trình DSS</h2></div></div>
-        <DSSProgressSteps status={run.status} />
-      </section>
 
       <section className="dssr-panel dssr-results-panel">
         <div className="dssr-panel-heading"><div><h2>Kết quả F1</h2></div></div>
@@ -92,6 +126,57 @@ export default function DSSRunDetailPage() {
           )}
         </div>
       </section>
+
+      {showCloseUnplanned &&
+        scope.unplanned_closure_enabled &&
+        run.status === 'COMPLETED' && (
+          <div className="dssr-modal-overlay">
+            <section
+              className="dssr-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="close-unplanned-title"
+            >
+              <div className="dssr-modal-header">
+                <h2 id="close-unplanned-title">
+                  Kết thúc nhu cầu không lập được kế hoạch
+                </h2>
+
+                <button
+                  type="button"
+                  className="dssr-modal-close"
+                  aria-label="Đóng biểu mẫu"
+                  onClick={() => setShowCloseUnplanned(false)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <CloseUnplannedForm
+                runCode={run.run_code}
+                demands={run.demand_results.map(row => ({
+                  id: row.demand_id,
+                  label: `Nhu cầu #${row.demand_id}`
+                }))}
+                embedded
+              />
+
+              <div className="dssr-modal-footer">
+                <button
+                  type="button"
+                  className="dssr-secondary-button"
+                  onClick={() => {
+                    setShowCloseUnplanned(false)
+                    reload()
+                  }}
+                >
+                  Đóng
+                </button>
+              </div>
+            </section>
+          </div>
+        )}
+
     </main>
   )
 }

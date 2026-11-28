@@ -4,8 +4,6 @@ import { f1Label, missing, runTime } from '../../components/dss/f1Display'
 import RunSummaryStats from '../../components/dss/RunSummaryStats'
 import { dssErrorMessage, dssService } from '../../services/dss/dssService'
 import { useDssQuery } from '../../services/dss/useDssQuery'
-import CloseUnplannedForm from '../foundation/CloseUnplannedForm'
-import { f1BusinessDate } from '../../components/dss/f1Display'
 import type { DSSOutletContext } from './ManagerRoute'
 import './DSSDashboardPage.css'
 import './F1Presentation.css'
@@ -28,6 +26,22 @@ export default function DSSDashboardPage() {
   const latest = recentHistory.data?.results[0]
   const selected = rules.data?.find((rule) => rule.id === selectedId) ?? rules.data?.[0]
   const error = rules.error ?? demands.error
+  const pageSize = 10
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil((recentHistory.data?.count ?? 0) / pageSize)
+  )
+
+  const startPage = Math.max(
+    1,
+    Math.min(page - 1, totalPages - 2)
+  )
+
+  const visiblePages = Array.from(
+    { length: Math.min(3, totalPages) },
+    (_, index) => startPage + index
+  )
 
   return (
     <main className="dssd-page dssf-dashboard">
@@ -51,13 +65,9 @@ export default function DSSDashboardPage() {
       <section className="dssd-stats dssf-scope-stats" aria-label="Tổng quan phạm vi F1">
         <article className="dssd-stat"><span>OUTLET ĐƯỢC CẤP QUYỀN</span><strong>{scope.outlet_ids.length}</strong></article>
         <article className="dssd-stat"><span>NHU CẦU THUỘC PHẠM VI</span><strong>{demands.data?.length ?? '—'}</strong><small>Danh sách hiện tại, gồm mọi trạng thái</small></article>
-        <article className="dssd-stat dssd-stat-green"><span>ĐỦ ĐIỀU KIỆN F1</span><strong>{selectable.data?.counts.eligible ?? '—'}</strong></article>
-        <article className="dssd-stat"><span>BỊ LOẠI KHỎI F1</span><strong>{selectable.data?.counts.excluded ?? '—'}</strong></article>
-        <article className="dssd-stat dssd-stat-amber"><span>LẦN CHẠY F1</span><strong>{recentHistory.data?.count ?? '—'}</strong></article>
+        <article className="dssd-stat dssd-stat-green"><span>SẴN SÀNG CHẠY F1</span><strong>{selectable.data?.counts.eligible ?? '—'}</strong><small>Có thể lựa chọn để chạy F1</small></article>
+        <article className="dssd-stat"><span>BỊ LOẠI KHỎI F1</span><strong>{selectable.data?.counts.excluded ?? '—'}</strong><small>Không đáp ứng điều kiện lựa chọn</small></article>
       </section>
-      {scope.unplanned_closure_enabled && <CloseUnplannedForm demands={(demands.data ?? [])
-        .filter(row => row.status === 'SUBMITTED' && row.requested_date < f1BusinessDate())
-        .map(row => ({ id: row.id, label: `${row.demand_code} · ${row.outlet_code}` }))} />}
 
       <div className="dssd-workspace dssf-dashboard-workspace">
         <section className="dssd-panel">
@@ -72,26 +82,67 @@ export default function DSSDashboardPage() {
           </label>}
           {selected && <dl className="dssf-facts">
             <div><dt>Tên</dt><dd>{selected.rule_set_name}</dd></div>
-            <div><dt>Số nhu cầu tối đa mỗi nhóm</dt><dd>{selected.max_group_size ?? missing}</dd></div>
+            <div><dt>Số nhu cầu tối đa mỗi nhóm</dt><dd>{selected.max_group_size ?? 'Không giới hạn'}</dd></div>
             <div><dt>Số nhóm tối đa mỗi lần chạy</dt><dd>{selected.max_candidates_per_run ?? missing}</dd></div>
           </dl>}
         </section>
 
-        <section className="dssd-panel">
-          <div className="dssd-panel-heading">
-            <div><h2>Lần chạy mới nhất</h2>{latest && <p>{runTime(latest.started_at)} · {f1Label(latest.status)}{latest.matching_outcome && ` · ${f1Label(latest.matching_outcome)}`}</p>}</div>
-            {latest && <Link className="dssf-link" to={`/dss/runs/${latest.run_code}`}>Xem chi tiết →</Link>}
-          </div>
-          {latest && <RunSummaryStats run={latest} />}
-          {recentHistory.loading && <div role="status">Đang tải kết quả mới nhất…</div>}
-          {recentHistory.data?.count === 0 && <div className="dssd-empty">Chưa có lần chạy F1.</div>}
-        </section>
+
+<div className="dssf-run-column">
+
+  {/* Tổng số lần chạy F1 - Khung độc lập */}
+  <article className="dssf-total-runs">
+    <span>Tổng số lần chạy F1</span>
+    <strong>{recentHistory.data?.count ?? '—'}</strong>
+  </article>
+
+  {/* Lần chạy mới nhất */}
+  <section className="dssd-panel">
+    <div className="dssd-panel-heading">
+      <div>
+        <h2>Lần chạy mới nhất</h2>
+
+        {latest && (
+          <p>
+            {runTime(latest.started_at)} · {f1Label(latest.status)}
+            {latest.matching_outcome &&
+              ` · ${f1Label(latest.matching_outcome)}`}
+          </p>
+        )}
+      </div>
+
+      {latest && (
+        <Link
+          className="dssf-link"
+          to={`/dss/runs/${latest.run_code}`}
+        >
+          Xem chi tiết →
+        </Link>
+      )}
+    </div>
+
+    {latest && <RunSummaryStats run={latest} />}
+
+    {recentHistory.loading && (
+      <div role="status">
+        Đang tải kết quả mới nhất…
+      </div>
+    )}
+
+    {recentHistory.data?.count === 0 && (
+      <div className="dssd-empty">
+        Chưa có lần chạy F1.
+      </div>
+    )}
+  </section>
+
+</div>
+
       </div>
 
       <section className="dssd-panel dssd-history">
         <div className="dssd-panel-heading">
           <div><h2>Lịch sử PlanningRun</h2></div>
-          {history.data && <span className="dssd-count">{history.data.count} lần chạy</span>}
         </div>
         {history.loading && <div className="dssd-loading" role="status">Đang tải lịch sử…</div>}
         {history.error !== null && <div className="dssd-alert dssd-alert-error" role="alert">{dssErrorMessage(history.error)}</div>}
@@ -100,7 +151,7 @@ export default function DSSDashboardPage() {
           <>
             <div className="dssd-table-wrap">
               <table className="dssd-table dssf-history-table">
-                <thead><tr><th>LẦN CHẠY</th><th>RULESET</th><th>BẮT ĐẦU</th><th>TRẠNG THÁI</th><th>NHU CẦU</th><th>NHÓM</th><th>THAO TÁC</th></tr></thead>
+                <thead><tr><th>LẦN CHẠY</th><th>RULESET</th><th>BẮT ĐẦU</th><th>TRẠNG THÁI</th><th>NHU CẦU</th><th>NHÓM ỨNG VIÊN</th><th>THAO TÁC</th></tr></thead>
                 <tbody>
                   {history.data.results.map((run) => (
                     <tr key={run.run_code}>
@@ -108,7 +159,7 @@ export default function DSSDashboardPage() {
                       <td>{run.rule_set_code ?? missing}{run.rule_set_version != null && ` · v${run.rule_set_version}`}</td>
                       <td>{runTime(run.started_at)}</td>
                       <td><span className={`dssd-run-status ${run.status === 'IN_PROGRESS' ? 'running' : run.status.toLowerCase()}`}>{f1Label(run.status)}</span>
-                        {run.matching_outcome && <small>{f1Label(run.matching_outcome)}</small>}</td>
+                      </td>
                       <td>{run.demand_count ?? '—'}</td>
                       <td>{run.candidate_count ?? '—'}</td>
                       <td><Link className="dssf-link" to={`/dss/runs/${run.run_code}`}>Chi tiết →</Link></td>
@@ -117,17 +168,87 @@ export default function DSSDashboardPage() {
                 </tbody>
               </table>
             </div>
-            {(history.data.previous || history.data.next) && <div className="dssd-pagination">
-              <div>
-                <button disabled={!history.data.previous} onClick={() => setPage(page - 1)}>Trang trước</button>
-                <span>Trang {page}</span>
-                <button disabled={!history.data.next} onClick={() => setPage(page + 1)}>Trang sau</button>
-              </div>
-            </div>}
+
+            {totalPages > 1 && (
+              <nav
+                className="dssd-pagination dssf-history-pagination"
+                aria-label="Phân trang lịch sử PlanningRun"
+              >
+                <button
+                  type="button"
+                  className="dssf-page-arrow"
+                  disabled={page === 1 || history.loading}
+                  onClick={() => setPage(page - 1)}
+                  aria-label="Trang trước"
+                  title="Trang trước"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="m15 18-6-6 6-6" />
+                  </svg>
+                </button>
+
+                {startPage > 1 && (
+                  <span className="dssf-page-ellipsis">…</span>
+                )}
+
+                {visiblePages.map((pageNumber) => (
+                  <button
+                    key={pageNumber}
+                    type="button"
+                    className={`dssf-page-number ${
+                      page === pageNumber ? 'is-active' : ''
+                    }`}
+                    onClick={() => setPage(pageNumber)}
+                    disabled={history.loading}
+                    aria-current={page === pageNumber ? 'page' : undefined}
+                    aria-label={`Trang ${pageNumber}`}
+                  >
+                    {pageNumber}
+                  </button>
+                ))}
+
+                {visiblePages[visiblePages.length - 1] < totalPages && (
+                  <span className="dssf-page-ellipsis">…</span>
+                )}
+
+                <button
+                  type="button"
+                  className="dssf-page-arrow"
+                  disabled={page >= totalPages || history.loading}
+                  onClick={() => setPage(page + 1)}
+                  aria-label="Trang sau"
+                  title="Trang sau"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </button>
+              </nav>
+            )}
+
           </>
         )}
       </section>
     </main>
   )
 }
-

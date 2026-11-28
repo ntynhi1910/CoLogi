@@ -6,7 +6,7 @@ export default function SnapshotViewer({ run }: { run: F1RunSummary }) {
     <>
       <div className="dssr-run-info">
         <div><span>RuleSet tại thời điểm chạy</span><strong>{run.rule_set_code ?? missing}{run.rule_set_version != null && ` · v${run.rule_set_version}`}</strong></div>
-        <div><span>Giới hạn mỗi nhóm / mỗi lần chạy</span><strong>{run.max_group_size ?? '—'} / {run.max_candidates_per_run ?? '—'}</strong></div>
+        <div><span>Giới hạn mỗi nhóm / mỗi lần chạy</span><strong>{run.max_group_size ?? (run.max_candidates_per_run != null ? 'Không giới hạn' : '—')} / {run.max_candidates_per_run ?? '—'}</strong></div>
         <div><span>Bắt đầu</span><strong>{runTime(run.started_at)}</strong></div>
         <div><span>Kết thúc</span><strong>{runTime(run.completed_at)}</strong></div>
       </div>

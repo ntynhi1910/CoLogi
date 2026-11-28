@@ -268,7 +268,9 @@ def _persist_completed_results(run, rows, result):
     seen = set()
     for group in result.candidate_groups:
         ids = tuple(group.demand_ids)
-        if (len(ids) < 2 or len(ids) > limit_size or ids != tuple(sorted(set(ids)))
+        if (len(ids) < 2
+                or (limit_size is not None and len(ids) > limit_size)
+                or ids != tuple(sorted(set(ids)))
                 or ids in seen or not set(ids).issubset(row_by_id)):
             raise RunExecutionError("RUN_RESULT_CANDIDATE_INVALID")
         for demand_id in ids:

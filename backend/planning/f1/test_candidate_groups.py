@@ -61,9 +61,32 @@ class CandidateGroupTests(unittest.TestCase):
         with self.assertRaises(CandidateLimitExceeded):
             self.bounded(demands, 2, 4)
 
+    def test_cp15_unlimited_group_size(self):
+        for count in (5, 8, 10, 20):
+            with self.subTest(count=count):
+                demands = [
+                    self.demand(i)
+                    for i in range(1, count + 1)
+                ]
+                groups = self.bounded(demands, None, 100)
+                self.assertEqual(
+                    [g.demand_ids for g in groups],
+                    [tuple(range(1, count + 1))],
+                )
+
+    def test_cp15_candidate_count_limit_is_retained(self):
+        demands = [
+            self.demand(1),
+            self.demand(2),
+            self.demand(3, requested_date=date(2026, 11, 21)),
+            self.demand(4, requested_date=date(2026, 11, 21)),
+        ]
+        with self.assertRaises(CandidateLimitExceeded):
+            self.bounded(demands, None, 1)
+
     def test_invalid_bounds_rejected(self):
         for size, limit in [(1, 2), (True, 2), (2, 0), (2, True),
-                            (2, None), (None, 2), ("2", 2)]:
+                            (2, None), (None, 0), ("2", 2)]:
             with self.subTest(size=size, limit=limit), self.assertRaises(ValueError):
                 self.bounded([], size, limit)
 
